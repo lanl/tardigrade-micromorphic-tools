@@ -42,13 +42,17 @@ namespace micromorphicTools{
 
     errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
 		                              const variableVector &deformationGradient,
+					      variableType &detF, variableVector &microStress );
+
+    errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
+		                              const variableVector &deformationGradient,
 					      variableVector &microStress );
 
     errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
 		                              const variableVector &deformationGradient,
 					      variableVector &microStress, 
-                                              variableMatrix &dmicroStressdReferenceMicroStress,
-                                              variableMatrix &dmicroStressdDeformationGradient);
+                                              variableMatrix &dMicroStressdReferenceMicroStress,
+                                              variableMatrix &dMicroStressdDeformationGradient );
 
     errorOut pushForwardHigherOrderStress( const variableVector &referenceHigherOrderStress,
                                            const variableVector &deformationGradient,

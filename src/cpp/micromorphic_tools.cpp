@@ -139,4 +139,144 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
+                                              const variableVector &deformationGradient,
+                                              variableVector &microStress ){
+        /*!
+         * Push forward the micro-stress in the reference configuration to the 
+         * configuration indicated by the deformation gradient.
+         *
+         * s_{ij} = (1 / J ) F_{i I} \Sigma_{I J} F_{j J}
+         *
+         * :param const variableVector &referenceMicroStress: The micro-stress in the 
+         *     reference configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param variableVector &microStress: The micro-stress in the current 
+         *     configuration.
+         */
+
+        variableType detF;
+        return pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, 
+                                                detF, microStress );
+
+    }
+
+    errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
+                                              const variableVector &deformationGradient,
+                                              variableType &detF, variableVector &microStress ){
+        /*!
+         * Push forward the micro-stress in the reference configuration to the 
+         * configuration indicated by the deformation gradient.
+         *
+         * s_{ij} = (1 / J ) F_{i I} \Sigma_{I J} F_{j J}
+         *
+         * :param const variableVector &referenceMicroStress: The micro-stress in the 
+         *     reference configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param const variableType &detF: The determinant of the deformation gradient.
+         * :param variableVector &microStress: The micro-stress in the current 
+         *     configuration.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        microStress = variableVector( dim * dim, 0 );
+
+        detF = vectorTools::determinant( deformationGradient, dim, dim );
+
+        for ( unsigned int i = 0; i < dim; i++ ){
+            for ( unsigned int j = 0; j < dim; j++ ){
+                for ( unsigned int I = 0; I < dim; I++ ){
+                    for ( unsigned int J = 0; J < dim; J++ ){
+                        microStress[ dim * i + j ] += deformationGradient[ dim * i + I ]
+                                                    * referenceMicroStress[ dim * I + J ]
+                                                    * deformationGradient[ dim * j + J ] / detF;
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
+                                              const variableVector &deformationGradient,
+                                              variableVector &microStress,
+                                              variableMatrix &dMicroStressdReferenceMicroStress,
+                                              variableMatrix &dMicroStressdDeformationGradient ){
+        /*!
+         * Push forward the micro-stress in the reference configuration to the 
+         * configuration indicated by the deformation gradient.
+         *
+         * s_{ij} = (1 / J ) F_{iI} \Sigma_{IJ} F_{jJ}
+         *
+         * Also computes the jacobians:
+         * \frac{ \partial s_{ij} }{\partial \Sigma_{KL} } = ( 1 / J ) F_{iK} F_{jL}
+         * \frac{ \partial s_{ij} }{\partial F_{kK} } = - ( 1 / J ) \frac{\partial J}{\partial F_{k K} } s_{ij} 
+         *     + ( 1 / J ) \delta_{ik} \Sigma_{KJ} F_{jJ} + ( 1 / J ) F_{iI} \Sigma_{IK} \delta_{jk}
+         *
+         * :param const variableVector &referenceMicroStress: The micro-stress in the 
+         *     reference configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param variableVector &microStress: The micro-stress in the current 
+         *     configuration.
+         * :param variableMatrix &dmicroStressdReferenceMicroStress: The jacobian of 
+         *     the micro-stress w.r.t. the micro-stress in the reference configuration.
+         * :param variableMatrix &dmicroSTressdDeformationGradient: The jacobian of 
+         *     the micro-stress w.r.t. the deformation gradient.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        variableType detF;
+        error = pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient,
+                                                 detF, microStress );
+
+        if (error){
+            errorOut result = new errorNode( "pushForwardReferenceMicroStress (jacobian)", "Error in computation of push forward of micro-stress" );
+            result->addNext(error);
+            return result;
+        }
+
+        //Assemble the jacobian of the determinant of the deformation gradient
+        variableVector inverseDeformationGradient = vectorTools::inverse( deformationGradient, dim, dim );
+
+        variableVector dDetFdF( dim * dim, 0 );
+
+        for (unsigned int i = 0; i < dim; i++ ){
+            for (unsigned int I = 0; I < dim; I++ ){
+                dDetFdF[ dim * i + I ] = inverseDeformationGradient[ dim * I + i ] * detF;
+            }
+        }
+
+        //Assemble the jacobians
+        dMicroStressdReferenceMicroStress = variableMatrix( microStress.size(), variableVector( referenceMicroStress.size(), 0 ) );
+        dMicroStressdDeformationGradient = variableMatrix( microStress.size(), variableVector( deformationGradient.size(), 0 ) );
+
+        for ( unsigned int i = 0; i < dim; i++ ){
+            for ( unsigned int j = 0; j < dim; j++ ){
+                for ( unsigned int k = 0; k < dim; k++ ){
+                    for ( unsigned int K = 0; K < dim; K++ ){
+                        dMicroStressdReferenceMicroStress[ dim * i + j ][ dim * k + K ] = deformationGradient[ dim * i + k ]
+                                                                                        * deformationGradient[ dim * j + K ] / detF;
+                        
+                        for ( unsigned int I = 0; I < dim; I++ ){
+
+                            dMicroStressdDeformationGradient[ dim * i + j ][ dim * k + K] = ( eye[ dim * i + k ] * referenceMicroStress[ dim * K + I ] * deformationGradient[ dim * j + I ]
+                                                                                          + deformationGradient[ dim * i + I ] * referenceMicroStress[ dim * I + K ] * eye[ dim * j + k ]
+                                                                                          - microStress[ dim * i + j ] * dDetFdF[ dim * k + K ] ) / detF;
+                        }
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
 }
