@@ -25,6 +25,10 @@ namespace micromorphicTools{
     typedef std::vector< parameterType > parameterVector;
     typedef std::vector< parameterVector > parameterMatrix;
 
+    typedef double constantType;
+    typedef std::vector< constantType > constantVector;
+    typedef std::vector< constantVector > constantMatrix;
+
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
 		         variableVector &Psi );
 
