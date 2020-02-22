@@ -126,7 +126,7 @@ namespace micromorphicTools{
          * :param variableMatrix &dMicroStraindPsi: The jacobian of the micro-strain.
          */
 
-        error = computeMicroStrain( Psi, microStrain );
+        errorOut error = computeMicroStrain( Psi, microStrain );
 
         if (error){
             errorOut result = new errorNode( "computeMicroStrain (jacobian)", "Error in computation of micro-strain" );
@@ -234,8 +234,8 @@ namespace micromorphicTools{
         unsigned int dim = 3;
 
         variableType detF;
-        error = pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient,
-                                                 detF, microStress );
+        errorOut error = pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient,
+                                                          detF, microStress );
 
         if (error){
             errorOut result = new errorNode( "pushForwardReferenceMicroStress (jacobian)", "Error in computation of push forward of micro-stress" );
@@ -257,6 +257,9 @@ namespace micromorphicTools{
         //Assemble the jacobians
         dMicroStressdReferenceMicroStress = variableMatrix( microStress.size(), variableVector( referenceMicroStress.size(), 0 ) );
         dMicroStressdDeformationGradient = variableMatrix( microStress.size(), variableVector( deformationGradient.size(), 0 ) );
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
 
         for ( unsigned int i = 0; i < dim; i++ ){
             for ( unsigned int j = 0; j < dim; j++ ){

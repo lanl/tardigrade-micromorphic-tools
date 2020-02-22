@@ -12,6 +12,7 @@
 #define MICROMORHPIC_TOOLS_H
 
 #include<error_tools.h>
+#define USE_EIGEN
 #include<vector_tools.h>
 #include<constitutive_tools.h>
 
@@ -28,6 +29,9 @@ namespace micromorphicTools{
     typedef double constantType;
     typedef std::vector< constantType > constantVector;
     typedef std::vector< constantVector > constantMatrix;
+
+    typedef errorTools::Node errorNode;
+    typedef errorNode* errorOut;
 
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
 		         variableVector &Psi );
