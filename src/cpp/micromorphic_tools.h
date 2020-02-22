@@ -72,6 +72,12 @@ namespace micromorphicTools{
     errorOut pushForwardHigherOrderStress( const variableVector &referenceHigherOrderStress,
                                            const variableVector &deformationGradient,
                                            const variableVector &microDeformation,
+                                           variableType &detF,
+                                           variableVector &higherOrderStress );
+
+    errorOut pushForwardHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                           const variableVector &deformationGradient,
+                                           const variableVector &microDeformation,
                                            variableVector &higherOrderStress,
                                            variableMatrix &dHigherOrderStressdReferenceHigherOrderStress,
                                            variableMatrix &dHigherOrderStressdDeformationGradient,
