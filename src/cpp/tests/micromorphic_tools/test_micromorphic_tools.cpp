@@ -142,6 +142,77 @@ int test_computePsi( std::ofstream &results ){
     return 0;
 }
 
+int test_computeMicroStrain( std::ofstream &results ){
+    /*!
+     * Test the computation of the micro-strain
+     *
+     * :param std::ofstream &results: The output file
+     */
+
+    variableVector Psi = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    variableVector answer = { 0, 2, 3, 4, 4, 6, 7, 8, 8 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computeMicroStrain( Psi, result );
+
+    if ( error ){
+        error->print();
+        results << "test_computeMicroStrain & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_computeMicroStrain (test 1) & False\n";
+        return 1;
+    }
+
+    //Test Jacobians 
+    
+    variableVector resultJ;
+    variableMatrix dMicroStraindPsi;
+    error = micromorphicTools::computeMicroStrain( Psi, resultJ, dMicroStraindPsi );
+
+    if ( error ){
+        error->print();
+        results << "test_computeMicroStrain & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_computeMicroStrain (test 2) & False\n";
+        return 1;
+    }
+
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < Psi.size(); i++ ){
+        constantVector delta( Psi.size(), 0 );
+        delta[i] = eps * fabs( Psi[i] ) + eps;
+
+        error = micromorphicTools::computeMicroStrain( Psi + delta, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computePsi & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dMicroStraindPsi[j][i] ) ){
+                results << "test_computePsi (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_computeMicroStrain & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -156,6 +227,7 @@ int main(){
 
     //Run the tests
     test_computePsi( results );
+    test_computeMicroStrain( results );
 
     //Close the results file
     results.close();
