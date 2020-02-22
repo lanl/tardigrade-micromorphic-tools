@@ -566,6 +566,82 @@ int test_pushForwardHigherOrderStress( std::ofstream &results){
     return 0;
 }
 
+int test_computeDeviatoricHigherOrderStress( std::ofstream &results ){
+    /*!
+     * Test the computation of the deviatoric higher order stress.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector higherOrderStress = {  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                         10, 11, 12, 13, 14, 15, 16, 17, 18,
+                                         19, 20, 21, 22, 23, 24, 25, 26, 27 };
+
+    variableVector answer = { -12., -12., -12.,   4.,   5.,   6.,   7.,   8.,   9.,
+                               10.,  11.,  12.,   0.,   0.,   0.,  16.,  17.,  18.,
+                               19.,  20.,  21.,  22.,  23.,  24.,  12.,  12.,  12. };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, result );
+
+    if ( error ){
+        results << "test_computeDeviatoricHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_computeDeviatoricHigherOrderStress (test 1) & False\n";
+        return 1;
+    }
+
+    //Test Jacobians
+    
+    variableVector resultJ;
+    variableMatrix dDeviatoricHigherOrderStressdHigherOrderStress;
+
+    error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, resultJ,
+                                                                   dDeviatoricHigherOrderStressdHigherOrderStress );
+
+    if ( error ){
+        results << "test_computeDeviatoricHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
+        results << "test_computeDeviatoricHigherOrderStress (test 2) & False\n";
+        return 1;
+    }
+
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < higherOrderStress.size(); i++ ){
+        constantVector delta( higherOrderStress.size(), 0 );
+        delta[i] = eps * fabs( higherOrderStress[i] ) + eps;
+
+        error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress + delta, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeDeviatoricHigherOrderStress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDeviatoricHigherOrderStressdHigherOrderStress[j][i] ) ){
+                results << "test_pushForwardHigherOrderStress (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+
+    results << "test_computeDeviatoricHigherOrderStress & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -584,6 +660,7 @@ int main(){
     test_computeMicroStrain( results );
     test_pushForwardReferenceMicroStress( results );
     test_pushForwardHigherOrderStress( results );
+    test_computeDeviatoricHigherOrderStress( results );
 
     //Close the results file
     results.close();

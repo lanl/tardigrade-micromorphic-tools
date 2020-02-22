@@ -104,6 +104,14 @@ namespace micromorphicTools{
         //Assume 3d
         unsigned int dim = 3;
 
+        if ( deformationGradient.size() != dim * dim ){
+            return new errorNode("computeGamma", "The deformation gradient isn't the right size");
+        }
+
+        if ( gradXi.size() != dim * dim * dim ){
+            return new errorNode("computeGamma", "The micro-deformation gradient isn't the right size");
+        }
+
         Gamma = variableVector( dim * dim * dim, 0 );
 
         for ( unsigned int I = 0; I < dim; I++ ){
@@ -272,6 +280,14 @@ namespace micromorphicTools{
         //Assume 3d
         unsigned int dim = 3;
 
+        if ( referenceMicroStress.size() != dim * dim ){
+            return new errorNode("pushForwardReferenceMicroStress", "The reference micro-stress has an incorrect size");
+        }
+
+        if ( deformationGradient.size() != dim * dim ){
+            return new errorNode("pushForwardReferenceMicroStress", "The deformation gradient has an incorrect size");
+        }
+
         microStress = variableVector( dim * dim, 0 );
 
         detF = vectorTools::determinant( deformationGradient, dim, dim );
@@ -418,6 +434,18 @@ namespace micromorphicTools{
         //Assume 3d
         unsigned int dim = 3;
 
+        if ( referenceHigherOrderStress.size() != dim * dim * dim ){
+            return new errorNode( "pushForwardHigherOrderStress", "The reference higher order stress doesn't have the correct size" );
+        }
+
+        if ( deformationGradient.size() != dim * dim ){
+            return new errorNode( "pushForwardHigherOrderStress", "The deformation gradient doesn't have the correct size" );
+        }
+
+        if ( microDeformation.size() != dim * dim ){
+            return new errorNode( "pushForwardHigherOrderStress", "The micro-deformation doesn't have the correct size" );
+        }
+
         detF = vectorTools::determinant( deformationGradient, dim, dim );
 
         higherOrderStress = variableVector( dim * dim * dim, 0 );
@@ -520,6 +548,94 @@ namespace micromorphicTools{
                             dHigherOrderStressdDeformationGradient[ dim * dim * i + dim * j + k ][ dim * l + M ] -= higherOrderStress[ dim * dim * i + dim * j + k ] * dDetFdF[ dim * l + M ];
                             dHigherOrderStressdDeformationGradient[ dim * dim * i + dim * j + k ][ dim * l + M ] /= detF;
                             dHigherOrderStressdMicroDeformation[ dim * dim * i + dim * j + k ][ dim * l + M ] /= detF;
+                        }
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut computeDeviatoricHigherOrderStress( const variableVector &higherOrderStress,
+                                                 variableVector &deviatoricHigherOrderStress ){
+        /*!
+         * Compute the deviatoric part of the higher order stress.
+         *
+         * dev ( m_{ijk} ) = m_{ijk} - ( 1 / 3 ) m_{llk} \delta_{ij}
+         *
+         * :param const variableVector &higherOrderStress: The higher order stress in the current configuration.
+         * :param variableVector &deviatoricHigherOrderStress: The deviatoric part of the higher order stress.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        if ( higherOrderStress.size() != dim * dim * dim ){
+            return new errorNode( "computeDeviatoricHigherOrderStress", "The higher order stress has an incorrect size" );
+        }
+
+        deviatoricHigherOrderStress = higherOrderStress;
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        for ( unsigned int i = 0; i < dim; i++ ){
+            for ( unsigned int j = 0; j < dim; j++ ){
+                for ( unsigned int k = 0; k < dim; k++ ){
+                    for ( unsigned int l = 0; l < dim; l++ ){
+                        deviatoricHigherOrderStress[ dim * dim * i + dim * j + k ] -= higherOrderStress[ dim * dim * l + dim * l + k ] 
+                                                                                    * eye[ dim * i + j ] / 3;
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut computeDeviatoricHigherOrderStress( const variableVector &higherOrderStress,
+                                                 variableVector &deviatoricHigherOrderStress,
+                                                 variableMatrix &dDeviatoricHigherOrderStressdHigherOrderStress){
+        /*!
+         * Compute the deviatoric part of the higher order stress.
+         *
+         * dev ( m_{ijk} ) = m_{ijk} - ( 1 / 3 ) m_{llk} \delta_{ij}
+         *
+         * Also compute the Jacobian
+         * \frac{ \partial dev ( m_{ijk} ) }{ \partial m_{mno} } = \delta_{im} \delta_{jn} \delta_{ko} - ( 1 / 3 ) \delta_{mn} \delta_{ko} \delta_{ij}
+         *
+         * :param const variableVector &higherOrderStress: The higher order stress in the current configuration.
+         * :param variableVector &deviatoricHigherOrderStress: The deviatoric part of the higher order stress.
+         * :param variableMatrix &dDeviatoricHigherOrderStressdHigherOrderStress: The gradient of the deviatoric part of the 
+         *     higher order stress w.r.t. the higher order stress.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        errorOut error = computeDeviatoricHigherOrderStress( higherOrderStress, deviatoricHigherOrderStress );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeDeviatoricHigherOrderStress (jacobian)",
+                                             "Error in the computation of the deviatoric part of the higher order stress" );
+            result->addNext(error);
+            return result;
+        }
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        dDeviatoricHigherOrderStressdHigherOrderStress = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
+
+        for ( unsigned int i = 0; i < dim; i++ ){
+            for ( unsigned int j = 0; j < dim; j++ ){
+                for ( unsigned int k = 0; k < dim; k++ ){
+                    for ( unsigned int m = 0; m < dim; m++ ){
+                        for ( unsigned int n = 0; n < dim; n++ ){
+                            for ( unsigned int o = 0; o < dim; o++ ){
+                                dDeviatoricHigherOrderStressdHigherOrderStress[ dim * dim * i + dim * j + k ][ dim * dim * m + dim * n + o ] = eye[ dim * i + m ] * eye[ dim * j + n ] * eye[ dim * k + o ] - eye[ dim * m + n ] * eye[ dim * k + o ] * eye[ dim * i + j ] / 3;
+                            }
                         }
                     }
                 }
