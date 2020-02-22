@@ -5,6 +5,21 @@
 #include<fstream>
 #include<iostream>
 
+typedef micromorphicTools::constantType constantType;
+typedef micromorphicTools::constantVector constantVector;
+typedef micromorphicTools::constantMatrix constantMatrix;
+
+typedef micromorphicTools::parameterType parameterType;
+typedef micromorphicTools::parameterVector parameterVector;
+typedef micromorphicTools::parameterMatrix parameterMatrix;
+
+typedef micromorphicTools::variableType variableType;
+typedef micromorphicTools::variableVector variableVector;
+typedef micromorphicTools::variableMatrix variableMatrix;
+
+typedef micromorphicTools::errorNode errorNode;
+typedef micromorphicTools::errorOut errorOut;
+
 struct cout_redirect{
     cout_redirect( std::streambuf * new_buffer)
         : old( std::cout.rdbuf( new_buffer ) )
@@ -31,6 +46,102 @@ struct cerr_redirect{
         std::streambuf * old;
 };
 
+int test_computePsi( std::ofstream &results ){
+    /*!
+     * Tests of the compute Psi function.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector F  = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    variableVector Xi = { 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+
+    variableVector answer = { 126, 135, 144, 162, 174, 186, 198, 213, 228 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computePsi( F, Xi, result );
+
+    if ( error ){
+        error->print();
+        results << "test_computePsi & False\n";
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_computePsi (test 1) & False\n";
+        return 1;
+    }
+
+    //Test Jacobians
+    variableVector resultJ;
+    variableMatrix dPsidF, dPsidXi;
+
+    error = micromorphicTools::computePsi( F, Xi, resultJ, dPsidF, dPsidXi );
+
+    if ( error ){
+        error->print();
+        results << "test_computePsi & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_computePsi (test 2) & False\n";
+        return 1;
+    }
+
+    //Test dPsidF
+    
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < F.size(); i++ ){
+        constantVector delta( F.size(), 0 );
+        delta[i] = eps * fabs( F[i] ) + eps;
+
+        error = micromorphicTools::computePsi( F + delta, Xi, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computePsi & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dPsidF[j][i] ) ){
+                results << "test_computePsi (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    for ( unsigned int i = 0; i < Xi.size(); i++ ){
+        constantVector delta( Xi.size(), 0 );
+        delta[i] = eps * fabs( Xi[i] ) + eps;
+
+        error = micromorphicTools::computePsi( F, Xi + delta, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computePsi & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dPsidXi[j][i] ) ){
+                results << "test_computePsi (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_computePsi & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -44,6 +155,7 @@ int main(){
     results.open("results.tex");
 
     //Run the tests
+    test_computePsi( results );
 
     //Close the results file
     results.close();
