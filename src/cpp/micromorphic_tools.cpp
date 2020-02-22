@@ -88,6 +88,95 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
+                           variableVector &Gamma ){
+        /*!
+         * Compute the deformation metric Gamma:
+         *
+         * Gamma_{IJK} = F_{iI} \Xi_{iJ,K}
+         *
+         * :param const variableVector &deformationGradient: The deformation gradient.
+         * :param const variableVector &gradXi: The gradient of the micro-deformation tensor
+         *     w.r.t. the reference configuration.
+         * :param variableVector &Gamma: The micromorphic deformation metric Gamma.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        Gamma = variableVector( dim * dim * dim, 0 );
+
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    for ( unsigned int i = 0; i < dim; i++ ){
+                        Gamma[ dim * dim * I + dim * J + K ] += deformationGradient[ dim * i + I ] * gradXi[ dim * dim * i + dim * J + K ];
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
+                           variableVector &Gamma, variableMatrix &dGammadF, variableMatrix &dGammadGradXi ){
+        /*!
+         * Compute the deformation metric Gamma:
+         *
+         * Gamma_{IJK} = F_{iI} \Xi_{iJ,K}
+         *
+         * Also return the Jacobians
+         * \frac{ \partial Gamma_{IJK} }{ \partial F_{lL} } = \delta_{IL} \Xi_{lJ,K}
+         * \frac{ \partial Gamma_{IJK} }{ \partial \Xi_{lL,M} } = F_{lI} \delta_{JL} \delta_{KM}
+         *
+         * :param const variableVector &deformationGradient: The deformation gradient.
+         * :param const variableVector &gradXi: The gradient of the micro-deformation tensor
+         *     w.r.t. the reference configuration.
+         * :param variableVector &Gamma: The micromorphic deformation metric Gamma.
+         * :param variableMatrix &dGammadF: The gradient of Gamma w.r.t. the deformation gradient.
+         * :param variableMatrix &dGammadGradXi: The gradient of Gamma w.r.t. the gradient of Xi in the reference 
+         *     configuration.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        errorOut error = computeGamma( deformationGradient, gradXi, Gamma );
+
+        if ( error ){
+            errorOut result = new errorNode("computeGamma (jacobian)", "Error in computation of Gamma");
+            result->addNext(error);
+            return result;
+        }
+
+        dGammadF      = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
+        dGammadGradXi = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
+
+        constantVector eye( dim * dim, 0 );
+        vectorTools::eye( eye );
+
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    for ( unsigned int l = 0; l < dim; l++ ){
+                        for ( unsigned int L = 0; L < dim; L++ ){
+                            dGammadF[ dim * dim * I + dim * J + K ][ dim * l + L ] = eye[ dim * I + L ]
+                                                                                   * gradXi[ dim * dim * l + dim * J + K ];
+                            for ( unsigned int M = 0; M < dim; M++ ){
+                                dGammadGradXi[ dim * dim * I + dim * J + K ][ dim * dim * l + dim * L + M ] = deformationGradient[ dim * l + I ]
+                                                                                                            * eye[ dim * J + L ] 
+                                                                                                            * eye[ dim * K + M ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
     errorOut computeMicroStrain( const variableVector &Psi, variableVector &microStrain ){
         /*!
          * Compute the microstrain defined as:

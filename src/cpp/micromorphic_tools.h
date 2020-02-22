@@ -39,6 +39,12 @@ namespace micromorphicTools{
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
 		         variableVector &Psi, variableMatrix &dPsidF, variableMatrix &dPsidXi );
 
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
+                           variableVector &Gamma );
+
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
+                           variableVector &Gamma, variableMatrix &dGammadF, variableMatrix &dGammadGradXi );
+
     errorOut computeMicroStrain( const variableVector &Psi, variableVector &microStrain );
 
     errorOut computeMicroStrain( const variableVector &Psi, variableVector &microStrain,

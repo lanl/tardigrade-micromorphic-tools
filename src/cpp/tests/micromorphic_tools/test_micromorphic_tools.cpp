@@ -314,6 +314,108 @@ int test_pushForwardReferenceMicroStress( std::ofstream &results ){
     return 0;
 }
 
+int test_computeGamma( std::ofstream &results ){
+    /*!
+     * Test the computation of the deformation gradient Gamma
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector deformationGradient = { -1, -2, -3, -4, -5, -6, -7, -8, -9 };
+    variableVector gradXi = { 1,  2,  3,  4,  5,  6,  7,  8,  9,
+                             10, 11, 12, 13, 14, 15, 16, 17, 18,
+                             19, 20, 21, 22, 23, 24, 25, 26, 27 };
+
+    variableVector answer = { -174, -186, -198, -210, -222, -234, -246, -258, -270,
+                              -204, -219, -234, -249, -264, -279, -294, -309, -324,
+                              -234, -252, -270, -288, -306, -324, -342, -360, -378 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computeGamma( deformationGradient, gradXi, result );
+
+    if ( error ){
+        error->print();
+        results << "test_computeGamma & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_computeGamma (test 1) & False\n";
+        return 1;
+    }
+
+    //Test Jacobian
+    variableVector resultJ;
+    variableMatrix dGammadF, dGammadGradXi;
+
+    error = micromorphicTools::computeGamma( deformationGradient, gradXi, resultJ, 
+                                             dGammadF, dGammadGradXi );
+
+    if ( error ){
+        error->print();
+        results << "test_computeGamma & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_computeGamma (test 2) & False\n";
+        return 1;
+    }
+
+    //Test dGammadF
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < deformationGradient.size(); i++ ){
+        constantVector delta( deformationGradient.size(), 0 );
+        delta[i] = eps * fabs( deformationGradient[i] ) + eps;
+
+        error = micromorphicTools::computeGamma( deformationGradient + delta, gradXi, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeGamma & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dGammadF[j][i] ) ){
+                results << "test_computeGamma (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    //Test dGammadGradXi
+    for ( unsigned int i = 0; i < gradXi.size(); i++ ){
+        constantVector delta( gradXi.size(), 0 );
+        delta[i] = eps * fabs( gradXi[i] ) + eps;
+
+        error = micromorphicTools::computeGamma( deformationGradient, gradXi + delta, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeGamma & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dGammadGradXi[j][i] ) ){
+                results << "test_computeGamma (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_computeGamma & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -328,6 +430,7 @@ int main(){
 
     //Run the tests
     test_computePsi( results );
+    test_computeGamma( results );
     test_computeMicroStrain( results );
     test_pushForwardReferenceMicroStress( results );
 
