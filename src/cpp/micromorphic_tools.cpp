@@ -215,8 +215,9 @@ namespace micromorphicTools{
          *
          * Also computes the jacobians:
          * \frac{ \partial s_{ij} }{\partial \Sigma_{KL} } = ( 1 / J ) F_{iK} F_{jL}
-         * \frac{ \partial s_{ij} }{\partial F_{kK} } = - ( 1 / J ) \frac{\partial J}{\partial F_{k K} } s_{ij} 
-         *     + ( 1 / J ) \delta_{ik} \Sigma_{KJ} F_{jJ} + ( 1 / J ) F_{iI} \Sigma_{IK} \delta_{jk}
+         * \frac{ \partial s_{ij} }{\partial F_{kK} } = ( \delta_{i k} \delta_{I K} \Sigma_{I J} F_{j J}
+         *                                              + F_{i I} \Sigma_{I J} \delta_{j k} \delta_{J K}
+         *                                              - s_{i j} dDetFdF_{kK} ) / J
          *
          * :param const variableVector &referenceMicroStress: The micro-stress in the 
          *     reference configuration.
@@ -270,10 +271,12 @@ namespace micromorphicTools{
                         
                         for ( unsigned int I = 0; I < dim; I++ ){
 
-                            dMicroStressdDeformationGradient[ dim * i + j ][ dim * k + K] = ( eye[ dim * i + k ] * referenceMicroStress[ dim * K + I ] * deformationGradient[ dim * j + I ]
-                                                                                          + deformationGradient[ dim * i + I ] * referenceMicroStress[ dim * I + K ] * eye[ dim * j + k ]
-                                                                                          - microStress[ dim * i + j ] * dDetFdF[ dim * k + K ] ) / detF;
+                            dMicroStressdDeformationGradient[ dim * i + j ][ dim * k + K] += eye[ dim * i + k ] * referenceMicroStress[ dim * K + I ] * deformationGradient[ dim * j + I ]
+                                                                                          + deformationGradient[ dim * i + I ] * referenceMicroStress[ dim * I + K ] * eye[ dim * j + k ];
                         }
+
+                        dMicroStressdDeformationGradient[ dim * i + j ][ dim * k + K] -= microStress[ dim * i + j ] * dDetFdF[ dim * k + K ];
+                        dMicroStressdDeformationGradient[ dim * i + j ][ dim * k + K] /= detF; 
                     }
                 }
             }

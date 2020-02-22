@@ -194,7 +194,7 @@ int test_computeMicroStrain( std::ofstream &results ){
 
         if ( error ){
             error->print();
-            results << "test_computePsi & False\n";
+            results << "test_computeMicroStrain & False\n";
             return 1;
         }
 
@@ -203,13 +203,114 @@ int test_computeMicroStrain( std::ofstream &results ){
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
             if ( !vectorTools::fuzzyEquals( gradCol[j], dMicroStraindPsi[j][i] ) ){
-                results << "test_computePsi (test 3) & False\n";
+                results << "test_computeMicroStrain (test 3) & False\n";
                 return 1;
             }
         }
     }
 
     results << "test_computeMicroStrain & True\n";
+    return 0;
+}
+
+int test_pushForwardReferenceMicroStress( std::ofstream &results ){
+    /*!
+     * Test the computation of the push-foward operation on the reference micro-stress.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector referenceMicroStress = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    variableVector deformationGradient  = { -1.08831037, -0.66333427, -0.48239487,
+                                            -0.904554  ,  1.28942848, -0.02156112,
+                                            -0.08464824, -0.07730218,  0.86415668 };
+
+    variableVector answer = { -10.75427056,   2.95576352,   4.7810659 ,
+                                5.36943821,  -1.06947471,  -1.91553073,
+                                7.58260457,  -1.61246489,  -2.82366599 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, result );
+
+    if ( error ){
+        error->print();
+        results << "test_pushForwardReferenceMicroStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_pushForwardReferenceMicroStress (test 1) & False\n";
+        return 1;
+    }
+
+    //Test Jacobian
+    variableVector resultJ;
+    variableMatrix dsdS, dsdF;
+
+    error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, resultJ,
+                                                                dsdS, dsdF );
+
+    if ( error ){
+        error->print();
+        results << "test_pushForwardReferenceMicroStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_pushForwardReferenceMicroStress (test 2) & False\n";
+        return 1;
+    }
+
+    //Test dsdS
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < referenceMicroStress.size(); i++ ){
+        constantVector delta( referenceMicroStress.size(), 0 );
+        delta[i] = eps * fabs( referenceMicroStress[i] ) + eps;
+
+        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress + delta, deformationGradient, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_pushForwardReferenceMicroStress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dsdS[j][i] ) ){
+                results << "test_pushForwardReferenceMicroStress (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    for ( unsigned int i = 0; i < deformationGradient.size(); i++ ){
+        constantVector delta( deformationGradient.size(), 0 );
+        delta[i] = eps * fabs( deformationGradient[i] ) + eps;
+
+        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient + delta, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_pushForwardReferenceMicroStress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dsdF[j][i], 1e-5, 1e-5 ) ){
+                results << "test_pushForwardReferenceMicroStress (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_pushForwardReferenceMicroStrain & True\n";
     return 0;
 }
 
@@ -228,6 +329,7 @@ int main(){
     //Run the tests
     test_computePsi( results );
     test_computeMicroStrain( results );
+    test_pushForwardReferenceMicroStress( results );
 
     //Close the results file
     results.close();
