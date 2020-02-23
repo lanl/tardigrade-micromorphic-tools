@@ -90,14 +90,19 @@ namespace micromorphicTools{
                                                  variableVector &deviatoricHigherOrderStress,
                                                  variableMatrix &dDeviatoricHigherOrderStressdHigherOrderStress);
 
-    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &higherOrderStress,
-                                                          const variableVector &rightGreenLagrangeDeformation,
-                                                          variableVector &deviatoricHigherOrderStress );
+    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                                          const variableVector &rightCauchyGreenDeformation,
+                                                          variableVector &deviatoricReferenceHigherOrderStress );
+
+    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                                          const variableVector &rightCauchyGreenDeformation,
+                                                          variableVector &invRCG, variableVector &CM,
+                                                          variableVector &deviatoricReferenceHigherOrderStress );
     
-    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &higherOrderStress,
-                                                          const variableVector &rightGreenLagrangeDeformation,
-                                                          variableVector &deviatoricHigherOrderStress,
-                                                          variableMatrix &dDeviatoricHigherOrderStressdHigherOrderStress,
+    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                                          const variableVector &rightCauchyGreenDeformation,
+                                                          variableVector &deviatoricReferenceHigherOrderStress,
+                                                          variableMatrix &dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress,
                                                           variableMatrix &dDeviatoricReferenceHigherOrderStressdRCG );
 }
 
