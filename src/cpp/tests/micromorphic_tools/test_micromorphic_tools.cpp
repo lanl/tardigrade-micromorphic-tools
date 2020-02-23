@@ -849,6 +849,74 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
     return 0;
 }
 
+int test_computeDeviatoricSecondOrderStress( std::ofstream &results ){
+    /*!
+     * Test the computation the deviatoric part of a second order 
+     * stress tensor in the current configuration.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector stress = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    variableVector answer = { -4.,  2.,  3.,  4.,  0.,  6.,  7.,  8.,  4. };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computeDeviatoricSecondOrderStress( stress, result );
+
+    if ( error ){
+        results << "test_computeDeviatoricSecondOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_computeDeviatoricSecondOrderStress (test 1) & False\n";
+        return 0;
+    }
+
+    variableVector resultJ;
+    variableMatrix jacobian;
+
+    error = micromorphicTools::computeDeviatoricSecondOrderStress( stress, resultJ, jacobian );
+
+    if ( error ){
+        results << "test_computeDeviatoricSecondOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
+        results << "test_computeDeviatoricSecondOrderStress (test 2) & False\n";
+        return 0;
+    }
+
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < stress.size(); i++ ){
+        constantVector delta( stress.size(), 0 );
+        delta[i] = eps * fabs( stress[i] ) + eps;
+
+        error = micromorphicTools::computeDeviatoricSecondOrderStress( stress + delta, resultJ );
+
+        if ( error ){
+            results << "test_computeDeviatoricSecondOrderStress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], jacobian[j][i] ) ){
+                results << "test_computeDeviatoricSecondOrderStress (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_computeDeviatoricSecondOrderStress & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -870,6 +938,7 @@ int main(){
     test_pushForwardHigherOrderStress( results );
     test_computeDeviatoricHigherOrderStress( results );
     test_computeDeviatoricReferenceHigherOrderStress( results );
+    test_computeDeviatoricSecondOrderStress( results );
 
     //Close the results file
     results.close();
