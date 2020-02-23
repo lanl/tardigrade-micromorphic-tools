@@ -917,6 +917,105 @@ int test_computeDeviatoricSecondOrderStress( std::ofstream &results ){
     return 0;
 }
 
+int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
+    /*!
+     * Test the computation of the deviatoric part of the second higher order stress.
+     *
+     * :param std::ofstream &results: The output file
+     */
+
+    variableVector S = { 0.77189588, -0.84417528,  0.95929231,
+                        -0.50465708,  0.50576944,  0.05335127,
+                         0.81510751,  0.76814059, -0.82146208 };
+
+    variableVector C = { 0.03468919, -0.31275742, -0.57541261,
+                        -0.27865312, -0.45844965,  0.52325004,
+                        -0.0439162 , -0.80201065, -0.44921044 };
+
+    variableVector answer = { -1.81433044, -2.17117481,  2.726381  ,
+                               0.10781401,  0.6746562 , -0.53446584,
+                              -0.0255477 ,  0.59634539, -0.39543207 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, result );
+
+    if ( error ){
+        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_computeDeviatoricReferenceSecondOrderStress (test 1) & False\n";
+        return 1;
+    }
+
+    variableVector resultJ;
+    variableMatrix dDevSdS, dDevSdC;
+
+    error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, resultJ, dDevSdS, dDevSdC );
+
+    if ( error ){
+        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_computeDeviatoricReferenceSecondOrderStress (test 2) & False\n";
+        return 1;
+    }
+
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < S.size(); i++ ){
+        constantVector delta( S.size(), 0 );
+        delta[i] = eps * fabs( S[i] ) + eps;
+
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S + delta, C, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdS[j][i] ) ){
+                results << "test_pushForwardSecondOrderStress (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    for ( unsigned int i = 0; i < C.size(); i++ ){
+        constantVector delta( C.size(), 0 );
+        delta[i] = eps * fabs( C[i] ) + eps;
+
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdC[j][i], 1e-4, 1e-5 ) ){
+                results << "test_computeDeviatoricReferenceSecondOrderStress (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_computeDeviatoricReferenceSecondOrderStress & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -939,6 +1038,7 @@ int main(){
     test_computeDeviatoricHigherOrderStress( results );
     test_computeDeviatoricReferenceHigherOrderStress( results );
     test_computeDeviatoricSecondOrderStress( results );
+    test_computeDeviatoricReferenceSecondOrderStress( results );
 
     //Close the results file
     results.close();
