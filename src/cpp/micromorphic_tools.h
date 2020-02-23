@@ -34,10 +34,10 @@ namespace micromorphicTools{
     typedef errorNode* errorOut;
 
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
-		         variableVector &Psi );
+                         variableVector &Psi );
 
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
-		         variableVector &Psi, variableMatrix &dPsidF, variableMatrix &dPsidXi );
+                         variableVector &Psi, variableMatrix &dPsidF, variableMatrix &dPsidXi );
 
     errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
                            variableVector &Gamma );
@@ -48,19 +48,30 @@ namespace micromorphicTools{
     errorOut computeMicroStrain( const variableVector &Psi, variableVector &microStrain );
 
     errorOut computeMicroStrain( const variableVector &Psi, variableVector &microStrain,
-		                 variableMatrix &dMicroStraindPsi );
+                                 variableMatrix &dMicroStraindPsi );
+
+
+    errorOut pushForwardPK2Stress( const variableVector &PK2Stress,
+                                   const variableVector &deformationGradient,
+                                   variableVector &cauchyStress );
+
+    errorOut pushForwardPK2Stress( const variableVector &PK2Stress,
+                                   const variableVector &deformationGradient,
+                                   variableVector &cauchyStress, 
+                                   variableMatrix &dcauchyStressdPK2Stress,
+                                   variableMatrix &dcauchyStressdDeformationGradient );
 
     errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
-		                              const variableVector &deformationGradient,
-					      variableType &detF, variableVector &microStress );
+                                              const variableVector &deformationGradient,
+                                              variableType &detF, variableVector &microStress );
 
     errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
-		                              const variableVector &deformationGradient,
-					      variableVector &microStress );
+                                              const variableVector &deformationGradient,
+                                              variableVector &microStress );
 
     errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
-		                              const variableVector &deformationGradient,
-					      variableVector &microStress, 
+                                              const variableVector &deformationGradient,
+                                              variableVector &microStress, 
                                               variableMatrix &dMicroStressdReferenceMicroStress,
                                               variableMatrix &dMicroStressdDeformationGradient );
 

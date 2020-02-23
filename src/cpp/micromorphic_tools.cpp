@@ -236,6 +236,79 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut pushForwardPK2Stress( const variableVector &PK2Stress,
+                                   const variableVector &deformationGradient,
+                                   variableVector &cauchyStress ){
+        /*!
+         * Push forward the PK2-stress in the reference configuration to the 
+         * configuration (the Cauchy stress) indicated by the deformation gradient.
+         *
+         * \cauchy_{ij} = (1 / J ) F_{i I} S_{I J} F_{j J}
+         *
+         * :param const variableVector &PK2Stress: The PK2 stress in the 
+         *     reference configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param variableVector &cauchyStress: The Cauchy stress in the current 
+         *     configuration.
+         */
+
+        variableType detF;
+        errorOut error = pushForwardReferenceMicroStress( PK2Stress, deformationGradient, 
+                                                          detF, cauchyStress );
+
+        if ( error ){
+            errorOut result = new errorNode( "pushForwardPK2Stress",
+                                             "Error in push-forward operation (micro-stress and PK2 are identical)" );
+            result->addNext( error );
+            return result;
+        }
+        return NULL;
+    }
+
+    errorOut pushForwardPK2Stress( const variableVector &PK2Stress,
+                                   const variableVector &deformationGradient,
+                                   variableVector &cauchyStress,
+                                   variableMatrix &dCauchyStressdPK2Stress,
+                                   variableMatrix &dCauchyStressdDeformationGradient ){
+        /*!
+         * Push forward the PK2 stress in the reference configuration to the 
+         * configuration indicated by the deformation gradient.
+         *
+         * \sigma_{ij} = (1 / J ) F_{iI} S_{IJ} F_{jJ}
+         *
+         * Also computes the jacobians:
+         * \frac{ \partial \cauchy_{ij} }{\partial \Sigma_{KL} } = ( 1 / J ) F_{iK} F_{jL}
+         * \frac{ \partial \cauchy_{ij} }{\partial F_{kK} } = ( \delta_{i k} \delta_{I K} S_{I J} F_{j J}
+         *                                                  + F_{i I} S_{I J} \delta_{j k} \delta_{J K}
+         *                                                  - \cauchy_{i j} dDetFdF_{kK} ) / J
+         *
+         * :param const variableVector &referenceMicroStress: The PK2 stress in the 
+         *     reference configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param variableVector &cauchyStress: The Cauchy stress in the current 
+         *     configuration.
+         * :param variableMatrix &CauchyStressdReferenceMicroStress: The jacobian of 
+         *     the Cauchy w.r.t. the PK2 tress in the reference configuration.
+         * :param variableMatrix &dCauchyStressdDeformationGradient: The jacobian of 
+         *     the Cauchy stress w.r.t. the deformation gradient.
+         */
+
+        errorOut error = pushForwardReferenceMicroStress( PK2Stress, deformationGradient, cauchyStress,
+                                                          dCauchyStressdPK2Stress,
+                                                          dCauchyStressdDeformationGradient );
+
+        if ( error ){
+            errorOut result = new errorNode( "pushForwardPK2Stress (jacobian)",
+                                             "Error in push-forward operation (micro-stress and PK2 are identical)" );
+            result->addNext( error );
+            return result;
+        }
+        return NULL;
+    }
+
+
     errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
                                               const variableVector &deformationGradient,
                                               variableVector &microStress ){

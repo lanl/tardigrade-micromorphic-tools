@@ -213,6 +213,107 @@ int test_computeMicroStrain( std::ofstream &results ){
     return 0;
 }
 
+int test_pushForwardPK2Stress( std::ofstream &results ){
+    /*!
+     * Test the computation of the push-foward operation on the PK2 Stress.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector PK2Stress = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    variableVector deformationGradient  = { -1.08831037, -0.66333427, -0.48239487,
+                                            -0.904554  ,  1.28942848, -0.02156112,
+                                            -0.08464824, -0.07730218,  0.86415668 };
+
+    variableVector answer = { -10.75427056,   2.95576352,   4.7810659 ,
+                                5.36943821,  -1.06947471,  -1.91553073,
+                                7.58260457,  -1.61246489,  -2.82366599 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, result );
+
+    if ( error ){
+        error->print();
+        results << "test_pushForwardPK2Stress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_pushForwardPK2Stress (test 1) & False\n";
+        return 1;
+    }
+
+    //Test Jacobian
+    variableVector resultJ;
+    variableMatrix dCauchydPK2, dCauchydF;
+
+    error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, resultJ,
+                                                     dCauchydPK2, dCauchydF );
+
+    if ( error ){
+        error->print();
+        results << "test_pushForwardPK2Stress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_pushForwardPK2Stress (test 2) & False\n";
+        return 1;
+    }
+
+    //Test dCauchydPK2
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < PK2Stress.size(); i++ ){
+        constantVector delta( PK2Stress.size(), 0 );
+        delta[i] = eps * fabs( PK2Stress[i] ) + eps;
+
+        error = micromorphicTools::pushForwardPK2Stress( PK2Stress + delta, deformationGradient, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_pushForwardPK2Stress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dCauchydPK2[j][i] ) ){
+                results << "test_pushForwardPK2Stress (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    for ( unsigned int i = 0; i < deformationGradient.size(); i++ ){
+        constantVector delta( deformationGradient.size(), 0 );
+        delta[i] = eps * fabs( deformationGradient[i] ) + eps;
+
+        error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient + delta, resultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_pushForwardPK2Stress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( resultJ - result ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dCauchydF[j][i], 1e-5, 1e-5 ) ){
+                results << "test_pushForwardPK2Stress (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_pushForwardPK2Stress & True\n";
+    return 0;
+}
+
 int test_pushForwardReferenceMicroStress( std::ofstream &results ){
     /*!
      * Test the computation of the push-foward operation on the reference micro-stress.
@@ -310,7 +411,7 @@ int test_pushForwardReferenceMicroStress( std::ofstream &results ){
         }
     }
 
-    results << "test_pushForwardReferenceMicroStrain & True\n";
+    results << "test_pushForwardReferenceMicroStress & True\n";
     return 0;
 }
 
@@ -764,6 +865,7 @@ int main(){
     test_computePsi( results );
     test_computeGamma( results );
     test_computeMicroStrain( results );
+    test_pushForwardPK2Stress( results );
     test_pushForwardReferenceMicroStress( results );
     test_pushForwardHigherOrderStress( results );
     test_computeDeviatoricHigherOrderStress( results );
