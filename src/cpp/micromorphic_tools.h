@@ -101,6 +101,13 @@ namespace micromorphicTools{
                                                  variableVector &deviatoricSecondOrderStress,
                                                  variableMatrix &dDeviatoricStressdStress );
 
+    errorOut computeReferenceSecondOrderStressPressure( const variableVector &referenceStressMeasure,
+                                                        const variableVector &rightCauchyGreen,  variableType &pressure );
+
+    errorOut computeReferenceSecondOrderStressPressure( const variableVector &referenceStressMeasure,
+                                                        const variableVector &rightCauchyGreen, variableType &pressure,
+                                                        variableVector &dpdStress, variableVector &dpdRCG );
+
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
                                                           const variableVector &rightCauchyGreenDeformation,
                                                           variableVector &deviatoricSecondOrderReferenceStress );

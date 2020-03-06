@@ -915,6 +915,62 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeReferenceSecondOrderStressPressure( const variableVector &referenceStressMeasure,
+                                                        const variableVector &rightCauchyGreen,  variableType &pressure ){
+        /*!
+         * Compute the pressure part of a second order stress measure in the reference configuration.
+         * p = \frac{1}{3} C_{IJ} S_{IJ}
+         *
+         * where C_{IJ} is the right Cauchy-Green deformation tensor and S_{IJ} is the stress measure.
+         *
+         * :param const variableVector &referenceStressMeasure: The stress measure in the reference configuration.
+         * :param const variableVector &rightCauchyGreen: The right Cauchy-Green deformation tensor between the 
+         *     current configuration and the reference configuration of the stress tensor.
+         * :param variableType &pressure: The computed pressure.
+         */
+
+        if ( referenceStressMeasure.size() != rightCauchyGreen.size() ){
+            return new errorNode( "computeReferenceSecondOrderStressPressure",
+                                  "The stress measure and right Cauchy-Green deformation tensors aren't the same size" );
+        }
+
+        pressure = vectorTools::dot( referenceStressMeasure, rightCauchyGreen ) / 3;
+
+        return NULL;
+    }
+
+    errorOut computeReferenceSecondOrderStressPressure( const variableVector &referenceStressMeasure,
+                                                        const variableVector &rightCauchyGreen,  variableType &pressure,
+                                                        variableVector &dpdStress, variableVector &dpdRCG ){
+        /*!
+         * Compute the pressure part of a second order stress measure in the reference configuration.
+         * p = \frac{1}{3} C_{IJ} S_{IJ}
+         *
+         * where C_{IJ} is the right Cauchy-Green deformation tensor and S_{IJ} is the stress measure.
+         *
+         * :param const variableVector &referenceStressMeasure: The stress measure in the reference configuration.
+         * :param const variableVector &rightCauchyGreen: The right Cauchy-Green deformation tensor between the 
+         *     current configuration and the reference configuration of the stress tensor.
+         * :param variableType &pressure: The computed pressure.
+         * :param variableVector &dpdStress: The Jacobian of the pressure w.r.t. the stress.
+         * :param variableVector &dpdRCG: The Jacobian of the pressure w.r.t. the right Cauchy-Green deformation tensor.
+         */
+
+        errorOut error = computeReferenceSecondOrderStressPressure( referenceStressMeasure, rightCauchyGreen, pressure );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeReferenceSecondOrderStressPressure (jacobian)",
+                                             "Error in computation of pressure in the reference configuration" );
+            result->addNext( error );
+            return result;
+        }
+
+        dpdStress = rightCauchyGreen / 3;
+        dpdRCG    = referenceStressMeasure / 3;
+
+        return NULL;
+    }
+
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
                                                           const variableVector &rightCauchyGreenDeformation,
                                                           variableVector &deviatoricSecondOrderReferenceStress ){
@@ -930,15 +986,15 @@ namespace micromorphicTools{
          */
 
         variableVector invRCG;
-        variableType CS;
+        variableType pressure;
         return computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress, rightCauchyGreenDeformation,
-                                                            invRCG, CS, deviatoricSecondOrderReferenceStress );
+                                                            invRCG, pressure, deviatoricSecondOrderReferenceStress );
 
     }
 
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
                                                           const variableVector &rightCauchyGreenDeformation,
-                                                          variableVector &invRCG, variableType &CS,
+                                                          variableVector &invRCG, variableType &pressure,
                                                           variableVector &deviatoricSecondOrderReferenceStress ){
         /*!
          * Compute the deviatoric part of a second order stress measure in the reference configuration.
@@ -948,8 +1004,7 @@ namespace micromorphicTools{
          * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy Green Deformation tensor of the 
          *     deformation between configurations.
          * :param variableVector &invRCG: The inverse of the right Cauchy-Green deformation tensor.
-         * :param variableType &CS: The inner product of the right Cauchy-Greend deformation tensor and the 
-         *     stress metric.
+         * :param variableType &pressure: The pressure in the reference configuration.
          * :param variableVector &deviatoricSecondOrderReferenceStrain: The deviatoric part of the second order 
          *     stress in the reference configuration.
          */
@@ -957,10 +1012,18 @@ namespace micromorphicTools{
         //Assume 3d
         unsigned int dim = 3;
 
-        CS = vectorTools::dot( rightCauchyGreenDeformation, secondOrderReferenceStress );
+        errorOut error = computeReferenceSecondOrderStressPressure( secondOrderReferenceStress, rightCauchyGreenDeformation, pressure );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeDeviatoricReferenceSecondOrderStress",
+                                             "Error in computation of the reference pressure" );
+            result->addNext( error );
+            return result;
+        }
+
         invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
 
-        deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - CS * invRCG / 3.;
+        deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
 
         return NULL;
     }
@@ -993,18 +1056,24 @@ namespace micromorphicTools{
         constantVector eye ( dim * dim );
         vectorTools::eye( eye );
 
-        variableVector invRCG;
-        variableType CS;
-        errorOut error = computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress, rightCauchyGreenDeformation,
-                                                                      invRCG, CS, deviatoricSecondOrderReferenceStress );
+        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+        variableVector dpdStress, dpdRCG;
+        variableType pressure;
+
+        errorOut error = computeReferenceSecondOrderStressPressure( secondOrderReferenceStress, rightCauchyGreenDeformation, pressure,
+                                                                    dpdStress, dpdRCG );
 
         if ( error ){
             errorOut result = new errorNode( "computeDeviatoricReferenceSecondOrderStress (jacobian)",
-                                             "Error in computation of deviatoric second order stress in the reference configuration" );
+                                             "Error in computation of the reference pressure" );
             result->addNext( error );
             return result;
         }
 
+        //Compute the deviatoric part of the reference stress
+        deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
+
+        //Assemblet the Jacobian
         dDeviatoricReferenceStressdReferenceStress = variableMatrix( deviatoricSecondOrderReferenceStress.size(),
                                                                      variableVector( secondOrderReferenceStress.size(), 0 ) );
 
@@ -1016,9 +1085,9 @@ namespace micromorphicTools{
                 for ( unsigned int K = 0; K < dim; K++ ){
                     for ( unsigned int L = 0; L < dim; L++ ){
                         dDeviatoricReferenceStressdReferenceStress[ dim * I + J ][ dim * K + L ] = eye[ dim * I + K ] * eye[ dim * L + J ]
-                            - rightCauchyGreenDeformation[ dim * K + L ] * invRCG[ dim * I + J ] / 3;
+                            - dpdStress[ dim * K + L ] * invRCG[ dim * I + J ];
 
-                        dDeviatoricReferenceStressdRCG[ dim * I + J ][ dim * K + L ] = ( CS * invRCG[ dim * I + K ] * invRCG[ dim * L + J ] - secondOrderReferenceStress[ dim * K + L ] * invRCG[ dim * I + J ] ) / 3;
+                        dDeviatoricReferenceStressdRCG[ dim * I + J ][ dim * K + L ] = ( pressure * invRCG[ dim * I + K ] * invRCG[ dim * L + J ] - dpdRCG[ dim * K + L ] * invRCG[ dim * I + J ] );
                     }
                 }
             }
