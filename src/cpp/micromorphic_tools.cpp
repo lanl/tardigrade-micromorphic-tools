@@ -718,6 +718,51 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeReferenceHigherOrderStressPressure( const variableVector &referenceHigherOrderStress,
+                                                        const variableVector &rightCauchyGreenDeformation,
+                                                        variableVector &referenceHigherOrderPressure ){
+        /*!
+         * Compute the pressure for a higher-order stress in the reference configuration.
+         * $p_K = \frac{1}{3} C_{AB} M_{ABK}$
+         *
+         * where $C_{AB}$ is the right Cauchy-Green deformation tensor and 
+         * M_{ABK} is the higher order stress tensor in the reference configuration.
+         *
+         * :param const variableVector &referenceHigherOrderStress: The higher order stress in the 
+         *     reference configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation
+         *     tensor.
+         * :param variableVector &referenceHigherOrderPressure: The higher order pressure.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        if ( rightCauchyGreenDeformation.size() != dim * dim ){
+            return new errorNode( "computeReferenceHigherOrderStressPressure",
+                                  "The right Cauchy-Green deformation tensor must have nine terms." );
+        }
+
+        if ( referenceHigherOrderStress.size() != dim * dim * dim ){
+            return new errorNode( "computeReferenceHigherOrderStressPressure",
+                                  "The higher order stress tensor must have 27 terms." );
+        }
+
+        referenceHigherOrderPressure = variableVector( dim, 0 );
+
+        for ( unsigned int K = 0; K < dim; K++ ){
+            for ( unsigned int A = 0; A < dim; A++ ){
+                for ( unsigned int B = 0; B < dim; B++ ){
+                    referenceHigherOrderPressure[K] += rightCauchyGreenDeformation[ dim * A + B ]
+                                                     * referenceHigherOrderStress[ dim * dim * A + dim * B + K ];
+                }
+            }
+        }
+
+        referenceHigherOrderPressure /= 3;
+        return NULL;
+    }
+
     errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
                                                           const variableVector &rightCauchyGreenDeformation,
                                                           variableVector &deviatoricReferenceHigherOrderStress ){

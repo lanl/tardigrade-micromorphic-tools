@@ -1139,6 +1139,42 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
     return 0;
 }
 
+int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
+    /*!
+     * Test the computation of the higher order stress pressure.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector M = {  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                         10, 11, 12, 13, 14, 15, 16, 17, 18,
+                         19, 20, 21, 22, 23, 24, 25, 26, 27 };
+
+    variableVector C = { 0.34852835, 0.47540122, 1.11252634,
+                         0.47540122, 1.49184663, 1.57435946,
+                         1.11252634, 1.57435946, 3.68235756 };
+
+    variableVector answer = { 69.06947837, 73.01858056, 76.96768276 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, result );
+
+    if ( error ){
+        error->print();
+        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
+        return 1;
+    }
+
+    results << "test_computeDeviatoricReferenceSecondOrderStress & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -1163,6 +1199,7 @@ int main(){
     test_computeReferenceSecondOrderStressPressure( results );
     test_computeDeviatoricSecondOrderStress( results );
     test_computeDeviatoricReferenceSecondOrderStress( results );
+    test_computeReferenceHigherOrderStressPressure( results );
 
     //Close the results file
     results.close();
