@@ -814,6 +814,7 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
     }
 
 
+    //Test dDevMdM
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < M.size(); i++ ){
         constantVector delta( M.size(), 0 );
@@ -846,6 +847,7 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         }
     }
 
+    //Test dDevMdC
     for ( unsigned int i = 0; i < C.size(); i++ ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
@@ -873,6 +875,41 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
             if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCJ2[j][i], 1e-4, 1e-5 ) ){
                 results << "test_computeDeviatoricReferenceHigherOrderStress (test 6) & False\n";
                 return 1;
+            }
+        }
+    }
+
+    //Test d2DevMdMdC
+    for ( unsigned int i = 0; i < C.size(); i++ ){
+        constantVector delta( C.size(), 0 );
+        delta[i] = eps * fabs( C[i] ) + eps;
+
+        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultJ2, dDevMdMJ2, dDevMdCJ2 );
+
+        if ( error ){
+            error->print();
+            results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
+            return 1;
+        }
+
+        constantMatrix gradCol = ( dDevMdMJ2 - dDevMdM ) / delta[i];
+
+        for ( unsigned int j = 0; j < 3; j++ ){
+            for ( unsigned int k = 0; k < 3; k++ ){
+                for ( unsigned int l = 0; l < 3; l++ ){
+                    for ( unsigned int m = 0; m < 3; m++ ){
+                        for ( unsigned int n = 0; n < 3; n++ ){
+                            for ( unsigned int o = 0; o < 3; o++ ){
+                                if ( !vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                    d2DevMdMdC[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ], 1e-4, 1e-4 ) ){
+
+                                    results << "test_computeDeviatoricReferenceHigherOrderStress (test 7) & False\n";
+                                    return 1;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
