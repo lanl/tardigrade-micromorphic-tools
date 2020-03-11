@@ -951,6 +951,10 @@ namespace micromorphicTools{
          * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor.
          * :param variableVector &deviatoricReferenceHigherOrderStress: The deviatoric part of the higher order tensor in the 
          *     reference configuration.
+         * :param variableVector &dDeviatoricReferenceHigherOrdeterStressdReferenceHigherOrderStress: The Jacobian of the 
+         *     deviatoric part of the reference higher order stress w.r.t. the reference higher order stress.
+         * :param variableVector &dDeviatoricReferenceHigherOrdeterStressdRCG: The Jacobian of the 
+         *     deviatoric part of the reference higher order stress w.r.t. the right Cauchy-Green deformation tensor.
          */
         
         //Assume 3d
@@ -1002,6 +1006,118 @@ namespace micromorphicTools{
 
                             dDeviatoricReferenceHigherOrderStressdRCG[ dim * dim * I + dim * J + K ][ dim * L + M ]
                                 = invRCG[ dim * I + L ] * invRCG[ dim * M + J ] * pressure[ K ] - invRCG[ dim * I + J ] * dpdC[ K ][ dim * L + M ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                                          const variableVector &rightCauchyGreenDeformation,
+                                                          variableVector &deviatoricReferenceHigherOrderStress,
+                                                          variableMatrix &dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress,
+                                                          variableMatrix &dDeviatoricReferenceHigherOrderStressdRCG,
+                                                          variableMatrix &d2MdMdRCG ){
+        /*!
+         * Compute the deviatoric part of the higher order stress in the reference configuration.
+         *
+         * dev ( M_{IJK} ) = M_{IJK} - \frac{1}{3} (C^{-1})_{IJ} C_{AB} M_{ABK} = M_{IJK} - ( C^{-1} )_{IJ} p_{K}
+         *
+         * Also compute Jacobians:
+         * \frac{ \partial dev ( M_{IJK} ) }{ \partial M_{LMN} } = \delta_{IL} \delta_{JM} \delta_{KN} - (C^{-1})_{IJ} \frac{ \partial p_K }{ \partial M_{LMN} }
+         * \frac{ \partial dev ( M_{IJK} ) }{ \partial C_{LM} } = \left( (C^{-1})_{IL} (C^{-1})_{MJ} p_{K} - (C^{-1})_{IJ} \frac{ \partial p_K }{ \partial C_{LM} } \right)
+         *
+         * \frac{ \partial dev( M_{IJK} ) }{ \partial M_{LMN} \partial C_{OP} } = (C^{-1})_{IO} (C^{-1})_{PJ} \frac{ \partial p_{k }{ \partial M_{LMN} } - (C^{-1})_{IJ} \frac{ \partial^2 p_K}{ \partial M_{LMN} \partial C_{OP} } 
+         *
+         * :param const variableVector &referenceHigherOrderStress: The higher order stress in the reference configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor.
+         * :param variableVector &deviatoricReferenceHigherOrderStress: The deviatoric part of the higher order tensor in the 
+         *     reference configuration.
+         * :param variableVector &dDeviatoricReferenceHigherOrdeterStressdReferenceHigherOrderStress: The Jacobian of the 
+         *     deviatoric part of the reference higher order stress w.r.t. the reference higher order stress.
+         * :param variableVector &dDeviatoricReferenceHigherOrdeterStressdRCG: The Jacobian of the 
+         *     deviatoric part of the reference higher order stress w.r.t. the right Cauchy-Green deformation tensor.
+         * :param variableMatrix &d2DevMdMdRCG: The mixed second derivative of the deviatoric part of the reference higher order 
+         *     stress tensor with respect to the reference higher order stress tensor and the right Cauchy-Green deformation 
+         *     tensor.
+         */
+        
+        //Assume 3d
+        unsigned int dim = 3;
+
+        variableVector invRCG, pressure;
+        variableMatrix dpdM, dpdC, d2pdMdRCG;
+
+        //Compute the pressure
+        errorOut error = computeReferenceHigherOrderStressPressure( referenceHigherOrderStress, rightCauchyGreenDeformation, pressure,
+                                                                    dpdM, dpdC, d2pdMdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeDeviatoricReferenceHigherOrderStress (second order jacobian)",
+                                             "Error in computation of higher order pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        deviatoricReferenceHigherOrderStress = referenceHigherOrderStress;
+
+        invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+
+        //Compute the deviatoric higher order stress        
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    deviatoricReferenceHigherOrderStress[ dim * dim * I + dim * J + K ] -= invRCG[ dim * I + J ] * pressure[ K ];
+                }
+            }
+        }
+
+        //Compute the first order Jacobians
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
+        dDeviatoricReferenceHigherOrderStressdRCG = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
+
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    for ( unsigned int L = 0; L < dim; L++ ){
+                        for ( unsigned int M = 0; M < dim; M++ ){
+                            for ( unsigned int N = 0; N < dim; N++ ){
+                                dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress[ dim * dim * I + dim * J + K ][ dim * dim * L + dim * M + N ]
+                                    = eye[ dim * I + L ] * eye[ dim * J + M ] * eye[ dim * K + N ] - invRCG[ dim * I + J ] * dpdM[ K ][ dim * dim * L + dim * M + N ];
+                            }
+
+                            dDeviatoricReferenceHigherOrderStressdRCG[ dim * dim * I + dim * J + K ][ dim * L + M ]
+                                = invRCG[ dim * I + L ] * invRCG[ dim * M + J ] * pressure[ K ] - invRCG[ dim * I + J ] * dpdC[ K ][ dim * L + M ];
+                        }
+                    }
+                }
+            }
+        }
+
+        //Compute the second order Jacobian
+
+        d2MdMdRCG = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim * dim * dim, 0 ) );
+
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    for ( unsigned int L = 0; L < dim; L++ ){
+                        for ( unsigned int M = 0; M < dim; M++ ){
+                            for ( unsigned int N = 0; N < dim; N++ ){
+                                for ( unsigned int O = 0; O < dim; O++ ){
+                                    for ( unsigned int P = 0; P < dim; P++ ){
+                                        d2MdMdRCG[ dim * dim * I + dim * J + dim * K ][ dim * dim * dim * dim * L + dim * dim * dim * M + dim * dim * N + dim * O + P ]
+                                            = invRCG[ dim * I + O ] * invRCG[ dim * P + J ] * dpdM[ K ][ dim * dim * L + dim * M + N ]
+                                            - invRCG[ dim * I + J ] * d2pdMdRCG[ K ][ dim * dim * dim * dim * L + dim * dim * dim * M + dim * dim * N + dim * O + P ];
+                                    }
+                                }
+                            }
                         }
                     }
                 }
