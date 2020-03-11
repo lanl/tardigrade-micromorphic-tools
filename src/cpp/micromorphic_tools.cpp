@@ -763,6 +763,67 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeReferenceHigherOrderStressPressure( const variableVector &referenceHigherOrderStress,
+                                                        const variableVector &rightCauchyGreenDeformation,
+                                                        variableVector &referenceHigherOrderPressure,
+                                                        variableMatrix &dpdM, variableMatrix &dpdC ){
+        /*!
+         * Compute the pressure for a higher-order stress in the reference configuration.
+         * $p_K = \frac{1}{3} C_{AB} M_{ABK}$
+         *
+         * Also compute the Jacobians
+         * $\frac{ \partial p_K }{ \partial M_{NOP} } = \frac{1}{3} C_{NO} \delta_{KP}$
+         * $\frac{ \partial p_K }{ \partial C_{NO} } = \frac{1}{3} M_{NOK}$
+         *
+         * where $C_{AB}$ is the right Cauchy-Green deformation tensor and 
+         * M_{ABK} is the higher order stress tensor in the reference configuration.
+         *
+         * :param const variableVector &referenceHigherOrderStress: The higher order stress in the 
+         *     reference configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation
+         *     tensor.
+         * :param variableVector &referenceHigherOrderPressure: The higher order pressure.
+         * :param variableMatrix &dpdM: The Jacobian of the pressure w.r.t. the higher order stress.
+         * :param variableMatrix &dpdC: The Jacobian of the pressure w.r.t. the right Cauchy-Green 
+         *     deformation tensor.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        errorOut error = computeReferenceHigherOrderStressPressure( referenceHigherOrderStress, rightCauchyGreenDeformation,
+                                                                    referenceHigherOrderPressure );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeReferenceHigherOrderStressPressure (jacobian)",
+                                             "Error in computation of reference higher order stress" );
+            result->addNext( error );
+            return result;
+        }
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        dpdM = variableMatrix( referenceHigherOrderPressure.size(), variableVector( referenceHigherOrderStress.size(), 0 ) );
+        dpdC = variableMatrix( referenceHigherOrderPressure.size(), variableVector( rightCauchyGreenDeformation.size(), 0 ) );
+
+        for ( unsigned int K = 0; K < dim; K++ ){
+            for ( unsigned int N = 0; N < dim; N++ ){
+                for ( unsigned int O = 0; O < dim; O++ ){
+                    dpdC[ K ][ dim * N + O ] = referenceHigherOrderStress[ dim * dim * N + dim * O + K ];
+                    for ( unsigned int P = 0; P < dim; P++ ){
+                        dpdM[ K ][ dim * dim * N + dim * O + P ] = rightCauchyGreenDeformation[ dim * N + O ] * eye[ dim * K + P ];
+                    }
+                }
+            }
+        }
+
+        dpdM /= 3;
+        dpdC /= 3;
+
+        return NULL;
+    }
+
     errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
                                                           const variableVector &rightCauchyGreenDeformation,
                                                           variableVector &deviatoricReferenceHigherOrderStress ){

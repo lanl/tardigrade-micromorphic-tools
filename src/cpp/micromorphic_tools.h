@@ -134,6 +134,11 @@ namespace micromorphicTools{
                                                         const variableVector &rightCauchyGreenDeformation,
                                                         variableVector &referenceHigherOrderPressure );
 
+    errorOut computeReferenceHigherOrderStressPressure( const variableVector &referenceHigherOrderStress, 
+                                                        const variableVector &rightCauchyGreenDeformation,
+                                                        variableVector &referenceHigherOrderPressure,
+                                                        variableMatrix &dpdM, variableMatrix &dpdC );
+
     errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
                                                           const variableVector &rightCauchyGreenDeformation,
                                                           variableVector &deviatoricReferenceHigherOrderStress );
