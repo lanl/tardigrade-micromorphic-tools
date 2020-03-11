@@ -1188,6 +1188,21 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
         return 1;
     }
 
+    variableVector resultJ2;
+    variableMatrix dpdMJ2, dpdCJ2, d2pdMdC;
+    error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, resultJ2, dpdMJ2, dpdCJ2, d2pdMdC );
+
+    if ( error ){
+        error->print();
+        results << "test_computeReferenceHigherOrderStressPressure & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ2 ) ){
+        results << "test_computeReferenceHigherOrderStressPressure (test 3) & False\n";
+        return 1;
+    }
+
     //Test dpdM
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < M.size(); i++ ){
@@ -1206,7 +1221,14 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
             if ( !vectorTools::fuzzyEquals( gradCol[j], dpdM[j][i] ) ){
-                results << "test_computeReferenceHigherOrderStressPressure (test 3) & False\n";
+                results << "test_computeReferenceHigherOrderStressPressure (test 4) & False\n";
+                return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dpdMJ2[j][i] ) ){
+                results << "test_computeReferenceHigherOrderStressPressure (test 5) & False\n";
                 return 1;
             }
         }
@@ -1229,8 +1251,45 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
             if ( !vectorTools::fuzzyEquals( gradCol[j], dpdC[j][i] ) ){
-                results << "test_computeReferenceHigherOrderStressPressure (test 4) & False\n";
+                results << "test_computeReferenceHigherOrderStressPressure (test 6) & False\n";
                 return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dpdCJ2[j][i] ) ){
+                results << "test_computeReferenceHigherOrderStressPressure (test 7) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    //Test d2pdMdC
+    for ( unsigned int i = 0; i < C.size(); i++ ){
+        constantVector delta( C.size(), 0 );
+        delta[i] = eps * fabs( C[i] ) + eps;
+
+        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultJ, dpdMJ2, dpdCJ2 );
+
+        if ( error ){
+            error->print();
+            results << "test_computeReferenceHigherOrderStressPressure & False\n";
+            return 1;
+        }
+
+        constantMatrix gradCol = ( dpdMJ2 - dpdM ) / delta[i];
+
+        for ( unsigned int j = 0; j < 3; j++ ){
+            for ( unsigned int k = 0; k < 3; k++ ){
+                for ( unsigned int l = 0; l < 3; l++ ){
+                    for ( unsigned int m = 0; m < 3; m++ ){
+                        if ( !vectorTools::fuzzyEquals( gradCol[ j ][ 9 * k + 3 * l + m ], 
+                                                        d2pdMdC[ j ][ 81 * k + 27 * l + 9 * m + 3 * (int)( i / 3 ) + i % 3 ] ) ){
+                            results << "test_computeReferenceHigherOrderStressPressure (test 7) & False\n";
+                            return 1;
+                        }
+                    }
+                }
             }
         }
     }

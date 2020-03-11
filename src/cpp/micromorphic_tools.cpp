@@ -796,7 +796,7 @@ namespace micromorphicTools{
 
         if ( error ){
             errorOut result = new errorNode( "computeReferenceHigherOrderStressPressure (jacobian)",
-                                             "Error in computation of reference higher order stress" );
+                                             "Error in computation of reference higher order pressure" );
             result->addNext( error );
             return result;
         }
@@ -820,6 +820,72 @@ namespace micromorphicTools{
 
         dpdM /= 3;
         dpdC /= 3;
+
+        return NULL;
+    }
+
+    errorOut computeReferenceHigherOrderStressPressure( const variableVector &referenceHigherOrderStress,
+                                                        const variableVector &rightCauchyGreenDeformation,
+                                                        variableVector &referenceHigherOrderPressure,
+                                                        variableMatrix &dpdM, variableMatrix &dpdC,
+                                                        variableMatrix &d2pdMdC ){
+        /*!
+         * Compute the pressure for a higher-order stress in the reference configuration.
+         * $p_K = \frac{1}{3} C_{AB} M_{ABK}$
+         *
+         * Also compute the Jacobians
+         * $\frac{ \partial p_K }{ \partial M_{NOP} } = \frac{1}{3} C_{NO} \delta_{KP}$
+         * $\frac{ \partial p_K }{ \partial C_{NO} } = \frac{1}{3} M_{NOK}$
+         * $\frac{ \partial^2 p_K}{ \partial M_{NOP} C_{QR} } = \frac{1}{3} \delta_{NQ} \delta_{OR} \delta_{KP}
+         *
+         * where $C_{AB}$ is the right Cauchy-Green deformation tensor and
+         * M_{ABK} is the higher order stress tensor in the reference configuration.
+         *
+         * :param const variableVector &referenceHigherOrderStress: The higher order stress in the
+         *     reference configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation
+         *     tensor.
+         * :param variableVector &referenceHigherOrderPressure: The higher order pressure.
+         * :param variableMatrix &dpdM: The Jacobian of the pressure w.r.t. the higher order stress.
+         * :param variableMatrix &dpdC: The Jacobian of the pressure w.r.t. the right Cauchy-Green
+         *     deformation tensor.
+         * :param variableMatrix &d2pdMdC: The second order jacobian of the pressure w.r.t the 
+         *     reference higher order stress and right Cauchy-Green deformation tensor. This Jacobian is organized
+         *     [ K ][ NOPQR ]
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        errorOut error = computeReferenceHigherOrderStressPressure( referenceHigherOrderStress, rightCauchyGreenDeformation,
+                                                                    referenceHigherOrderPressure, dpdM, dpdC );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeReferenceHigherOrderStressPressure (second order jacobian)",
+                                             "Error in computation of reference higher order pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        variableVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        d2pdMdC = variableMatrix( dim, variableVector( dim * dim * dim * dim * dim, 0 ) );
+
+        for ( unsigned int K = 0; K < dim; K++ ){
+            for ( unsigned int N = 0; N < dim; N++ ){
+                for ( unsigned int O = 0; O < dim; O++ ){
+                    for ( unsigned int P = 0; P < dim; P++ ){
+                        for ( unsigned int Q = 0; Q < dim; Q++ ){
+                            for ( unsigned int R = 0; R < dim; R++ ){
+                                d2pdMdC[ K ][ dim * dim * dim * dim * N + dim * dim * dim * O + dim * dim * P + dim * Q + R ] = 
+                                    eye[ dim * N + Q ] * eye[ dim * O + R ] * eye[ dim * K + P ] / 3;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         return NULL;
     }
