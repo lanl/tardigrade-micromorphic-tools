@@ -1112,7 +1112,7 @@ namespace micromorphicTools{
                             for ( unsigned int N = 0; N < dim; N++ ){
                                 for ( unsigned int O = 0; O < dim; O++ ){
                                     for ( unsigned int P = 0; P < dim; P++ ){
-                                        d2MdMdRCG[ dim * dim * I + dim * J + dim * K ][ dim * dim * dim * dim * L + dim * dim * dim * M + dim * dim * N + dim * O + P ]
+                                        d2MdMdRCG[ dim * dim * I + dim * J + K ][ dim * dim * dim * dim * L + dim * dim * dim * M + dim * dim * N + dim * O + P ]
                                             = invRCG[ dim * I + O ] * invRCG[ dim * P + J ] * dpdM[ K ][ dim * dim * L + dim * M + N ]
                                             - invRCG[ dim * I + J ] * d2pdMdRCG[ K ][ dim * dim * dim * dim * L + dim * dim * dim * M + dim * dim * N + dim * O + P ];
                                     }

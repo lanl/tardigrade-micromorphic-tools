@@ -798,6 +798,22 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         return 1;
     }
 
+    variableVector resultJ2;
+    variableMatrix dDevMdMJ2, dDevMdCJ2, d2DevMdMdC;
+
+    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, resultJ2, dDevMdMJ2, dDevMdCJ2, d2DevMdMdC );
+
+    if ( error ){
+        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_computeDeviatoricReferenceHigherOrderStress (test 3) & False\n";
+        return 1;
+    }
+
+
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < M.size(); i++ ){
         constantVector delta( M.size(), 0 );
@@ -820,6 +836,14 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
                 return 1;
             }
         }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdMJ2[j][i] ) ){
+                results << "test_pushForwardHigherOrderStress (test 4) & False\n";
+                return 1;
+            }
+        }
     }
 
     for ( unsigned int i = 0; i < C.size(); i++ ){
@@ -839,7 +863,15 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
             if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdC[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 4) & False\n";
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 5) & False\n";
+                return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCJ2[j][i], 1e-4, 1e-5 ) ){
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 6) & False\n";
                 return 1;
             }
         }
