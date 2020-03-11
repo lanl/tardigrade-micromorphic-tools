@@ -151,7 +151,7 @@ namespace micromorphicTools{
 
     errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
                                                           const variableVector &rightCauchyGreenDeformation,
-                                                          variableVector &invRCG, variableVector &CM,
+                                                          variableVector &invRCG, variableVector &pressure,
                                                           variableVector &deviatoricReferenceHigherOrderStress );
     
     errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
