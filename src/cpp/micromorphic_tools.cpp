@@ -1418,9 +1418,6 @@ namespace micromorphicTools{
          *     stress in the reference configuration.
          */
 
-        //Assume 3d
-        unsigned int dim = 3;
-
         variableType pressure;
         errorOut error = computeReferenceSecondOrderStressPressure( secondOrderReferenceStress, rightCauchyGreenDeformation, pressure );
 
@@ -1431,11 +1428,8 @@ namespace micromorphicTools{
             return result;
         }
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
-
-        deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
-
-        return NULL;
+        return computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress, rightCauchyGreenDeformation,
+                                                            pressure, deviatoricSecondOrderReferenceStress );
     }
 
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
@@ -1486,8 +1480,6 @@ namespace micromorphicTools{
          * :param variableMatrix &dDeviatoricreferenceStressdRCG: The jacobian w.r.t. the right Cauchy Green deformation
          *     tensor.
          */
-        //Assume 3d
-        unsigned int dim = 3;
 
         variableType pressure;
         variableVector dpdS, dpdC;
@@ -1501,26 +1493,11 @@ namespace micromorphicTools{
             return result;
         }
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
-
-        deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
-
-        //Compute the first order jacobians
-        dDeviatoricReferenceStressdReferenceStress = vectorTools::eye< constantType >( dim * dim );
-        dDeviatoricReferenceStressdReferenceStress -= vectorTools::dyadic( invRCG, dpdS );
-
-        dDeviatoricReferenceStressdRCG = - vectorTools::dyadic( invRCG, dpdC );
-        for ( unsigned int I = 0; I < dim; I++ ){
-            for ( unsigned int J = 0; J < dim; J++ ){
-                for ( unsigned int K = 0; K < dim; K++ ){
-                    for ( unsigned int L = 0; L < dim; L++ ){
-                        dDeviatoricReferenceStressdRCG[ dim * I + J ][ dim * K + L ] += pressure * invRCG[ dim * I + K ] * invRCG[ dim * L + J ];
-                    }
-                }
-            }
-        }
-
-        return NULL;
+        return computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress, rightCauchyGreenDeformation,
+                                                            pressure, dpdS, dpdC,
+                                                            deviatoricSecondOrderReferenceStress,
+                                                            dDeviatoricReferenceStressdReferenceStress,
+                                                            dDeviatoricReferenceStressdRCG );
     }
 
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
@@ -1684,8 +1661,6 @@ namespace micromorphicTools{
          * :param variableMatrix &d2DevSdSdRCG: The second order mixed Jacobian w.r.t. the stress and right Cauchy-Green 
          *     deformation tensor. Stored [IJ][KLMN]
          */
-        //Assume 3d
-        unsigned int dim = 3;
 
         variableType pressure;
         variableVector dpdS, dpdC;
@@ -1700,44 +1675,12 @@ namespace micromorphicTools{
             return result;
         }
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
-
-        deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
-
-        //Compute the first order jacobians
-        dDeviatoricReferenceStressdReferenceStress = vectorTools::eye< constantType >( dim * dim );
-        dDeviatoricReferenceStressdReferenceStress -= vectorTools::dyadic( invRCG, dpdS );
-
-        dDeviatoricReferenceStressdRCG = - vectorTools::dyadic( invRCG, dpdC );
-        for ( unsigned int I = 0; I < dim; I++ ){
-            for ( unsigned int J = 0; J < dim; J++ ){
-                for ( unsigned int K = 0; K < dim; K++ ){
-                    for ( unsigned int L = 0; L < dim; L++ ){
-                        dDeviatoricReferenceStressdRCG[ dim * I + J ][ dim * K + L ] += pressure * invRCG[ dim * I + K ] * invRCG[ dim * L + J ];
-                    }
-                }
-            }
-        }
-
-        //Compute the second order jacobians
-        d2DevSdSdRCG = variableMatrix( dim * dim, variableVector( dim * dim * dim * dim, 0 ) );
-        for ( unsigned int I = 0; I < dim; I++ ){
-            for ( unsigned int J = 0; J < dim; J++ ){
-                for ( unsigned int K = 0; K < dim; K++ ){
-                    for ( unsigned int L = 0; L < dim; L++ ){
-                        for ( unsigned int M = 0; M < dim; M++ ){
-                            for ( unsigned int N = 0; N < dim; N++ ){
-                                d2DevSdSdRCG[ dim * I + J ][ dim * dim * dim * K + dim * dim * L + dim * M + N ] = 
-                                    -d2pdSdC[ dim * K + L ][ dim * M + N ] * invRCG[ dim * I + J ]
-                                    +dpdS[ dim * K + L ] * invRCG[ dim * I + M ] * invRCG[ dim * N + J ];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return NULL;
+        return computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress, rightCauchyGreenDeformation,
+                                                            pressure, dpdS, dpdC, d2pdSdC,
+                                                            deviatoricSecondOrderReferenceStress,
+                                                            dDeviatoricReferenceStressdReferenceStress,
+                                                            dDeviatoricReferenceStressdRCG,
+                                                            d2DevSdSdRCG );
     }
 
     errorOut computeSecondOrderReferenceStressDecomposition( const variableVector &secondOrderReferenceStress,
