@@ -1200,6 +1200,7 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
         return 1;
     }
 
+    //Test of dpdS
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < S.size(); i++ ){
         constantVector delta( S.size(), 0 );
@@ -1232,6 +1233,7 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
         }
     }
 
+    //Test of dpdC
     for ( unsigned int i = 0; i < C.size(); i++ ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
@@ -1259,6 +1261,37 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
             if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdCJ2[j][i], 1e-4, 1e-5 ) ){
                 results << "test_computeDeviatoricReferenceSecondOrderStress (test 6) & False\n";
                 return 1;
+            }
+        }
+    }
+
+    //Test of d2pdSdC
+    for ( unsigned int i = 0; i < C.size(); i++ ){
+        constantVector delta( C.size(), 0 );
+        delta[i] = eps * fabs( C[i] ) + eps;
+
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultJ, dDevSdSJ2, dDevSdCJ2 );
+
+        if ( error ){
+            error->print();
+            results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
+            return 1;
+        }
+
+        constantMatrix gradCol = ( dDevSdSJ2 - dDevSdS ) / delta[i];
+
+        for ( unsigned int j = 0; j < 3; j++ ){
+            for ( unsigned int k = 0; k < 3; k++ ){
+                for ( unsigned int l = 0; l < 3; l++ ){
+                    for ( unsigned int m = 0; m < 3; m++ ){
+                        if ( !vectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
+                                                        d2DevSdSdC[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ],
+                                                        1e-4, 1e-5 ) ){
+                            results << "test_computeDeviatoricReferenceSecondOrderStress (test 6) & False\n";
+                            return 1;
+                        }
+                    }
+                }
             }
         }
     }
