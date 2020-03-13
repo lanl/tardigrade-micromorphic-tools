@@ -1577,4 +1577,46 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherdOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricHigherOrderReferenceStress,
+                                                             variableVector &pressure ){
+        /*!
+         * Compute the decomposition of the higher-order stress measure into pressure and deviatoric parts.
+         *
+         * :param const variableVector &higherOrderReferenceStress: The higher order stress in the reference
+         *     configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor 
+         *     between the current configuration and the configuration the stress is located in.
+         * :param variableVector &deviatoricHigherOrderReferenceStress: The deviatoric part of the higher order 
+         *     stress tensor.
+         * :param variableVector &pressure: The pressure of the higher order stress tensor.
+         */
+
+        errorOut error = computeReferenceHigherOrderStressPressure( higherOrderReferenceStress,
+                                                                    rightCauchyGreenDeformation,
+                                                                    pressure );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderReferenceStressDecomposition",
+                                             "Error in computation of pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        error = computeDeviatoricReferenceHigherOrderStress( secondOrderReferenceStress,
+                                                             rightCauchyGreenDeformation,
+                                                             pressure,
+                                                             deviatoricHigherOrderReferenceStress );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderReferenceStressDecomposition",
+                                             "Error in computation of the deviatoric part of the stress" );
+            result->addNext( error );
+            return result;
+        }
+
+        return NULL;
+    }
+
 }
