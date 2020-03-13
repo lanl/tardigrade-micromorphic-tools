@@ -1027,12 +1027,12 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
     if ( error ){
         error->print();
-        results << "test_computeReferenceSecondOrderStress & False\n";
+        results << "test_computeReferenceSecondOrderStressPressure & False\n";
         return 1;
     }
 
     if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_computeReferenceSecondOrderStress (test 1) & False\n";
+        results << "test_computeReferenceSecondOrderStressPressure (test 1) & False\n";
         return 1;
     }
 
@@ -1045,12 +1045,12 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
     if ( error ){
         error->print();
-        results << "test_computeReferenceSecondOrderStress & False\n";
+        results << "test_computeReferenceSecondOrderStressPressure & False\n";
         return 1;
     }
 
     if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeReferenceSecondOrderStress (test 2) & False\n";
+        results << "test_computeReferenceSecondOrderStressPressure (test 2) & False\n";
         return 1;
     }
 
@@ -1062,12 +1062,12 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
     if ( error ){
         error->print();
-        results << "test_computeReferenceSecondOrderStress & False\n";
+        results << "test_computeReferenceSecondOrderStressPressure & False\n";
         return 1;
     }
 
     if ( !vectorTools::fuzzyEquals( resultJ2, answer ) ){
-        results << "test_computeReferenceSecondOrderStress (test 3) & False\n";
+        results << "test_computeReferenceSecondOrderStressPressure (test 3) & False\n";
         return 1;
     }
 
@@ -1082,19 +1082,19 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
         if ( error ){
             error->print();
-            results << "test_computeReferenceSecondOrderStress & False\n";
+            results << "test_computeReferenceSecondOrderStressPressure & False\n";
             return 1;
         }
 
         constantType gradCol = ( resultJ - result ) / delta[i];
 
         if ( !vectorTools::fuzzyEquals( gradCol, dpdS[i] ) ){
-            results << "test_computeReferenceSecondOrderStress (test 4) & False\n";
+            results << "test_computeReferenceSecondOrderStressPressure (test 4) & False\n";
             return 1;
         }
 
         if ( !vectorTools::fuzzyEquals( gradCol, dpdSJ2[i] ) ){
-            results << "test_computeReferenceSecondOrderStress (test 5) & False\n";
+            results << "test_computeReferenceSecondOrderStressPressure (test 5) & False\n";
             return 1;
         }
 
@@ -1109,19 +1109,19 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
         if ( error ){
             error->print();
-            results << "test_computeReferenceSecondOrderStress & False\n";
+            results << "test_computeReferenceSecondOrderStressPressure & False\n";
             return 1;
         }
 
         constantType gradCol = ( resultJ - result ) / delta[i];
 
         if ( !vectorTools::fuzzyEquals( gradCol, dpdC[i] ) ){
-            results << "test_computeReferenceSecondOrderStress (test 6) & False\n";
+            results << "test_computeReferenceSecondOrderStressPressure (test 6) & False\n";
             return 1;
         }
 
         if ( !vectorTools::fuzzyEquals( gradCol, dpdCJ2[i] ) ){
-            results << "test_computeReferenceSecondOrderStress (test 7) & False\n";
+            results << "test_computeReferenceSecondOrderStressPressure (test 7) & False\n";
             return 1;
         }
     }
@@ -1135,7 +1135,7 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
         if ( error ){
             error->print();
-            results << "test_computeReferenceSecondOrderStress & False\n";
+            results << "test_computeReferenceSecondOrderStressPressure & False\n";
             return 1;
         }
 
@@ -1143,13 +1143,13 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
             if ( !vectorTools::fuzzyEquals( gradCol[j], d2pdSdC[j][i] ) ){
-                results << "test_computeReferenceSecondOrderStress (test 8) & False\n";
+                results << "test_computeReferenceSecondOrderStressPressure (test 8) & False\n";
                 return 1;
             }
         }
     }
 
-    results << "test_computeReferenceSecondOrderStress & True\n";
+    results << "test_computeReferenceSecondOrderStressPressure & True\n";
     return 0;
 }
 
