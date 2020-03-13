@@ -1231,6 +1231,10 @@ namespace micromorphicTools{
          *
          * where C_{IJ} is the right Cauchy-Green deformation tensor and S_{IJ} is the stress measure.
          *
+         * Also compute the Jacobians
+         * \frac{ \partial p }{ \partial C_{IJ} } = \frac{1}{3} S_{IJ}
+         * \frac{ \partial p }{ \partial S_{IJ} } = \frac{1}{3} C_{IJ}
+         *
          * :param const variableVector &referenceStressMeasure: The stress measure in the reference configuration.
          * :param const variableVector &rightCauchyGreen: The right Cauchy-Green deformation tensor between the 
          *     current configuration and the reference configuration of the stress tensor.
@@ -1253,6 +1257,8 @@ namespace micromorphicTools{
 
         return NULL;
     }
+
+
 
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
                                                           const variableVector &rightCauchyGreenDeformation,
