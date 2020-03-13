@@ -1109,6 +1109,29 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
         }
     }
 
+    //Test d2pdSdC
+    for ( unsigned int i = 0; i < C.size(); i++ ){
+        constantVector delta( C.size(), 0 );
+        delta[i] = eps * fabs( C[i] ) + eps;
+
+        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultJ, dpdSJ2, dpdCJ2 );
+
+        if ( error ){
+            error->print();
+            results << "test_computeReferenceSecondOrderStress & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( dpdSJ2 - dpdS ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], d2pdSdC[j][i] ) ){
+                results << "test_computeReferenceSecondOrderStress (test 8) & False\n";
+                return 1;
+            }
+        }
+    }
+
     results << "test_computeReferenceSecondOrderStress & True\n";
     return 0;
 }
