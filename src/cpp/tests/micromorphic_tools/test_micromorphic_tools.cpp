@@ -769,8 +769,9 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
                               6.32230906, -18.52878201,  -2.87440491,  14.2858097 ,
                               4.98150383,   1.82382829,  -3.45626291 };
 
-    variableVector expectedPressure;
-    micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, expectedPressure );
+    variableVector pressure;
+    variableMatrix dpdM, dpdC, d2pdMdC;
+    micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, pressure, dpdM, dpdC, d2pdMdC );
 
     variableVector result;
 
@@ -786,7 +787,7 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         return 1;
     }
 
-    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, expectedPressure, result );
+    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, result );
 
     if ( error ){
         results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
@@ -813,6 +814,21 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         return 1;
     }
 
+    variableVector resultJP;
+    variableMatrix dDevMdMP, dDevMdCP;
+
+    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, resultJP, dDevMdMP, dDevMdCP );
+
+    if ( error ){
+        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJP, answer ) ){
+        results << "test_computeDeviatoricReferenceHigherOrderStress (test 4) & False\n";
+        return 1;
+    }
+
     variableVector resultJ2;
     variableMatrix dDevMdMJ2, dDevMdCJ2, d2DevMdMdC;
 
@@ -824,7 +840,23 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
     }
 
     if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress (test 4) & False\n";
+        results << "test_computeDeviatoricReferenceHigherOrderStress (test 5) & False\n";
+        return 1;
+    }
+
+    variableVector resultJ2P;
+    variableMatrix dDevMdMJ2P, dDevMdCJ2P, d2DevMdMdCP;
+
+    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, d2pdMdC,
+                                                                            resultJ2P, dDevMdMJ2P, dDevMdCJ2P, d2DevMdMdCP );
+
+    if ( error ){
+        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ2P, answer ) ){
+        results << "test_computeDeviatoricReferenceHigherOrderStress (test 6) & False\n";
         return 1;
     }
 
@@ -848,9 +880,15 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
             if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdM[j][i] ) ){
-                std::cout << gradCol[j] << "\n";
-                std::cout << dDevMdM[j][i] << "\n";
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 5) & False\n";
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 7) & False\n";
+                return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdMP[j][i] ) ){
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 8) & False\n";
                 return 1;
             }
         }
@@ -858,7 +896,15 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
             if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdMJ2[j][i] ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 6) & False\n";
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 9) & False\n";
+                return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdMJ2P[j][i] ) ){
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 10) & False\n";
                 return 1;
             }
         }
@@ -882,7 +928,15 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
             if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdC[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 7) & False\n";
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 11) & False\n";
+                return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCP[j][i], 1e-4, 1e-5 ) ){
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 12) & False\n";
                 return 1;
             }
         }
@@ -890,7 +944,15 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
             if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCJ2[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 8) & False\n";
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 13) & False\n";
+                return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCJ2P[j][i], 1e-4, 1e-5 ) ){
+                results << "test_computeDeviatoricReferenceHigherOrderStress (test 14) & False\n";
                 return 1;
             }
         }
@@ -920,7 +982,13 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
                                 if ( !vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
                                     d2DevMdMdC[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ], 1e-4, 1e-4 ) ){
 
-                                    results << "test_computeDeviatoricReferenceHigherOrderStress (test 9) & False\n";
+                                    results << "test_computeDeviatoricReferenceHigherOrderStress (test 15) & False\n";
+                                    return 1;
+                                }
+                                if ( !vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                    d2DevMdMdCP[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ], 1e-4, 1e-4 ) ){
+
+                                    results << "test_computeDeviatoricReferenceHigherOrderStress (test 16) & False\n";
                                     return 1;
                                 }
                             }
