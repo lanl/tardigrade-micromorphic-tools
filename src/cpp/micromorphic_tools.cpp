@@ -944,7 +944,7 @@ namespace micromorphicTools{
          *
          * :param const variableVector &referenceHigherOrderStress: The higher order stress in the reference configuration.
          * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor.
-         * :param const variableType &pressure: The pressure.
+         * :param const variableType &pressure: The pressure of the higher-order stress.
          * :param variableVector &deviatoricReferenceHigherOrderStress: The deviatoric part of the higher order tensor in the 
          *     reference configuration.
          */
