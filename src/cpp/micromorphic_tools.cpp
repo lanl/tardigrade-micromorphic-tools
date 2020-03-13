@@ -1577,7 +1577,7 @@ namespace micromorphicTools{
         return NULL;
     }
 
-    errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherdOrderReferenceStress,
+    errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherOrderReferenceStress,
                                                              const variableVector &rightCauchyGreenDeformation,
                                                              variableVector &deviatoricHigherOrderReferenceStress,
                                                              variableVector &pressure ){
@@ -1604,7 +1604,7 @@ namespace micromorphicTools{
             return result;
         }
 
-        error = computeDeviatoricReferenceHigherOrderStress( secondOrderReferenceStress,
+        error = computeDeviatoricReferenceHigherOrderStress( higherOrderReferenceStress,
                                                              rightCauchyGreenDeformation,
                                                              pressure,
                                                              deviatoricHigherOrderReferenceStress );

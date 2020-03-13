@@ -1537,6 +1537,58 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
     return 0;
 }
 
+int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results ){
+    /*!
+     * Test the computation of the decomposition of the higher order stress
+     * into deviatoric and volumetric (pressure) parts.
+     * 
+     * :param std::ofstream &results: The output file
+     */
+
+    variableVector M = { 0.80732114,  0.79202055,  0.17990022,  0.97454675,  0.703207  ,
+                        -0.58236697,  0.53324571, -0.93438873, -0.40650796,  0.14071918,
+                         0.66933708, -0.67854069, -0.30317772, -0.93821882,  0.97270622,
+                         0.00295302, -0.12441126,  0.30539971, -0.0580227 ,  0.89696105,
+                         0.17567709, -0.9592962 ,  0.63535407,  0.95437804, -0.64531877,
+                         0.69978907,  0.81327586 };
+
+    variableVector C = { 0.3991656 ,  0.43459435,  0.15398811,
+                        -0.20239202, -0.50763359,  0.04756988,
+                        -0.0573016 , -0.95939895,  0.2693173 };
+
+    variableVector deviatoricAnswer = { 5.27633771,   1.68477127,  -3.21111472,  13.96704974,
+                                        3.29864744, -10.4408607 ,  -4.31689678,  -1.90327486,
+                                        3.27369895,  -2.4001685 ,   0.161758  ,   1.24944234,
+                                       -6.01118653,  -2.07847616,   5.30384773,   2.46397506,
+                                        0.3672135 ,  -1.56198261,  -8.15866529,  -0.72125951,
+                                        6.32230906, -18.52878201,  -2.87440491,  14.2858097 ,
+                                        4.98150383,   1.82382829,  -3.45626291 };
+
+    variableVector pressureAnswer = { 0.56778037,  0.11342234, -0.43082224 };
+
+    variableVector deviatoricResult, pressureResult;
+    errorOut error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResult, pressureResult );
+
+    if ( error ){
+        error->print();
+        results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) ){
+        results << "test_computeHigherOrderReferenceStressDecomposition (test 1) & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) ){
+        results << "test_computeHigherOrderReferenceStressDecomposition (test 2) & False\n";
+        return 1;
+    }
+    
+    results << "test_computeHigherOrderReferenceStressDecomposition & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -1563,7 +1615,7 @@ int main(){
     test_computeDeviatoricReferenceSecondOrderStress( results );
     test_computeReferenceHigherOrderStressPressure( results );
     test_computeSecondOrderReferenceStressDecomposition( results );
-//    test_computeHigherOrderReferenceStressDecomposition( results );
+    test_computeHigherOrderReferenceStressDecomposition( results );
 
     //Close the results file
     results.close();

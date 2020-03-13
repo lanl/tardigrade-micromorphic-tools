@@ -184,7 +184,7 @@ namespace micromorphicTools{
                                                              variableVector &deviatoricSecondOrderReferenceStress,
                                                              variableType &pressure );
 
-    errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherdOrderReferenceStress,
+    errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherOrderReferenceStress,
                                                              const variableVector &rightCauchyGreenDeformation,
                                                              variableVector &deviatoricHigherOrderReferenceStress,
                                                              variableVector &pressure );
