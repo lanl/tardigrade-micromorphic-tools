@@ -1475,4 +1475,46 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeSecondOrderReferenceStressDecomposition( const variableVector &secondOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricSecondOrderReferenceStress,
+                                                             variableType &pressure ){
+        /*!
+         * Compute the decomposition of a second-order stress measure into pressure and deviatoric parts.
+         *
+         * :param const variableVector &secondOrderReferenceStress: The second-order stress in the reference
+         *     configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor 
+         *     between the current configuration and the configuration the stress is located in.
+         * :param variableVector &deviatoricSecondOrderReferenceStress: The deviatoric part of the second order 
+         *     stress tensor.
+         * :param variableType &pressure: The pressure of the stress tensor.
+         */
+
+        errorOut error = computeReferenceSecondOrderStressPressure( secondOrderReferenceStress,
+                                                                    rightCauchyGreenDeformation
+                                                                    pressure );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition",
+                                             "Error in computation of pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        error = computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress,
+                                                             rightCauchyGreenDeformation,
+                                                             pressure,
+                                                             deviatoricSecondOrderReferenceStress );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition",
+                                             "Error in computation of the deviatoric part of the stress" );
+            result->addNext( error );
+            return result;
+        }
+
+        return NULL;
+    }
+
 }
