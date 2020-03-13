@@ -1508,6 +1508,86 @@ namespace micromorphicTools{
 
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
                                                           const variableVector &rightCauchyGreenDeformation,
+                                                          const variableType &pressure,
+                                                          const variableVector &dPressuredStress,
+                                                          const variableVector &dPressuredRCG,
+                                                          const variableMatrix &d2PressuredStressdRCG,
+                                                          variableVector &deviatoricSecondOrderReferenceStress,
+                                                          variableMatrix &dDeviatoricReferenceStressdReferenceStress,
+                                                          variableMatrix &dDeviatoricReferenceStressdRCG,
+                                                          variableMatrix &d2DevSdSdRCG ){
+        /*!
+         * Compute the deviatoric part of a second order stress measure in the reference configuration.
+         * \hat{S}_{IJ} = S_{IJ} - \frac{1}{3} C_{AB} S_{AB} (C^{-1})_{IJ}
+         * 
+         * Also compute the Jacobians.
+         * \frac{ \partial \hat{S}_{IJ} }{ \partial S_{KL} } = \delta_{IK} \delta_{LJ} - \frac{1}{3} C_{KL} (C^{-1})_{IJ}
+         * \frac{ \partial \hat{S}_{IJ} }{ \partial C_{KL} } = \frac{1}{3} \left( C_{AB} S_{AB} (C^{-1})_{IK} (C^{-1})_{LJ} - S_{KL} (C^{-1}_{IJ}) \right)
+         *
+         * \frac{ \partial \hat{S}_{IJ} }{ \partial S_{KL} \partial C_{MN} } = - \frac{ \partial p^2 }{ \partial S_{KL} \partial C_{MN}} (C^{-1})_{IJ} + \frac{ \partial p }{ \partial S_{KL} } (C^{-1})_{IM} (C^{-1})_{NJ}
+         *
+         * :param const variableVector &secondOrderReferenceStress: The stress measure in the reference configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor of the 
+         *     deformation between configurations.
+         * :param const variableType &pressure: The pressure of the reference stress.
+         * :param const variableVector &dPressuredStress: The Jacobian of the pressure w.r.t. the stress.
+         * :param const variableVector &dPressuredRCG: The Jacobian of the pressure w.r.t. the right Cauchy-Green
+         *     deformation tensor.
+         * :param const variableMatrix &dPressuredStressdRCG: The Jacobian of the pressure w.r.t. the stress and 
+         *     the right Cauchy-Green deformation tensor.
+         * :param variableVector &deviatoricSecondOrderReferenceStrain: The deviatoric part of the second order 
+         *     stress in the reference configuration.
+         * :param variableMatrix &dDeviatoricReferenceStressdReferenceStress: The Jacobian w.r.t. the reference stress.
+         * :param variableMatrix &dDeviatoricreferenceStressdRCG: The Jacobian w.r.t. the right Cauchy-Green deformation
+         *     tensor.
+         * :param variableMatrix &d2DevSdSdRCG: The second order mixed Jacobian w.r.t. the stress and right Cauchy-Green 
+         *     deformation tensor. Stored [IJ][KLMN]
+         */
+        //Assume 3d
+        unsigned int dim = 3;
+
+        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+
+        deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
+
+        //Compute the first order jacobians
+        dDeviatoricReferenceStressdReferenceStress = vectorTools::eye< constantType >( dim * dim );
+        dDeviatoricReferenceStressdReferenceStress -= vectorTools::dyadic( invRCG, dPressuredStress );
+
+        dDeviatoricReferenceStressdRCG = - vectorTools::dyadic( invRCG, dPressuredRCG );
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    for ( unsigned int L = 0; L < dim; L++ ){
+                        dDeviatoricReferenceStressdRCG[ dim * I + J ][ dim * K + L ] += pressure * invRCG[ dim * I + K ] * invRCG[ dim * L + J ];
+                    }
+                }
+            }
+        }
+
+        //Compute the second order jacobians
+        d2DevSdSdRCG = variableMatrix( dim * dim, variableVector( dim * dim * dim * dim, 0 ) );
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    for ( unsigned int L = 0; L < dim; L++ ){
+                        for ( unsigned int M = 0; M < dim; M++ ){
+                            for ( unsigned int N = 0; N < dim; N++ ){
+                                d2DevSdSdRCG[ dim * I + J ][ dim * dim * dim * K + dim * dim * L + dim * M + N ] = 
+                                    -d2PressuredStressdRCG[ dim * K + L ][ dim * M + N ] * invRCG[ dim * I + J ]
+                                    +dPressuredStress[ dim * K + L ] * invRCG[ dim * I + M ] * invRCG[ dim * N + J ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
+                                                          const variableVector &rightCauchyGreenDeformation,
                                                           variableVector &deviatoricSecondOrderReferenceStress,
                                                           variableMatrix &dDeviatoricReferenceStressdReferenceStress,
                                                           variableMatrix &dDeviatoricReferenceStressdRCG,
