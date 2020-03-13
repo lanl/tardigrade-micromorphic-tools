@@ -1455,6 +1455,7 @@ namespace micromorphicTools{
         }
 
         //Compute the second order jacobians
+        d2DevSdSdRCG = variableMatrix( dim * dim, variableVector( dim * dim * dim * dim, 0 ) );
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
                 for ( unsigned int K = 0; K < dim; K++ ){
@@ -1462,7 +1463,7 @@ namespace micromorphicTools{
                         for ( unsigned int M = 0; M < dim; M++ ){
                             for ( unsigned int N = 0; N < dim; N++ ){
                                 d2DevSdSdRCG[ dim * I + J ][ dim * dim * dim * K + dim * dim * L + dim * M + N ] = 
-                                    -d2pdSdC[ dim * K + L ][ dim * C + N ] * invRCG[ dim * I + J ]
+                                    -d2pdSdC[ dim * K + L ][ dim * M + N ] * invRCG[ dim * I + J ]
                                     +dpdS[ dim * K + L ] * invRCG[ dim * I + M ] * invRCG[ dim * N + J ];
                             }
                         }
