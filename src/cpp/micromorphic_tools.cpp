@@ -1258,6 +1258,46 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeReferenceSecondOrderStressPressure( const variableVector &referenceStressMeasure,
+                                                        const variableVector &rightCauchyGreen,  variableType &pressure,
+                                                        variableVector &dpdStress, variableVector &dpdRCG,
+                                                        variableMatrix &d2pdStressdRCG ){
+        /*!
+         * Compute the pressure part of a second order stress measure in the reference configuration.
+         * p = \frac{1}{3} C_{IJ} S_{IJ}
+         *
+         * where C_{IJ} is the right Cauchy-Green deformation tensor and S_{IJ} is the stress measure.
+         *
+         * Also compute the Jacobians
+         * \frac{ \partial p }{ \partial C_{IJ} } = \frac{1}{3} S_{IJ}
+         * \frac{ \partial p }{ \partial S_{IJ} } = \frac{1}{3} C_{IJ}
+         *
+         * \frac{ \partial^2 p}{ \partial S_{IJ} \partial C_{KL} } = \frac{1}{3} \delta_{IK} \delta_{JL}
+         *
+         * :param const variableVector &referenceStressMeasure: The stress measure in the reference configuration.
+         * :param const variableVector &rightCauchyGreen: The right Cauchy-Green deformation tensor between the 
+         *     current configuration and the reference configuration of the stress tensor.
+         * :param variableType &pressure: The computed pressure.
+         * :param variableVector &dpdStress: The Jacobian of the pressure w.r.t. the stress.
+         * :param variableVector &dpdRCG: The Jacobian of the pressure w.r.t. the right Cauchy-Green deformation tensor.
+         * :param variableMatrix $d2pdStressdRCG: The second-order Jacobian of the pressure w.r.t. the stress and the 
+         *     right Cauchy-Green deformation tensor.
+         */
+
+        errorOut error = computeReferenceSecondOrderStressPressure( referenceStressMeasure, rightCauchyGreen, pressure,
+                                                                    dpdStress, dpdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeReferenceSecondOrderStressPressure (second order jacobian)",
+                                             "Error in computation of pressure in the reference configuration" );
+            result->addNext( error );
+            return result;
+        }
+
+        d2pdStressdRCG = vectorTools::eye< constantType >( referenceStressMeasure.size() ) / 3;
+
+        return NULL;
+    }
 
 
     errorOut computeDeviatoricReferenceSecondOrderStress( const variableVector &secondOrderReferenceStress,
