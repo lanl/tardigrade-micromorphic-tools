@@ -1037,6 +1037,24 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
         return 1;
     }
 
+    variableType resultJ2;
+    variableVector dpdSJ2, dpdCJ2;
+    variableMatrix d2pdSdC;
+
+    error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, resultJ2, dpdSJ2, dpdCJ2, d2pdSdC );
+
+    if ( error ){
+        error->print();
+        results << "test_computeReferenceSecondOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ2, answer ) ){
+        results << "test_computeReferenceSecondOrderStress (test 3) & False\n";
+        return 1;
+    }
+
+
     //Test dpdS
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < S.size(); i++ ){
@@ -1054,9 +1072,15 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
         constantType gradCol = ( resultJ - result ) / delta[i];
 
         if ( !vectorTools::fuzzyEquals( gradCol, dpdS[i] ) ){
-            results << "test_computeReferenceSecondOrderStress (test 3) & False\n";
+            results << "test_computeReferenceSecondOrderStress (test 4) & False\n";
             return 1;
         }
+
+        if ( !vectorTools::fuzzyEquals( gradCol, dpdSJ2[i] ) ){
+            results << "test_computeReferenceSecondOrderStress (test 5) & False\n";
+            return 1;
+        }
+
     }
 
     //Test dpdC
@@ -1075,7 +1099,12 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
         constantType gradCol = ( resultJ - result ) / delta[i];
 
         if ( !vectorTools::fuzzyEquals( gradCol, dpdC[i] ) ){
-            results << "test_computeReferenceSecondOrderStress (test 4) & False\n";
+            results << "test_computeReferenceSecondOrderStress (test 6) & False\n";
+            return 1;
+        }
+
+        if ( !vectorTools::fuzzyEquals( gradCol, dpdCJ2[i] ) ){
+            results << "test_computeReferenceSecondOrderStress (test 7) & False\n";
             return 1;
         }
     }
