@@ -1300,6 +1300,53 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
     return 0;
 }
 
+int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results ){
+    /*!
+     * Test the computation of the deviatoric - volumetric (pressure) stress 
+     * decomposition.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector S = { 0.77189588, -0.84417528,  0.95929231,
+                        -0.50465708,  0.50576944,  0.05335127,
+                         0.81510751,  0.76814059, -0.82146208 };
+
+    variableVector C = { 0.03468919, -0.31275742, -0.57541261,
+                        -0.27865312, -0.45844965,  0.52325004,
+                        -0.0439162 , -0.80201065, -0.44921044 };
+
+    variableVector deviatoricAnswer = { -1.81433044, -2.17117481,  2.726381  ,
+                                         0.10781401,  0.6746562 , -0.53446584,
+                                        -0.0255477 ,  0.59634539, -0.39543207 };
+
+    variableType pressureAnswer = -0.20245462701026676;
+
+    variableType pressureResult;
+    variableVector deviatoricResult;
+
+    errorOut error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResult, pressureResult );
+
+    if ( error ){
+        error->print();
+        results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) ){
+        results << "test_computeSecondOrderReferenceStressDecomposition (test 1) & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) ){
+        results << "test_computeSecondOrderReferenceStressDecomposition (test 2) & False\n";
+        return 1;
+    }
+
+    results << "test_computeSecondOrderReferenceStressDecomposition & True\n";
+    return 0;
+}
+
 int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
     /*!
      * Test the computation of the higher order stress pressure.
@@ -1484,6 +1531,7 @@ int main(){
     test_computeDeviatoricSecondOrderStress( results );
     test_computeDeviatoricReferenceSecondOrderStress( results );
     test_computeReferenceHigherOrderStressPressure( results );
+    test_computeSecondOrderReferenceStressDecomposition( results );
 
     //Close the results file
     results.close();
