@@ -194,6 +194,26 @@ namespace micromorphicTools{
 
     errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
                                                           const variableVector &rightCauchyGreenDeformation,
+                                                          const variableVector &pressure,
+                                                          const variableMatrix &dPressuredStress,
+                                                          const variableMatrix &dPressuredRCG,
+                                                          variableVector &deviatoricReferenceHigherOrderStress,
+                                                          variableMatrix &dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress,
+                                                          variableMatrix &dDeviatoricReferenceHigherOrderStressdRCG );
+
+    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                                          const variableVector &rightCauchyGreenDeformation,
+                                                          variableVector &deviatoricReferenceHigherOrderStress,
+                                                          variableMatrix &dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress,
+                                                          variableMatrix &dDeviatoricReferenceHigherOrderStressdRCG,
+                                                          variableMatrix &d2DevMdMdRCG );
+
+    errorOut computeDeviatoricReferenceHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                                          const variableVector &rightCauchyGreenDeformation,
+                                                          const variableVector &pressure,
+                                                          const variableMatrix &dPressuredStress,
+                                                          const variableMatrix &dPressuredRCG,
+                                                          const variableMatrix &d2PressuredStressdRCG,
                                                           variableVector &deviatoricReferenceHigherOrderStress,
                                                           variableMatrix &dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress,
                                                           variableMatrix &dDeviatoricReferenceHigherOrderStressdRCG,
