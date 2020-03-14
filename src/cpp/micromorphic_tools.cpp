@@ -1725,6 +1725,124 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeSecondOrderReferenceStressDecomposition( const variableVector &secondOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricSecondOrderReferenceStress,
+                                                             variableType &pressure, variableMatrix &dDevStressdStress,
+                                                             variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
+                                                             variableMatrix &dPressuredRCG ){
+        /*!
+         * Compute the decomposition of a second-order stress measure into pressure and deviatoric parts.
+         *
+         * Includes the first order Jacobians
+         *
+         * :param const variableVector &secondOrderReferenceStress: The second-order stress in the reference
+         *     configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor 
+         *     between the current configuration and the configuration the stress is located in.
+         * :param variableVector &deviatoricSecondOrderReferenceStress: The deviatoric part of the second order 
+         *     stress tensor.
+         * :param variableType &pressure: The pressure of the stress tensor.
+         * :param variableMatrix &dDevStressdStress: The Jacobian of the deviatoric part of the reference 
+         *     stress w.r.t. the reference stress.
+         * :param variableMatrix &dDevStressdRCG: The Jacobian of the deviatoric part of the reference stress
+         *     w.r.t. the right Cauchy-Green deformation tensor.
+         * :param variableMatrix &dPressuredStress: The Jacobian of the pressure w.r.t. the reference stress.
+         * :param variableMatrix &dPressuredRCG: The Jacobian of the pressure w.r.t. the right Cauchy-Green 
+         *     deformation tensor.
+         */
+
+        errorOut error = computeReferenceSecondOrderStressPressure( secondOrderReferenceStress,
+                                                                    rightCauchyGreenDeformation,
+                                                                    pressure, dPressuredStress, dPressuredRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition (jacobian)",
+                                             "Error in computation of pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        error = computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress,
+                                                             rightCauchyGreenDeformation,
+                                                             pressure, dPressuredStress, dPressuredRCG,
+                                                             deviatoricSecondOrderReferenceStress,
+                                                             dDevStressdStress, dDevStressdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition (jacobian)",
+                                             "Error in computation of the deviatoric part of the stress" );
+            result->addNext( error );
+            return result;
+        }
+
+        return NULL;
+    }
+
+    errorOut computeSecondOrderReferenceStressDecomposition( const variableVector &secondOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricSecondOrderReferenceStress,
+                                                             variableType &pressure, variableMatrix &dDevStressdStress,
+                                                             variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
+                                                             variableMatrix &dPressuredRCGi, variableMatrix &d2DevStressdStressdRCG,
+                                                             variableMatrix &d2PressuredStressdRCG ){
+        /*!
+         * Compute the decomposition of a second-order stress measure into pressure and deviatoric parts.
+         *
+         * Includes the first and some of the second order Jacobians
+         *
+         * :param const variableVector &secondOrderReferenceStress: The second-order stress in the reference
+         *     configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor 
+         *     between the current configuration and the configuration the stress is located in.
+         * :param variableVector &deviatoricSecondOrderReferenceStress: The deviatoric part of the second order 
+         *     stress tensor.
+         * :param variableType &pressure: The pressure of the stress tensor.
+         * :param variableMatrix &dDevStressdStress: The Jacobian of the deviatoric part of the reference 
+         *     stress w.r.t. the reference stress.
+         * :param variableMatrix &dDevStressdRCG: The Jacobian of the deviatoric part of the reference stress
+         *     w.r.t. the right Cauchy-Green deformation tensor.
+         * :param variableMatrix &dPressuredStress: The Jacobian of the pressure w.r.t. the reference stress.
+         * :param variableMatrix &dPressuredRCG: The Jacobian of the pressure w.r.t. the right Cauchy-Green 
+         *     deformation tensor.
+         * :param variableMatrix &d2DevStressdStressdRCG: The second order Jacobian of the deviatoric part of the 
+         *     reference stress w.r.t. the reference stress and the right Cauchy-Green deformation tensor. 
+         *     $\frac{ \partial^2 dev( S )_{IJ} }{ \partial S_{KL} \partial C_{MN} }$
+         *     stored as [IJ][KLMN]
+         * :param variableMatrix &d2PressuredStressdRCG: THe second order Jacobian of the deviatoric part of the 
+         *     reference stress w.r.t. the reference stress and the right Cauchy-Green deformation tensor.
+         */
+
+        errorOut error = computeReferenceSecondOrderStressPressure( secondOrderReferenceStress,
+                                                                    rightCauchyGreenDeformation,
+                                                                    pressure, dPressuredStress, dPressuredRCG,
+                                                                    d2PressuredStressdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition (jacobian)",
+                                             "Error in computation of pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        error = computeDeviatoricReferenceSecondOrderStress( secondOrderReferenceStress,
+                                                             rightCauchyGreenDeformation,
+                                                             pressure, dPressuredStress, dPressuredRCG,
+                                                             d2PressuredStressdRCG,
+                                                             deviatoricSecondOrderReferenceStress,
+                                                             dDevStressdStress, dDevStressdRCG,
+                                                             d2DevStressdStressdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition (jacobian)",
+                                             "Error in computation of the deviatoric part of the stress" );
+            result->addNext( error );
+            return result;
+        }
+
+        return NULL;
+    }
+
     errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherOrderReferenceStress,
                                                              const variableVector &rightCauchyGreenDeformation,
                                                              variableVector &deviatoricHigherOrderReferenceStress,
