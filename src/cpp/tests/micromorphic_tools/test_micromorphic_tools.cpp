@@ -1617,6 +1617,44 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
         }
     }
 
+    //Test deriatives w.r.t. the right Cauchy-Green deformation tensor
+    for ( unsigned int i = 0; i < C.size(); i++ ){
+        constantVector delta( C.size(), 0 );
+        delta[i] = eps * fabs( C[i] ) + eps;
+
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, deviatoricResultJ, pressureResultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCG[j][i], 1e-4 ) ){
+                results << "test_computeSecondOrderReferenceStressDecomposition (test 11) & False\n";
+                return 1;
+            }
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCGJ2[j][i], 1e-4 ) ){
+                results << "test_computeSecondOrderReferenceStressDecomposition (test 12) & False\n";
+                return 1;
+            }
+        }
+
+        constantType gradScalar = ( pressureResultJ - pressureResult ) / delta[i];
+
+        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredRCG[i], 1e-4 ) ){
+            results << "test_computeSecondOrderReferenceStressDecomposition (test 13) & False\n";
+            return 1;
+        }
+
+        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredRCGJ2[i], 1e-4 ) ){
+            results << "test_computeSecondOrderReferenceStressDecomposition (test 14) & False\n";
+            return 1;
+        }
+    }
 
     results << "test_computeSecondOrderReferenceStressDecomposition & True\n";
     return 0;
