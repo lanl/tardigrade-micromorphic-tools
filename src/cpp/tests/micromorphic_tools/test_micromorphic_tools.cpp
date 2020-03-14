@@ -1521,6 +1521,65 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
         return 1;
     }
 
+    //Test the Jacobians
+    variableType pressureResultJ;
+    variableVector deviatoricResultJ;
+
+    variableVector dPressuredStress, dPressuredRCG;
+    variableMatrix dDevStressdStress, dDevStressdRCG;
+
+    error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResultJ, pressureResultJ,
+                                                                               dDevStressdStress, dDevStressdRCG,
+                                                                               dPressuredStress, dPressuredRCG );
+
+    if ( error ){
+        error->print();
+        results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) ){
+        results << "test_computeSecondOrderReferenceStressDecomposition (test 3) & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) ){
+        results << "test_computeSecondOrderReferenceStressDecomposition (test 4) & False\n";
+        return 1;
+    }
+
+    variableType pressureResultJ2;
+    variableVector deviatoricResultJ2;
+
+    variableVector dPressuredStressJ2, dPressuredRCGJ2;
+    variableMatrix dDevStressdStressJ2, dDevStressdRCGJ2;
+
+    variableMatrix d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2;
+
+    error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResultJ2, pressureResultJ2,
+                                                                               dDevStressdStressJ2, dDevStressdRCGJ2,
+                                                                               dPressuredStressJ2, dPressuredRCGJ2,
+                                                                               d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2 );
+
+    if ( error ){
+        error->print();
+        results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) ){
+        results << "test_computeSecondOrderReferenceStressDecomposition (test 5) & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) ){
+        results << "test_computeSecondOrderReferenceStressDecomposition (test 6) & False\n";
+        return 1;
+    }
+
+    //Test deriatives w.r.t. the stress.
+
+
     results << "test_computeSecondOrderReferenceStressDecomposition & True\n";
     return 0;
 }
