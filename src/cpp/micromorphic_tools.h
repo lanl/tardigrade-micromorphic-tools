@@ -224,6 +224,22 @@ namespace micromorphicTools{
                                                              variableVector &deviatoricSecondOrderReferenceStress,
                                                              variableType &pressure );
 
+    errorOut computeSecondOrderReferenceStressDecomposition( const variableVector &secondOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricSecondOrderReferenceStress,
+                                                             variableType &pressure, variableMatrix &dDevStressdStress,
+                                                             variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
+                                                             variableMatrix &dPressuredRCG );
+
+    errorOut computeSecondOrderReferenceStressDecomposition( const variableVector &secondOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricSecondOrderReferenceStress,
+                                                             variableType &pressure, variableMatrix &dDevStressdStress,
+                                                             variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
+                                                             variableMatrix &dPressuredRCG, variableMatrix &d2DevStressdStress2,
+                                                             variableMatrix &d2DevStressdStressdRCG,
+                                                             variableMatrix &d2PressuredStressdRCG );
+
     errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherOrderReferenceStress,
                                                              const variableVector &rightCauchyGreenDeformation,
                                                              variableVector &deviatoricHigherOrderReferenceStress,
