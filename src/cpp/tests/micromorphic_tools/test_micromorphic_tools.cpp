@@ -1618,6 +1618,8 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
     }
 
     //Test deriatives w.r.t. the right Cauchy-Green deformation tensor
+    variableMatrix dDevStressdStressP, dDevStressdRCGP;
+    variableVector dPressuredStressP, dPressuredRCGP;
     for ( unsigned int i = 0; i < C.size(); i++ ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
@@ -1653,6 +1655,42 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
         if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredRCGJ2[i], 1e-4 ) ){
             results << "test_computeSecondOrderReferenceStressDecomposition (test 14) & False\n";
             return 1;
+        }
+
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, deviatoricResultJ, pressureResultJ,
+                                                                                   dDevStressdStressP, dDevStressdRCGP, 
+                                                                                   dPressuredStressP, dPressuredRCGP );
+
+        if ( error ){
+            error->print();
+            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
+            return 1;
+        }
+
+        constantMatrix gradMat = ( dDevStressdStressP - dDevStressdStress ) / delta[i];
+
+        for ( unsigned int j = 0; j < 3; j++ ){
+            for ( unsigned int k = 0; k < 3; k++ ){
+                for ( unsigned int l = 0; l < 3; l++ ){
+                    for ( unsigned int m = 0; m < 3; m++ ){
+                        if ( !vectorTools::fuzzyEquals( gradMat[ 3 * j + k ][ 3 * l + m ],
+                                                        d2DevStressdStressdRCGJ2[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ],
+                                                        1e-4, 1e-5 ) ){
+                            results << "test_computeSecondOrderReferenceStressDecomposition (test 15) & False\n";
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        gradCol = ( dPressuredStressP - dPressuredStress ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], d2PressuredStressdRCGJ2[j][i], 1e-4 ) ){
+                results << "test_computeSecondOrderReferenceStressDecomposition (test 16) & False\n";
+                return 1;
+            }
         }
     }
 
