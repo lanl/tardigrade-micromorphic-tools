@@ -1578,6 +1578,44 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
     }
 
     //Test deriatives w.r.t. the stress.
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < S.size(); i++ ){
+        constantVector delta( S.size(), 0 );
+        delta[i] = eps * fabs( S[i] ) + eps;
+
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S + delta, C, deviatoricResultJ, pressureResultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStress[j][i] ) ){
+                results << "test_computeSecondOrderReferenceStressDecomposition (test 7) & False\n";
+                return 1;
+            }
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStressJ2[j][i] ) ){
+                results << "test_computeSecondOrderReferenceStressDecomposition (test 8) & False\n";
+                return 1;
+            }
+        }
+
+        constantType gradScalar = ( pressureResultJ - pressureResult ) / delta[i];
+
+        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredStress[i] ) ){
+            results << "test_computeSecondOrderReferenceStressDecomposition (test 9) & False\n";
+            return 1;
+        }
+
+        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredStressJ2[i] ) ){
+            results << "test_computeSecondOrderReferenceStressDecomposition (test 10) & False\n";
+            return 1;
+        }
+    }
 
 
     results << "test_computeSecondOrderReferenceStressDecomposition & True\n";
