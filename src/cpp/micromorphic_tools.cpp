@@ -1730,7 +1730,7 @@ namespace micromorphicTools{
                                                              variableVector &deviatoricSecondOrderReferenceStress,
                                                              variableType &pressure, variableMatrix &dDevStressdStress,
                                                              variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
-                                                             variableMatrix &dPressuredRCG ){
+                                                             variableVector &dPressuredRCG ){
         /*!
          * Compute the decomposition of a second-order stress measure into pressure and deviatoric parts.
          *
@@ -1784,7 +1784,7 @@ namespace micromorphicTools{
                                                              variableVector &deviatoricSecondOrderReferenceStress,
                                                              variableType &pressure, variableMatrix &dDevStressdStress,
                                                              variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
-                                                             variableMatrix &dPressuredRCGi, variableMatrix &d2DevStressdStressdRCG,
+                                                             variableVector &dPressuredRCG, variableMatrix &d2DevStressdStressdRCG,
                                                              variableMatrix &d2PressuredStressdRCG ){
         /*!
          * Compute the decomposition of a second-order stress measure into pressure and deviatoric parts.

@@ -229,14 +229,14 @@ namespace micromorphicTools{
                                                              variableVector &deviatoricSecondOrderReferenceStress,
                                                              variableType &pressure, variableMatrix &dDevStressdStress,
                                                              variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
-                                                             variableMatrix &dPressuredRCG );
+                                                             variableVector &dPressuredRCG );
 
     errorOut computeSecondOrderReferenceStressDecomposition( const variableVector &secondOrderReferenceStress,
                                                              const variableVector &rightCauchyGreenDeformation,
                                                              variableVector &deviatoricSecondOrderReferenceStress,
                                                              variableType &pressure, variableMatrix &dDevStressdStress,
                                                              variableMatrix &dDevStressdRCG, variableVector &dPressuredStress,
-                                                             variableMatrix &dPressuredRCG, variableMatrix &d2DevStressdStressdRCG,
+                                                             variableVector &dPressuredRCG, variableMatrix &d2DevStressdStressdRCG,
                                                              variableMatrix &d2PressuredStressdRCG );
 
     errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherOrderReferenceStress,
