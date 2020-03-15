@@ -1904,6 +1904,196 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
         results << "test_computeHigherOrderReferenceStressDecomposition (test 2) & False\n";
         return 1;
     }
+
+    //Test the Jacobians
+    variableVector pressureResultJ;
+    variableVector deviatoricResultJ;
+
+    variableMatrix dPressuredStress, dPressuredRCG;
+    variableMatrix dDevStressdStress, dDevStressdRCG;
+
+    error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResultJ, pressureResultJ,
+                                                                               dDevStressdStress, dDevStressdRCG,
+                                                                               dPressuredStress, dPressuredRCG );
+
+    if ( error ){
+        error->print();
+        results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) ){
+        results << "test_computeHigherOrderReferenceStressDecomposition (test 3) & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) ){
+        results << "test_computeHigherOrderReferenceStressDecomposition (test 4) & False\n";
+        return 1;
+    }
+
+
+    variableVector pressureResultJ2;
+    variableVector deviatoricResultJ2;
+
+    variableMatrix dPressuredStressJ2, dPressuredRCGJ2;
+    variableMatrix dDevStressdStressJ2, dDevStressdRCGJ2;
+
+    variableMatrix d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2;
+
+    error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResultJ2, pressureResultJ2,
+                                                                               dDevStressdStressJ2, dDevStressdRCGJ2,
+                                                                               dPressuredStressJ2, dPressuredRCGJ2,
+                                                                               d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2 );
+
+    if ( error ){
+        error->print();
+        results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) ){
+        results << "test_computeHigherOrderReferenceStressDecomposition (test 5) & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) ){
+        results << "test_computeHigherOrderReferenceStressDecomposition (test 6) & False\n";
+        return 1;
+    }
+
+    //Test deriatives w.r.t. the stress.
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < M.size(); i++ ){
+        constantVector delta( M.size(), 0 );
+        delta[i] = eps * fabs( M[i] ) + eps;
+
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M + delta, C, deviatoricResultJ, pressureResultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStress[j][i] ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 7) & False\n";
+                return 1;
+            }
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStressJ2[j][i] ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 8) & False\n";
+                return 1;
+            }
+        }
+
+        gradCol = ( pressureResultJ - pressureResult ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredStress[j][i] ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 9) & False\n";
+                return 1;
+            }
+    
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredStressJ2[j][i] ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 10) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    //Test deriatives w.r.t. the right Cauchy-Green deformation tensor
+    variableMatrix dDevStressdStressP, dDevStressdRCGP;
+    variableMatrix dPressuredStressP, dPressuredRCGP;
+    for ( unsigned int i = 0; i < C.size(); i++ ){
+        constantVector delta( C.size(), 0 );
+        delta[i] = eps * fabs( C[i] ) + eps;
+
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, deviatoricResultJ, pressureResultJ );
+
+        if ( error ){
+            error->print();
+            results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
+            return 1;
+        }
+
+        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCG[j][i], 1e-4 ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 11) & False\n";
+                return 1;
+            }
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCGJ2[j][i], 1e-4 ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 12) & False\n";
+                return 1;
+            }
+        }
+
+        gradCol = ( pressureResultJ - pressureResult ) / delta[i];
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredRCG[j][i], 1e-4 ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 13) & False\n";
+                return 1;
+            }
+    
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredRCGJ2[j][i], 1e-4 ) ){
+                results << "test_computeHigherOrderReferenceStressDecomposition (test 14) & False\n";
+                return 1;
+            }
+        }
+
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, deviatoricResultJ, pressureResultJ,
+                                                                                   dDevStressdStressP, dDevStressdRCGP, 
+                                                                                   dPressuredStressP, dPressuredRCGP );
+
+        if ( error ){
+            error->print();
+            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
+            return 1;
+        }
+
+        constantMatrix gradMat = ( dDevStressdStressP - dDevStressdStress ) / delta[i];
+
+        for ( unsigned int j = 0; j < 3; j++ ){
+            for ( unsigned int k = 0; k < 3; k++ ){
+                for ( unsigned int l = 0; l < 3; l++ ){
+                    for ( unsigned int m = 0; m < 3; m++ ){
+                        for ( unsigned int n = 0; n < 3; n++ ){
+                            for ( unsigned int o = 0; o < 3; o++ ){
+                                if ( !vectorTools::fuzzyEquals( gradMat[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                                                d2DevStressdStressdRCGJ2[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + + 9 * o + 3 * ( int )( i / 3 ) + i % 3 ],
+                                                                1e-4, 1e-5 ) ){
+                                    results << "test_computeSecondOrderReferenceStressDecomposition (test 15) & False\n";
+                                    return 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        gradMat = ( dPressuredStressP - dPressuredStress ) / delta[i];
+
+        for ( unsigned int j = 0; j < 3; j++ ){
+            for ( unsigned int k = 0; k < 3; k++ ){
+                for ( unsigned int l = 0; l < 3; l++ ){
+                    for ( unsigned int m = 0; m < 3; m++ ){
+                        if ( !vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
+                                                        d2PressuredStressdRCGJ2[ j ][ 81 * k + 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ],
+                                                        1e-4 ) ){
+                            results << "test_computeSecondOrderReferenceStressDecomposition (test 16) & False\n";
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     results << "test_computeHigherOrderReferenceStressDecomposition & True\n";
     return 0;
