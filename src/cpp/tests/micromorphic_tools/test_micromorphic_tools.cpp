@@ -2099,6 +2099,40 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
     return 0;
 }
 
+int test_computeHigherOrderStressNorm( std::ofstream &results ){
+    /*!
+     * Test the computation of the special higher order stress norm.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector M = { 0.80732114,  0.79202055,  0.17990022,  0.97454675,  0.703207  ,
+                        -0.58236697,  0.53324571, -0.93438873, -0.40650796,  0.14071918,
+                         0.66933708, -0.67854069, -0.30317772, -0.93821882,  0.97270622,
+                         0.00295302, -0.12441126,  0.30539971, -0.0580227 ,  0.89696105,
+                         0.17567709, -0.9592962 ,  0.63535407,  0.95437804, -0.64531877,
+                         0.69978907,  0.81327586 };
+
+    variableVector answer = { 1.82692071, 2.24422424, 1.90780645 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::computeHigherOrderStressNorm( M, result );
+
+    if ( error ){
+        results << "test_computeHigherOrderStressNorm & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_computeHigherOrderStressNorm (test 1) & False\n";
+        return 1;
+    }
+
+    results << "test_computeHigherOrderStressNorm & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -2126,6 +2160,7 @@ int main(){
     test_computeReferenceHigherOrderStressPressure( results );
     test_computeSecondOrderReferenceStressDecomposition( results );
     test_computeHigherOrderReferenceStressDecomposition( results );
+    test_computeHigherOrderStressNorm( results );
 
     //Close the results file
     results.close();

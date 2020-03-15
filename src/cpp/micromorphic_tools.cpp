@@ -2000,4 +2000,37 @@ namespace micromorphicTools{
 
         return NULL;
     }
+
+    errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm ){
+        /*!
+         * Compute the norm of the higher order stress which is defined as
+         * || M ||_K = \sqrt{ M_{IJK} M_{IJK} }
+         *
+         * where K is not summed over.
+         *
+         * :param const variableVector &higherOrderStress: The higher order stress tensor.
+         * :param variableVector &higherOrderStressNorm: The norm of the higher order stress.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        if ( higherOrderStress.size() != dim * dim * dim ){
+            return new errorNode( "computeHigherOrderStressNorm",
+                                  "The higher order stress does not have the expected dimension" );
+        }
+        
+        higherOrderStressNorm = variableVector( dim, 0 );
+        for ( unsigned int K = 0; K < 3; K++ ){
+            for ( unsigned int I = 0; I < 3; I++ ){
+                for ( unsigned int J = 0; J < 3; J++ ){
+                     higherOrderStressNorm[ K ] += higherOrderStress[ dim * dim * I + dim * J + K ]
+                                                 * higherOrderStress[ dim * dim * I + dim * J + K ];
+                }
+            }
+            higherOrderStressNorm[ K ] = std::sqrt( higherOrderStressNorm[ K ] );
+        }
+
+        return NULL;
+    }
 }
