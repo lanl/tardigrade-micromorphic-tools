@@ -2129,6 +2129,56 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
         return 1;
     }
 
+    //Test the Jacobians
+    variableVector resultJ;
+    variableMatrix dNormMdMJ;
+
+    error = micromorphicTools::computeHigherOrderStressNorm( M, resultJ, dNormMdMJ );
+
+    if ( error ){
+        results << "test_computeHigherOrderStressNorm & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
+        results << "test_computeHigherOrderStressNorm (test 2) & False\n";
+        return 1;
+    }
+
+    //Test dNormMdM
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < M.size(); i++ ){
+        constantVector delta( M.size(), 0 );
+        delta[i] = eps * fabs( M[i] ) + eps;
+
+        variableVector resultP, resultM;
+
+        error = micromorphicTools::computeHigherOrderStressNorm( M + delta, resultP );
+
+        if ( error ){
+            error->print();
+            results << "test_computeHigherOrderStressNorm & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::computeHigherOrderStressNorm( M - delta, resultM );
+
+        if ( error ){
+            error->print();
+            results << "test_computeHigherOrderStressNorm & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( resultP - resultM ) / ( 2 * delta[i] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ[ j ][ i ] ) ){
+                results << "test_computeHigherOrderStressNorm (test 3) & False\n";
+                return 1;
+            }
+        }
+    }
+
     results << "test_computeHigherOrderStressNorm & True\n";
     return 0;
 }

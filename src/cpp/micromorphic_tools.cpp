@@ -2033,4 +2033,53 @@ namespace micromorphicTools{
 
         return NULL;
     }
+
+    errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
+                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress ){
+        /*!
+         * Compute the norm of the higher order stress which is defined as
+         * || M ||_K = \sqrt{ M_{IJK} M_{IJK} }
+         *
+         * where K is not summed over.
+         *
+         * Also computes the Jacobians
+         *
+         * \frac{ \partial || M ||_K }{ \partial M_{LMN} } = \frac{ M_{IMK} \delta_{KN} }{ || M ||_K }
+         *
+         * where K is not summed over
+         *
+         * :param const variableVector &higherOrderStress: The higher order stress tensor.
+         * :param variableVector &higherOrderStressNorm: The norm of the higher order stress.
+         * :param variableMatrix &dHigherOrderSTressNormdHigherOrderStress: The Jacobian of the higher order
+         *     stress norm w.r.t. the higher order stress.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        errorOut error = computeHigherOrderStressNorm( higherOrderStress, higherOrderStressNorm );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderStressNorm (jacobian)",
+                                             "Error in computation of higher order stress norm" );
+            result->addNext( error );
+            return result;
+        }
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+        dHigherOrderStressNormdHigherOrderStress = variableMatrix( dim, variableVector( dim * dim * dim, 0 ) );
+        for ( unsigned int K = 0; K < 3; K++ ){
+            for ( unsigned int L = 0; L < 3; L++ ){
+                for ( unsigned int M = 0; M < 3; M++ ){
+                    for ( unsigned int N = 0; N < 3; N++ ){
+                        dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * L + dim * M + N ] = higherOrderStress[ dim * dim * L + dim * M + K ]  * eye[ dim * K + N ] / higherOrderStressNorm[ K ];
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
 }
