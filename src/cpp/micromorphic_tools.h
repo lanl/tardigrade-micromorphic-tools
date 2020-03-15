@@ -258,6 +258,14 @@ namespace micromorphicTools{
                                                              variableMatrix &dDevStressdRCG, variableMatrix &dPressuredStress,
                                                              variableMatrix &dPressuredRCG, variableMatrix &d2DevStressdStressdRCG,
                                                              variableMatrix &d2PressuredStressdRCG );
+
+    errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm );
+
+    errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
+                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress );
+
+    errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
+                                           variableMatrix &d2HigherOrderStressNormdHigherOrderStress2 );
 }
 
 #endif
