@@ -1819,7 +1819,7 @@ namespace micromorphicTools{
                                                                     d2PressuredStressdRCG );
 
         if ( error ){
-            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition (jacobian)",
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition (second order jacobian)",
                                              "Error in computation of pressure" );
             result->addNext( error );
             return result;
@@ -1834,7 +1834,7 @@ namespace micromorphicTools{
                                                              d2DevStressdStressdRCG );
 
         if ( error ){
-            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition (jacobian)",
+            errorOut result = new errorNode( "computeSecondOrderReferenceStressDecomposition ( second order jacobian)",
                                              "Error in computation of the deviatoric part of the stress" );
             result->addNext( error );
             return result;
@@ -1885,4 +1885,119 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricHigherOrderReferenceStress,
+                                                             variableVector &pressure, variableMatrix &dDevStressdStress,
+                                                             variableMatrix &dDevStressdRCG, variableMatrix &dPressuredStress,
+                                                             variableMatrix &dPressuredRCG ){
+        /*!
+         * Compute the decomposition of the higher-order stress measure into pressure and deviatoric parts.
+         *
+         * Also return the Jacobians
+         *
+         * :param const variableVector &higherOrderReferenceStress: The higher order stress in the reference
+         *     configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor 
+         *     between the current configuration and the configuration the stress is located in.
+         * :param variableVector &deviatoricHigherOrderReferenceStress: The deviatoric part of the higher order 
+         *     stress tensor.
+         * :param variableVector &pressure: The pressure of the higher order stress tensor.
+         * :param variableMatrix &dDevStressdStress: The Jacobian of the deviatoric stress w.r.t. the stress.
+         * :param variableMatrix &dDevStressdRCG: The Jacobian of the deviatoric stress w.r.t. the right 
+         *     Cauchy-Green deformation tensor.
+         * :param variableMatrix &dPressuredStress: The Jacobian of the pressure w.r.t. the stress.
+         * :param variableMatrix &dPressuredRCG: The Jacobian of the pressure w.r.t. the right 
+         *     Cauchy-Green deformation tensor.
+         */
+
+        errorOut error = computeReferenceHigherOrderStressPressure( higherOrderReferenceStress,
+                                                                    rightCauchyGreenDeformation,
+                                                                    pressure, dPressuredStress,
+                                                                    dPressuredRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderReferenceStressDecomposition (jacobian)",
+                                             "Error in computation of pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        error = computeDeviatoricReferenceHigherOrderStress( higherOrderReferenceStress,
+                                                             rightCauchyGreenDeformation,
+                                                             pressure, dPressuredStress,
+                                                             dPressuredRCG,
+                                                             deviatoricHigherOrderReferenceStress,
+                                                             dDevStressdStress, dDevStressdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderReferenceStressDecomposition (jacobian)",
+                                             "Error in computation of the deviatoric part of the stress" );
+            result->addNext( error );
+            return result;
+        }
+
+        return NULL;
+    }
+
+    errorOut computeHigherOrderReferenceStressDecomposition( const variableVector &higherOrderReferenceStress,
+                                                             const variableVector &rightCauchyGreenDeformation,
+                                                             variableVector &deviatoricHigherOrderReferenceStress,
+                                                             variableVector &pressure, variableMatrix &dDevStressdStress,
+                                                             variableMatrix &dDevStressdRCG, variableMatrix &dPressuredStress,
+                                                             variableMatrix &dPressuredRCG, variableMatrix &d2DevStressdStressdRCG,
+                                                             variableMatrix &d2PressuredStressdRCG ){
+        /*!
+         * Compute the decomposition of the higher-order stress measure into pressure and deviatoric parts.
+         *
+         * Also return the Jacobians
+         *
+         * :param const variableVector &higherOrderReferenceStress: The higher order stress in the reference
+         *     configuration.
+         * :param const variableVector &rightCauchyGreenDeformation: The right Cauchy-Green deformation tensor 
+         *     between the current configuration and the configuration the stress is located in.
+         * :param variableVector &deviatoricHigherOrderReferenceStress: The deviatoric part of the higher order 
+         *     stress tensor.
+         * :param variableVector &pressure: The pressure of the higher order stress tensor.
+         * :param variableMatrix &dDevStressdStress: The Jacobian of the deviatoric stress w.r.t. the stress.
+         * :param variableMatrix &dDevStressdRCG: The Jacobian of the deviatoric stress w.r.t. the right 
+         *     Cauchy-Green deformation tensor.
+         * :param variableMatrix &dPressuredStress: The Jacobian of the pressure w.r.t. the stress.
+         * :param variableMatrix &dPressuredRCG: The Jacobian of the pressure w.r.t. the right 
+         *     Cauchy-Green deformation tensor.
+         * :param variableMatrix &d2DevStressdStressdRCG: The second order jacobian of the deviatoric stress 
+         *     w.r.t. the stress and the right Cauchy-Green deformation tensor.
+         * :param variableMatrix &d2PressuredStressdRCG: The second order jacobian of the pressure
+         *     w.r.t. the stress and the right Cauchy-Green deformation tensor.
+         */
+
+        errorOut error = computeReferenceHigherOrderStressPressure( higherOrderReferenceStress,
+                                                                    rightCauchyGreenDeformation,
+                                                                    pressure, dPressuredStress,
+                                                                    dPressuredRCG, d2PressuredStressdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderReferenceStressDecomposition (second order jacobian)",
+                                             "Error in computation of pressure" );
+            result->addNext( error );
+            return result;
+        }
+
+        error = computeDeviatoricReferenceHigherOrderStress( higherOrderReferenceStress,
+                                                             rightCauchyGreenDeformation,
+                                                             pressure, dPressuredStress,
+                                                             dPressuredRCG, d2PressuredStressdRCG,
+                                                             deviatoricHigherOrderReferenceStress,
+                                                             dDevStressdStress, dDevStressdRCG,
+                                                             d2DevStressdStressdRCG );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderReferenceStressDecomposition (second order jacobian)",
+                                             "Error in computation of the deviatoric part of the stress" );
+            result->addNext( error );
+            return result;
+        }
+
+        return NULL;
+    }
 }
