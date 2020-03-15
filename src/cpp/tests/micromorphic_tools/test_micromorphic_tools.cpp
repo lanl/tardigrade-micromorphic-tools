@@ -2145,6 +2145,21 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
         return 1;
     }
 
+    variableVector resultJ2;
+    variableMatrix dNormMdMJ2, d2NormMdM2J2;
+
+    error = micromorphicTools::computeHigherOrderStressNorm( M, resultJ2, dNormMdMJ2, d2NormMdM2J2 );
+
+    if ( error ){
+        results << "test_computeHigherOrderStressNorm & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ2 ) ){
+        results << "test_computeHigherOrderStressNorm (test 3) & False\n";
+        return 1;
+    }
+
     //Test dNormMdM
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < M.size(); i++ ){
@@ -2173,8 +2188,53 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
             if ( !vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ[ j ][ i ] ) ){
-                results << "test_computeHigherOrderStressNorm (test 3) & False\n";
+                results << "test_computeHigherOrderStressNorm (test 4) & False\n";
                 return 1;
+            }
+        }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ2[ j ][ i ] ) ){
+                results << "test_computeHigherOrderStressNorm (test 5) & False\n";
+                return 1;
+            }
+        }
+
+        variableMatrix derP, derM;
+
+        error = micromorphicTools::computeHigherOrderStressNorm( M + delta, resultP, derP );
+
+        if ( error ){
+            error->print();
+            results << "test_computeHigherOrderStressNorm & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::computeHigherOrderStressNorm( M - delta, resultM, derM );
+
+        if ( error ){
+            error->print();
+            results << "test_computeHigherOrderStressNorm & False\n";
+            return 1;
+        }
+
+        variableMatrix gradMat = ( derP - derM ) / ( 2 * delta[i] );
+
+        unsigned int n = ( int )( i / 9 );
+        unsigned int o = ( int )( ( i - 9 * n ) / 3 );
+        unsigned int p = ( i - 9 * n - 3 * o ) % 3;
+
+        for ( unsigned int j = 0; j < 3; j++ ){
+            for ( unsigned int k = 0; k < 3; k++ ){
+                for ( unsigned int l = 0; l < 3; l++ ){
+                    for ( unsigned int m = 0; m < 3; m++ ){
+                        if ( !vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
+                                                        d2NormMdM2J2[ j ][ 243 * k + 81 * l + 27 * m + 9 * n + 3 * o + p ] ) ){
+                            results << "test_computeHigherOrderStressNorm (test 6) & False\n";
+                            return 1;
+                        }
+                    }
+                }
             }
         }
     }

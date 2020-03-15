@@ -265,6 +265,7 @@ namespace micromorphicTools{
                                            variableMatrix &dHigherOrderStressNormdHigherOrderStress );
 
     errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
+                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress,
                                            variableMatrix &d2HigherOrderStressNormdHigherOrderStress2 );
 }
 

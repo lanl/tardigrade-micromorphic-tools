@@ -2044,7 +2044,7 @@ namespace micromorphicTools{
          *
          * Also computes the Jacobians
          *
-         * \frac{ \partial || M ||_K }{ \partial M_{LMN} } = \frac{ M_{IMK} \delta_{KN} }{ || M ||_K }
+         * \frac{ \partial || M ||_K }{ \partial M_{LMN} } = \frac{ M_{LMK} \delta_{KN} }{ || M ||_K }
          *
          * where K is not summed over
          *
@@ -2074,6 +2074,70 @@ namespace micromorphicTools{
                 for ( unsigned int M = 0; M < 3; M++ ){
                     for ( unsigned int N = 0; N < 3; N++ ){
                         dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * L + dim * M + N ] = higherOrderStress[ dim * dim * L + dim * M + K ]  * eye[ dim * K + N ] / higherOrderStressNorm[ K ];
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
+                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress,
+                                           variableMatrix &d2HigherOrderStressNormdHigherOrderStress2 ){
+        /*!
+         * Compute the norm of the higher order stress which is defined as
+         * || M ||_K = \sqrt{ M_{IJK} M_{IJK} }
+         *
+         * where K is not summed over.
+         *
+         * Also computes the Jacobians
+         *
+         * \frac{ \partial || M ||_K }{ \partial M_{LMN} } = \frac{ M_{LMK} \delta_{KN} }{ || M ||_K }
+         * \frac{ \partial^2 || M ||_K }{ \partial M_{LMN} \partial M_{OPQ} } = \frac{1}{ || M ||_K } \left[ \delta_{LO} \delta_{MP} \delta_{KQ} \delta_{KN} - \frac{ M_{LMK} \delta_{KN} }{ || M ||_K } \frac{ M_{OPK} \delta_{KQ} }{ || M ||_K } \right]
+         *
+         * where K is not summed over
+         *
+         * :param const variableVector &higherOrderStress: The higher order stress tensor.
+         * :param variableVector &higherOrderStressNorm: The norm of the higher order stress.
+         * :param variableMatrix &dHigherOrderSTressNormdHigherOrderStress: The Jacobian of the higher order
+         *     stress norm w.r.t. the higher order stress.
+         * :param variableMatrix &d2HigherOrderStressNormdHigherOrderStress2: The second order Jacobian of the 
+         *     higher order stress norm w.r.t. the higher order stress.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        errorOut error = computeHigherOrderStressNorm( higherOrderStress, higherOrderStressNorm, dHigherOrderStressNormdHigherOrderStress );
+
+        if ( error ){
+            errorOut result = new errorNode( "computeHigherOrderStressNorm (second order jacobian)",
+                                             "Error in computation of higher order stress norm" );
+            result->addNext( error );
+            return result;
+        }
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        d2HigherOrderStressNormdHigherOrderStress2 = variableMatrix( dim, variableVector( dim * dim * dim * dim * dim * dim, 0 ) );
+
+        for ( unsigned int K = 0; K < dim; K++ ){
+            for ( unsigned int L = 0; L < dim; L++ ){
+                for ( unsigned int M = 0; M < dim; M++ ){
+                    for ( unsigned int N = 0; N < dim; N++ ){
+                        for ( unsigned int O = 0; O < dim; O++ ){
+                            for ( unsigned int P = 0; P < dim; P++ ){
+                                for ( unsigned int Q = 0; Q < dim; Q++ ){
+                                    d2HigherOrderStressNormdHigherOrderStress2[ K ][ dim * dim * dim * dim * dim * L + dim * dim * dim * dim * M + dim * dim * dim * N + dim * dim * O + dim * P + Q ]
+                                        = ( eye[ dim * L + O ] * eye[ dim * M + P ] * eye[ dim * K + Q ] * eye[ dim * K + N ]
+                                        -   dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * L + dim * M + N ]
+                                        *   dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * O + dim * P + Q ] )
+                                        / higherOrderStressNorm[ K ];
+                                }
+                            }
+                        }
                     }
                 }
             }
