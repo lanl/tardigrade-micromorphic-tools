@@ -2261,6 +2261,7 @@ int test_assembleDeformationGradient( std::ofstream &results ){
     errorOut error = micromorphicTools::assembleDeformationGradient( displacementGradient, result );
 
     if ( error ){
+        error->print();
         results << "test_assembleDeformationGradient & False\n";
         return 1;
     }
@@ -2268,6 +2269,56 @@ int test_assembleDeformationGradient( std::ofstream &results ){
     if ( !vectorTools::fuzzyEquals( answer, result ) ){
         results << "test_assembleDeformationGradient (test 1) & False\n";
         return 1;
+    }
+
+    //Tests of the Jacobians
+    variableVector resultJ;
+    variableMatrix dFdGradU;
+    error = micromorphicTools::assembleDeformationGradient( displacementGradient, resultJ, dFdGradU );
+
+    if ( error ){
+        error->print();
+        results << "test_assembleDeformationGradient & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
+        results << "test_assembleDeformationGradient (test 2) & False\n";
+        return 1;
+    }
+
+    //Test the Jacobian w.r.t. the displacement gradient
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < 9; i++ ){
+        constantMatrix delta = constantMatrix( 3, constantVector( 3, 0 ) );
+        delta[ ( int )( i / 3) ][ i % 3 ] = eps * fabs( displacementGradient[ ( int )( i / 3 ) ][ i % 3 ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::assembleDeformationGradient( displacementGradient + delta, P );
+
+        if ( error ){
+            error->print();
+            results << "test_assembleDeformationGradient & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::assembleDeformationGradient( displacementGradient - delta, M );
+
+        if ( error ){
+            error->print();
+            results << "test_assembleDeformationGradient & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ ( int )( i / 3 ) ][ i % 3 ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dFdGradU[ j ][ i ] ) ){
+                results << "test_assembledDeformationGradient (test 3) & False\n";
+                return 1;
+            }
+        }
     }
 
     results << "test_assembleDeformationGradient & True\n";
@@ -2290,6 +2341,7 @@ int test_assembleMicroDeformation( std::ofstream &results ){
     errorOut error = micromorphicTools::assembleMicroDeformation( microDisplacement, result );
 
     if ( error ){
+        error->print();
         results << "test_assembleMicroDeformation & False\n";
         return 1;
     }
@@ -2297,6 +2349,57 @@ int test_assembleMicroDeformation( std::ofstream &results ){
     if ( !vectorTools::fuzzyEquals( answer, result ) ){
         results << "test_assembleMicroDeformation (test 1) & False\n";
         return 1;
+    }
+
+    //Test the Jacobians
+    variableVector resultJ;
+    variableMatrix dChidPhi;
+
+    error = micromorphicTools::assembleMicroDeformation( microDisplacement, resultJ, dChidPhi );
+
+    if ( error ){
+        error->print();
+        results << "test_assembleMicroDeformation & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
+        results << "test_assembleMicroDeformation (test 2) & False\n";
+        return 1;
+    }
+
+    //Test the jacobians w.r.t. phi
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < microDisplacement.size(); i++ ){
+        constantVector delta( microDisplacement.size(), 0 );
+        delta[i] = eps * fabs( microDisplacement[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::assembleMicroDeformation( microDisplacement + delta, P );
+
+        if ( error ){
+            error->print();
+            results << "test_assembleMicroDeformation & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::assembleMicroDeformation( microDisplacement - delta, M );
+
+        if ( error ){
+            error->print();
+            results << "test_assembleMicroDeformation & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dChidPhi[ j ][ i ] ) ){
+                results << "test_assembleMicroDeformation (test 3) & False\n";
+                return 1;
+            }
+        }
     }
 
     results << "test_assembleMicroDeformation & True\n";
@@ -2329,6 +2432,7 @@ int test_assembleMicroDeformationGradient( std::ofstream &results ){
     errorOut error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient, result );
 
     if ( error ){
+        error->print();
         results << "test_assembleMicroDeformationGradient & False\n";
         return 1;
     }
@@ -2336,6 +2440,57 @@ int test_assembleMicroDeformationGradient( std::ofstream &results ){
     if ( !vectorTools::fuzzyEquals( answer, result ) ){
         results << "test_assembleMicroDeformationGradient (test 1) & False\n";
         return 1;
+    }
+
+    //Test the Jacobians
+    variableVector resultJ;
+    variableMatrix dGradChidGradPhi;
+
+    error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient, resultJ, dGradChidGradPhi );
+
+    if ( error ){
+        error->print();
+        results << "test_assembleMicroDeformationGradient & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
+        results << "test_assembleMicroDeformationGradient (test 2) & False\n";
+        return 1;
+    }
+
+    //Test the Jacobian w.r.t. the micro displacement gradient
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < 27; i++ ){
+        constantMatrix delta( 9, constantVector( 3, 0 ) );
+        delta[ ( int )( i / 3 ) ][ i % 3 ] = eps * fabs( microDisplacementGradient[ ( int )( i / 3 ) ][ i % 3 ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient + delta, P );
+
+        if ( error ){
+            error->print();
+            results << "test_assembleMicroDeformationGradient & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient - delta, M );
+
+        if ( error ){
+            error->print();
+            results << "test_assembleMicroDeformationGradient & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ ( int )( i / 3 ) ][ i % 3 ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dGradChidGradPhi[ j ][ i ] ) ){
+                results << "test_assembleMicroDeformationGradient (test 3) & False\n";
+                return 1;
+            }
+        }
     }
 
     results << "test_assembleMicroDeformationGradient & True\n";
