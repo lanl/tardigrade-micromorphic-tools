@@ -2146,30 +2146,57 @@ namespace micromorphicTools{
         return NULL;
     }
 
-    errorOut assembleDeformationGradient( const variableMatrix &gradDisplacement, variableVector &deformationGradient ){
+    errorOut assembleDeformationGradient( const variableMatrix &displacementGradient, variableVector &deformationGradient ){
         /*!
          * Assemble the deformation gradient from the gradient of the displacement.
          *
-         * :param const variableMatrix &gradDisplacement: The gradient of the displacement.
+         * :param const variableMatrix &displacementGradient: The gradient of the displacement.
          * :param variableVector &deformationGradient: The deformation gradient.
          */
 
         //Assume 3D
         unsigned int dim = 3;
 
-        if ( gradDisplacement.size() != dim ){
+        if ( displacementGradient.size() != dim ){
             return new errorNode( "assembleDeformationGradient",
                                   "The gradient of the deformation is not 3D" );
         }
 
         for ( unsigned int i = 0; i < dim; i++ ){
-            if ( gradDisplacement[ i ].size() != dim ){
+            if ( displacementGradient[ i ].size() != dim ){
                 return new errorNode( "assembleDeformationGradient",
                                       "The gradient of the deformation is not a regular matrix" );
             }
         }
 
-        deformationGradient = vectorTools::appendVectors( gradDisplacement + vectorTools::eye< variableType >( dim ) );
+        deformationGradient = vectorTools::appendVectors( displacementGradient + vectorTools::eye< variableType >( dim ) );
+
+        return NULL;
+    }
+
+    errorOut assembleDeformationGradient( const variableMatrix &displacementGradient, variableVector &deformationGradient,
+                                          variableMatrix &dFdGradU ){
+        /*!
+         * Assemble the deformation gradient from the gradient of the displacement.
+         *
+         * :param const variableMatrix &displacementGradient: The gradient of the displacement.
+         * :param variableVector &deformationGradient: The deformation gradient.
+         * :param variableMatrix &dFdGradU: The Jacobian of the deformation gradient w.r.t. the displacement gradient.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        errorOut error = assembleDeformationGradient( displacementGradient, deformationGradient );
+
+        if ( error ){
+            errorOut result = new errorNode( "assembleDeformationGradient (jacobian)",
+                                             "Error in the computation of the deformation gradient" );
+            result->addNext( error );
+            return result;
+        }
+
+        dFdGradU = vectorTools::eye< variableType >( dim * dim );
 
         return NULL;
     }
@@ -2198,40 +2225,98 @@ namespace micromorphicTools{
         return NULL;
     }
 
-    errorOut assembleMicroGradient( const variableMatrix &gradientMicroDisplacement, variableVector &gradientMicroDeformation ){
+    errorOut assembleMicroDeformation( const variableVector &microDisplacement, variableVector &microDeformation,
+                                       variableMatrix &dChidPhi ){
         /*!
-         * Assemble the gradient of the micro deforamtion from the gradient of the micro displacement
-         * in the reference configuration
+         * Assemble the micro deformation from the micro displacement
          *
-         * :param const variableVector &gradientMicroDisplacement: The gradient of the micro displacement
-         * :param variableVector &gradientMicroDeformation: The gradient of the micro deformation.
+         * :param const variableVector &microDisplacement: The micro degrees of freedom.
+         * :param variableVector &microDeformation: The micro deformation.
+         * :param variableMatrix &dChidPhi: The Jacobian of the micro deformation w.r.t. the micro displacement
          */
 
         //Assume 3D
         unsigned int dim = 3;
 
-        if ( gradientMicroDisplacement.size() != dim * dim ){
+        errorOut error = assembleMicroDeformation( microDisplacement, microDeformation );
+
+        if ( error ){
+            errorOut result = new errorNode( "assembleMicroDeformation (jacobian)",
+                                             "Errir in the computation of the micro deformation" );
+            result->addNext( error );
+            return result;
+        }
+
+        dChidPhi = vectorTools::eye< variableType >( dim * dim );
+
+        return NULL;
+    }
+
+    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
+                                               variableVector &microDeformationGradient ){
+        /*!
+         * Assemble the gradient of the micro deformation from the gradient of the micro displacement
+         * in the reference configuration
+         *
+         * :param const variableVector &microDisplacementGradient: The gradient of the micro displacement
+         * :param variableVector &microDeformationGradient: The gradient of the micro deformation.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        if ( microDisplacementGradient.size() != dim * dim ){
             return new errorNode( "assembleMicroGradient",
                                   "The gradient of the micro displacement must be 3D" );
         }
 
         for ( unsigned int i = 0; i < dim; i++ ){
-            if ( gradientMicroDisplacement[ i ].size() != dim ){
+            if ( microDisplacementGradient[ i ].size() != dim ){
                 return new errorNode( "assembleMicroGradient",
                                       "The gradient of the micro displacement must be 3D" );
             }
         }
 
-        gradientMicroDeformation = variableVector( dim * dim * dim, 0 );
+        microDeformationGradient = variableVector( dim * dim * dim, 0 );
 
         for ( unsigned int i = 0; i < dim; i++ ){
             for ( unsigned int I = 0; I < dim; I++ ){
                 for ( unsigned int J = 0; J < dim; J++ ){
-                    gradientMicroDeformation[ dim * dim * i + dim * I + J ] = gradientMicroDisplacement[ dim * i + I ][ J ];
+                    microDeformationGradient[ dim * dim * i + dim * I + J ] = microDisplacementGradient[ dim * i + I ][ J ];
                 }
             }
         }
 
         return NULL;
     } 
+
+    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
+                                               variableVector &microDeformationGradient,
+                                               variableMatrix &dGradChidGradPhi ){
+        /*!
+         * Assemble the gradient of the micro deformation from the gradient of the micro displacement
+         * in the reference configuration
+         *
+         * :param const variableVector &microDisplacementGradient: The gradient of the micro displacement
+         * :param variableVector &microDeformationGradient: The gradient of the micro deformation.
+         * :param variableMatrix &dGradChidGradPhi: The gradient of the micro deformation gradient w.r.t.
+         *     the micro displacement gradient.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        errorOut error = assembleMicroDeformationGradient( microDisplacementGradient, microDeformationGradient );
+
+        if ( error ){
+            errorOut result = new errorNode( "assembleMicroDeformationGradient (jacobian)",
+                                             "Error in the computation of the micro deformation gradient" );
+            result->addNext( error );
+            return result;
+        }
+        
+        dGradChidGradPhi = vectorTools::eye< variableType >( dim * dim * dim );
+
+        return NULL;
+    }
 }

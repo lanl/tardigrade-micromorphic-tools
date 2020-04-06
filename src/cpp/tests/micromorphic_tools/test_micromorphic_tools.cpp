@@ -2243,6 +2243,105 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
     return 0;
 }
 
+int test_assembleDeformationGradient( std::ofstream &results ){
+    /*!
+     * Test the assembly of the deformation gradient from the gradient of the displacement.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableMatrix displacementGradient = { { 1, 2, 3 },
+                                            { 4, 5, 6 },
+                                            { 7, 8, 9 } };
+
+    variableVector answer = { 2, 2, 3, 4, 6, 6, 7, 8, 10 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::assembleDeformationGradient( displacementGradient, result );
+
+    if ( error ){
+        results << "test_assembleDeformationGradient & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_assembleDeformationGradient (test 1) & False\n";
+        return 1;
+    }
+
+    results << "test_assembleDeformationGradient & True\n";
+    return 0;
+}
+
+int test_assembleMicroDeformation( std::ofstream &results ){
+    /*!
+     * Test the assembly of the micro deformation from the micro displacement
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector microDisplacement = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    variableVector answer = { 2, 2, 3, 4, 6, 6, 7, 8, 10 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::assembleMicroDeformation( microDisplacement, result );
+
+    if ( error ){
+        results << "test_assembleMicroDeformation & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_assembleMicroDeformation (test 1) & False\n";
+        return 1;
+    }
+
+    results << "test_assembleMicroDeformation & True\n";
+    return 0;
+}
+
+int test_assembleMicroDeformationGradient( std::ofstream &results ){
+    /*!
+     * Test the assembly of the micro deformation gradient
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableMatrix microDisplacementGradient = { {  1,  2,  3 },
+                                                 {  4,  5,  6 },
+                                                 {  7,  8,  9 },
+                                                 { 10, 11, 12 },
+                                                 { 13, 14, 15 },
+                                                 { 16, 17, 18 },
+                                                 { 19, 20, 21 },
+                                                 { 22, 23, 24 },
+                                                 { 25, 26, 27 } };
+
+    variableVector answer = { 1,  2,  3,  4,  5,  6,  7,  8,  9,
+                             10, 11, 12, 13, 14, 15, 16, 17, 18,
+                             19, 20, 21, 22, 23, 24, 25, 26, 27 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient, result );
+
+    if ( error ){
+        results << "test_assembleMicroDeformationGradient & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_assembleMicroDeformationGradient (test 1) & False\n";
+        return 1;
+    }
+
+    results << "test_assembleMicroDeformationGradient & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -2271,6 +2370,9 @@ int main(){
     test_computeSecondOrderReferenceStressDecomposition( results );
     test_computeHigherOrderReferenceStressDecomposition( results );
     test_computeHigherOrderStressNorm( results );
+    test_assembleDeformationGradient( results );
+    test_assembleMicroDeformation( results );
+    test_assembleMicroDeformationGradient( results );
 
     //Close the results file
     results.close();

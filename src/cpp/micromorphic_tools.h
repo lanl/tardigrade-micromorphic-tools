@@ -268,11 +268,21 @@ namespace micromorphicTools{
                                            variableMatrix &dHigherOrderStressNormdHigherOrderStress,
                                            variableMatrix &d2HigherOrderStressNormdHigherOrderStress2 );
 
-    errorOut assembleDeformationGradient( const variableMatrix &grad_u, variableVector &deformationGradient );
+    errorOut assembleDeformationGradient( const variableMatrix &displacementGradient, variableVector &deformationGradient );
 
-    errorOut assembleMicroDeformation( const variableVector &phi, variableVector &microDeformation );
+    errorOut assembleDeformationGradient( const variableMatrix &displacementGradient, variableVector &deformationGradient,
+                                          variableMatrix &dFdGradU );
 
-    errorOut assembleMicroGradient( const variableMatrix &grad_phi, variableVector &gradMicroDeformation );
+    errorOut assembleMicroDeformation( const variableVector &microDisplacement, variableVector &microDeformation );
+
+    errorOut assembleMicroDeformation( const variableVector &microDisplacement, variableVector &microDeformation,
+                                       variableMatrix &dChidPhi );
+
+    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
+                                               variableVector &microDeformationGradient );
+
+    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
+                                               variableVector &microDeformationGradient, variableMatrix &dGradChidGradPhi );
 }
 
 #endif
