@@ -37,13 +37,13 @@ namespace micromorphicTools{
                          variableVector &Psi );
 
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
-                         variableVector &Psi, variableMatrix &dPsidF, variableMatrix &dPsidXi );
+                         variableVector &Psi, variableMatrix &dPsidF, variableMatrix &dPsidChi );
 
-    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradChi,
                            variableVector &Gamma );
 
-    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
-                           variableVector &Gamma, variableMatrix &dGammadF, variableMatrix &dGammadGradXi );
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradChi,
+                           variableVector &Gamma, variableMatrix &dGammadF, variableMatrix &dGammadGradChi );
 
     errorOut computeMicroStrain( const variableVector &Psi, variableVector &microStrain );
 
@@ -267,6 +267,12 @@ namespace micromorphicTools{
     errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
                                            variableMatrix &dHigherOrderStressNormdHigherOrderStress,
                                            variableMatrix &d2HigherOrderStressNormdHigherOrderStress2 );
+
+    errorOut assembleDeformationGradient( const variableMatrix &grad_u, variableVector &deformationGradient );
+
+    errorOut assembleMicroDeformation( const variableVector &phi, variableVector &microDeformation );
+
+    errorOut assembleMicroGradient( const variableMatrix &grad_phi, variableVector &gradMicroDeformation );
 }
 
 #endif

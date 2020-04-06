@@ -16,7 +16,7 @@ namespace micromorphicTools{
                          variableVector &Psi ){
         /*!
          * Computes the micromorphic quantity psi defined as:
-         * \Psi_{IJ} = F_{i I} \Xi_{i J}
+         * \Psi_{IJ} = F_{i I} \Chi_{i J}
          *
          * :param const variableVector &deformationGradient: The deformation gradient.
          * :param const variableVector &microDeformation: The micro-deformation.
@@ -41,21 +41,21 @@ namespace micromorphicTools{
     }
 
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
-                         variableVector &Psi, variableMatrix &dPsidF, variableMatrix &dPsidXi ){
+                         variableVector &Psi, variableMatrix &dPsidF, variableMatrix &dPsidChi ){
         /*!
          * Computes the micromorphic quantity psi defined as:
-         * \Psi_{IJ} = F_{i I} \Xi_{i J}
+         * \Psi_{IJ} = F_{i I} \Chi_{i J}
          *
          * along with the jacobians
          *
-         * \frac{ \partial \Psi_{IJ} }{ \partial F_{k K} } = \delta_{I K} \Xi_{k J}
-         * \frac{ \partial \Psi_{IJ} }{ \partial \Xi_{k K} } = F_{k I} \delta_{J K}
+         * \frac{ \partial \Psi_{IJ} }{ \partial F_{k K} } = \delta_{I K} \Chi_{k J}
+         * \frac{ \partial \Psi_{IJ} }{ \partial \Chi_{k K} } = F_{k I} \delta_{J K}
          *
          * :param const variableVector &deformationGradient: The deformation gradient.
          * :param const variableVector &microDeformation: The micro-deformation.
          * :param variableVector &Psi: The micro-displacement metric Psi
          * :param variableMatrix &dPsidF: The jacobian of Psi w.r.t. the deformation gradient.
-         * :param variableMatrix &dPsidXi: The jacobian of Psi w.r.t. the micro-deformation.
+         * :param variableMatrix &dPsidChi: The jacobian of Psi w.r.t. the micro-deformation.
          */
 
         //Assume 3d
@@ -73,14 +73,14 @@ namespace micromorphicTools{
         vectorTools::eye( eye );
 
         dPsidF  = variableMatrix( Psi.size(), variableVector( deformationGradient.size(), 0 ) );
-        dPsidXi = variableMatrix( Psi.size(), variableVector( microDeformation.size(), 0 ) );
+        dPsidChi = variableMatrix( Psi.size(), variableVector( microDeformation.size(), 0 ) );
 
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
                 for ( unsigned int k = 0; k < dim; k++ ){
                     for ( unsigned int K = 0; K < dim; K++ ){
                         dPsidF[ dim * I + J ][ dim * k + K ] = eye[ dim * I + K ] * microDeformation[ dim * k + J ];
-                        dPsidXi[ dim * I + J ][ dim * k + K ] = deformationGradient[ dim * k + I ] * eye[ dim * J + K ];
+                        dPsidChi[ dim * I + J ][ dim * k + K ] = deformationGradient[ dim * k + I ] * eye[ dim * J + K ];
                     }
                 }
             }
@@ -88,15 +88,15 @@ namespace micromorphicTools{
         return NULL;
     }
 
-    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradChi,
                            variableVector &Gamma ){
         /*!
          * Compute the deformation metric Gamma:
          *
-         * Gamma_{IJK} = F_{iI} \Xi_{iJ,K}
+         * Gamma_{IJK} = F_{iI} \Chi_{iJ,K}
          *
          * :param const variableVector &deformationGradient: The deformation gradient.
-         * :param const variableVector &gradXi: The gradient of the micro-deformation tensor
+         * :param const variableVector &gradChi: The gradient of the micro-deformation tensor
          *     w.r.t. the reference configuration.
          * :param variableVector &Gamma: The micromorphic deformation metric Gamma.
          */
@@ -108,7 +108,7 @@ namespace micromorphicTools{
             return new errorNode("computeGamma", "The deformation gradient isn't the right size");
         }
 
-        if ( gradXi.size() != dim * dim * dim ){
+        if ( gradChi.size() != dim * dim * dim ){
             return new errorNode("computeGamma", "The micro-deformation gradient isn't the right size");
         }
 
@@ -118,7 +118,7 @@ namespace micromorphicTools{
             for ( unsigned int J = 0; J < dim; J++ ){
                 for ( unsigned int K = 0; K < dim; K++ ){
                     for ( unsigned int i = 0; i < dim; i++ ){
-                        Gamma[ dim * dim * I + dim * J + K ] += deformationGradient[ dim * i + I ] * gradXi[ dim * dim * i + dim * J + K ];
+                        Gamma[ dim * dim * I + dim * J + K ] += deformationGradient[ dim * i + I ] * gradChi[ dim * dim * i + dim * J + K ];
                     }
                 }
             }
@@ -127,30 +127,30 @@ namespace micromorphicTools{
         return NULL;
     }
 
-    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradXi,
-                           variableVector &Gamma, variableMatrix &dGammadF, variableMatrix &dGammadGradXi ){
+    errorOut computeGamma( const variableVector &deformationGradient, const variableVector &gradChi,
+                           variableVector &Gamma, variableMatrix &dGammadF, variableMatrix &dGammadGradChi ){
         /*!
          * Compute the deformation metric Gamma:
          *
-         * Gamma_{IJK} = F_{iI} \Xi_{iJ,K}
+         * Gamma_{IJK} = F_{iI} \Chi_{iJ,K}
          *
          * Also return the Jacobians
-         * \frac{ \partial Gamma_{IJK} }{ \partial F_{lL} } = \delta_{IL} \Xi_{lJ,K}
-         * \frac{ \partial Gamma_{IJK} }{ \partial \Xi_{lL,M} } = F_{lI} \delta_{JL} \delta_{KM}
+         * \frac{ \partial Gamma_{IJK} }{ \partial F_{lL} } = \delta_{IL} \Chi_{lJ,K}
+         * \frac{ \partial Gamma_{IJK} }{ \partial \Chi_{lL,M} } = F_{lI} \delta_{JL} \delta_{KM}
          *
          * :param const variableVector &deformationGradient: The deformation gradient.
-         * :param const variableVector &gradXi: The gradient of the micro-deformation tensor
+         * :param const variableVector &gradChi: The gradient of the micro-deformation tensor
          *     w.r.t. the reference configuration.
          * :param variableVector &Gamma: The micromorphic deformation metric Gamma.
          * :param variableMatrix &dGammadF: The gradient of Gamma w.r.t. the deformation gradient.
-         * :param variableMatrix &dGammadGradXi: The gradient of Gamma w.r.t. the gradient of Xi in the reference 
+         * :param variableMatrix &dGammadGradChi: The gradient of Gamma w.r.t. the gradient of Chi in the reference 
          *     configuration.
          */
 
         //Assume 3d
         unsigned int dim = 3;
 
-        errorOut error = computeGamma( deformationGradient, gradXi, Gamma );
+        errorOut error = computeGamma( deformationGradient, gradChi, Gamma );
 
         if ( error ){
             errorOut result = new errorNode("computeGamma (jacobian)", "Error in computation of Gamma");
@@ -159,7 +159,7 @@ namespace micromorphicTools{
         }
 
         dGammadF      = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
-        dGammadGradXi = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
+        dGammadGradChi = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
 
         constantVector eye( dim * dim, 0 );
         vectorTools::eye( eye );
@@ -170,9 +170,9 @@ namespace micromorphicTools{
                     for ( unsigned int l = 0; l < dim; l++ ){
                         for ( unsigned int L = 0; L < dim; L++ ){
                             dGammadF[ dim * dim * I + dim * J + K ][ dim * l + L ] = eye[ dim * I + L ]
-                                                                                   * gradXi[ dim * dim * l + dim * J + K ];
+                                                                                   * gradChi[ dim * dim * l + dim * J + K ];
                             for ( unsigned int M = 0; M < dim; M++ ){
-                                dGammadGradXi[ dim * dim * I + dim * J + K ][ dim * dim * l + dim * L + M ] = deformationGradient[ dim * l + I ]
+                                dGammadGradChi[ dim * dim * I + dim * J + K ][ dim * dim * l + dim * L + M ] = deformationGradient[ dim * l + I ]
                                                                                                             * eye[ dim * J + L ] 
                                                                                                             * eye[ dim * K + M ];
                             }
@@ -470,7 +470,7 @@ namespace micromorphicTools{
         /*!
          * Compute the push-forward operation on the higher order stress.
          *
-         * m_{ijk} = \frac{1}{J} F_{iI} F_{jJ} \Xi_{kK} M_{IJK}
+         * m_{ijk} = \frac{1}{J} F_{iI} F_{jJ} \Chi_{kK} M_{IJK}
          *
          * :param const variableVector &referenceHigherOrderStress: The higher order stress in the 
          *     reference configuration.
@@ -493,7 +493,7 @@ namespace micromorphicTools{
         /*!
          * Compute the push-forward operation on the higher order stress.
          *
-         * m_{ijk} = \frac{1}{J} F_{iI} F_{jJ} \Xi_{kK} M_{IJK}
+         * m_{ijk} = \frac{1}{J} F_{iI} F_{jJ} \Chi_{kK} M_{IJK}
          *
          * :param const variableVector &referenceHigherOrderStress: The higher order stress in the 
          *     reference configuration.
@@ -554,15 +554,15 @@ namespace micromorphicTools{
         /*!
          * Compute the push-forward operation on the higher order stress.
          *
-         * m_{ijk} = \frac{1}{J} F_{iI} F_{jJ} \Xi_{kK} M_{IJK}
+         * m_{ijk} = \frac{1}{J} F_{iI} F_{jJ} \Chi_{kK} M_{IJK}
          *
          * Also returns the Jacobians
          *
-         * \frac{ \partial m_{ijk} }{ \partial M_{LMN} } = \frac{1}{J} F_{iL} F_{jM} \Xi_{kN}
-         * \frac{ \partial m_{ijk} }{ \partial F_{lM} } = \left( \delta_{il} F_{jN} \Xi_{kO} M_{MNO}
-         *                                                     + F_{iN} \delta_{jl} \Xi_{kO} M_{NMO}
+         * \frac{ \partial m_{ijk} }{ \partial M_{LMN} } = \frac{1}{J} F_{iL} F_{jM} \Chi_{kN}
+         * \frac{ \partial m_{ijk} }{ \partial F_{lM} } = \left( \delta_{il} F_{jN} \Chi_{kO} M_{MNO}
+         *                                                     + F_{iN} \delta_{jl} \Chi_{kO} M_{NMO}
          *                                                     - m_{ijk} dDetFdF_{lM} \right)/J
-         * \frac{ \partial m_{ijk} }{ \partial \Xi_{lM} } = \frac{1}{J} F_{iN} F_{jO} \delta_{kl} M_{NOM}
+         * \frac{ \partial m_{ijk} }{ \partial \Chi_{lM} } = \frac{1}{J} F_{iN} F_{jO} \delta_{kl} M_{NOM}
          *
          * :param const variableVector &referenceHigherOrderStress: The higher order stress in the 
          *     reference configuration.

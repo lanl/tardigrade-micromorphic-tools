@@ -54,13 +54,13 @@ int test_computePsi( std::ofstream &results ){
      */
 
     variableVector F  = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-    variableVector Xi = { 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+    variableVector Chi = { 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 
     variableVector answer = { 126, 135, 144, 162, 174, 186, 198, 213, 228 };
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computePsi( F, Xi, result );
+    errorOut error = micromorphicTools::computePsi( F, Chi, result );
 
     if ( error ){
         error->print();
@@ -74,9 +74,9 @@ int test_computePsi( std::ofstream &results ){
 
     //Test Jacobians
     variableVector resultJ;
-    variableMatrix dPsidF, dPsidXi;
+    variableMatrix dPsidF, dPsidChi;
 
-    error = micromorphicTools::computePsi( F, Xi, resultJ, dPsidF, dPsidXi );
+    error = micromorphicTools::computePsi( F, Chi, resultJ, dPsidF, dPsidChi );
 
     if ( error ){
         error->print();
@@ -96,7 +96,7 @@ int test_computePsi( std::ofstream &results ){
         constantVector delta( F.size(), 0 );
         delta[i] = eps * fabs( F[i] ) + eps;
 
-        error = micromorphicTools::computePsi( F + delta, Xi, resultJ );
+        error = micromorphicTools::computePsi( F + delta, Chi, resultJ );
 
         if ( error ){
             error->print();
@@ -115,11 +115,11 @@ int test_computePsi( std::ofstream &results ){
         }
     }
 
-    for ( unsigned int i = 0; i < Xi.size(); i++ ){
-        constantVector delta( Xi.size(), 0 );
-        delta[i] = eps * fabs( Xi[i] ) + eps;
+    for ( unsigned int i = 0; i < Chi.size(); i++ ){
+        constantVector delta( Chi.size(), 0 );
+        delta[i] = eps * fabs( Chi[i] ) + eps;
 
-        error = micromorphicTools::computePsi( F, Xi + delta, resultJ );
+        error = micromorphicTools::computePsi( F, Chi + delta, resultJ );
 
         if ( error ){
             error->print();
@@ -131,7 +131,7 @@ int test_computePsi( std::ofstream &results ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dPsidXi[j][i] ) ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dPsidChi[j][i] ) ){
                 results << "test_computePsi (test 4) & False\n";
                 return 1;
             }
@@ -423,7 +423,7 @@ int test_computeGamma( std::ofstream &results ){
      */
 
     variableVector deformationGradient = { -1, -2, -3, -4, -5, -6, -7, -8, -9 };
-    variableVector gradXi = { 1,  2,  3,  4,  5,  6,  7,  8,  9,
+    variableVector gradChi = { 1,  2,  3,  4,  5,  6,  7,  8,  9,
                              10, 11, 12, 13, 14, 15, 16, 17, 18,
                              19, 20, 21, 22, 23, 24, 25, 26, 27 };
 
@@ -433,7 +433,7 @@ int test_computeGamma( std::ofstream &results ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeGamma( deformationGradient, gradXi, result );
+    errorOut error = micromorphicTools::computeGamma( deformationGradient, gradChi, result );
 
     if ( error ){
         error->print();
@@ -448,10 +448,10 @@ int test_computeGamma( std::ofstream &results ){
 
     //Test Jacobian
     variableVector resultJ;
-    variableMatrix dGammadF, dGammadGradXi;
+    variableMatrix dGammadF, dGammadGradChi;
 
-    error = micromorphicTools::computeGamma( deformationGradient, gradXi, resultJ, 
-                                             dGammadF, dGammadGradXi );
+    error = micromorphicTools::computeGamma( deformationGradient, gradChi, resultJ, 
+                                             dGammadF, dGammadGradChi );
 
     if ( error ){
         error->print();
@@ -470,7 +470,7 @@ int test_computeGamma( std::ofstream &results ){
         constantVector delta( deformationGradient.size(), 0 );
         delta[i] = eps * fabs( deformationGradient[i] ) + eps;
 
-        error = micromorphicTools::computeGamma( deformationGradient + delta, gradXi, resultJ );
+        error = micromorphicTools::computeGamma( deformationGradient + delta, gradChi, resultJ );
 
         if ( error ){
             error->print();
@@ -489,12 +489,12 @@ int test_computeGamma( std::ofstream &results ){
         }
     }
 
-    //Test dGammadGradXi
-    for ( unsigned int i = 0; i < gradXi.size(); i++ ){
-        constantVector delta( gradXi.size(), 0 );
-        delta[i] = eps * fabs( gradXi[i] ) + eps;
+    //Test dGammadGradChi
+    for ( unsigned int i = 0; i < gradChi.size(); i++ ){
+        constantVector delta( gradChi.size(), 0 );
+        delta[i] = eps * fabs( gradChi[i] ) + eps;
 
-        error = micromorphicTools::computeGamma( deformationGradient, gradXi + delta, resultJ );
+        error = micromorphicTools::computeGamma( deformationGradient, gradChi + delta, resultJ );
 
         if ( error ){
             error->print();
@@ -506,7 +506,7 @@ int test_computeGamma( std::ofstream &results ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dGammadGradXi[j][i] ) ){
+            if ( !vectorTools::fuzzyEquals( gradCol[j], dGammadGradChi[j][i] ) ){
                 results << "test_computeGamma (test 4) & False\n";
                 return 1;
             }
