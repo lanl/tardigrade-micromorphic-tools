@@ -2146,4 +2146,92 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut assembleDeformationGradient( const variableMatrix &gradDisplacement, variableVector &deformationGradient ){
+        /*!
+         * Assemble the deformation gradient from the gradient of the displacement.
+         *
+         * :param const variableMatrix &gradDisplacement: The gradient of the displacement.
+         * :param variableVector &deformationGradient: The deformation gradient.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        if ( gradDisplacement.size() != dim ){
+            return new errorNode( "assembleDeformationGradient",
+                                  "The gradient of the deformation is not 3D" );
+        }
+
+        for ( unsigned int i = 0; i < dim; i++ ){
+            if ( gradDisplacement[ i ].size() != dim ){
+                return new errorNode( "assembleDeformationGradient",
+                                      "The gradient of the deformation is not a regular matrix" );
+            }
+        }
+
+        deformationGradient = vectorTools::appendVectors( gradDisplacement + vectorTools::eye< variableType >( dim ) );
+
+        return NULL;
+    }
+
+    errorOut assembleMicroDeformation( const variableVector &microDisplacement, variableVector &microDeformation ){
+        /*!
+         * Assemble the micro deformation from the micro displacement
+         *
+         * :param const variableVector &microDisplacement: The micro degrees of freedom.
+         * :param variableVector &microDeformation: The micro deformation.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        if ( microDisplacement.size() != dim * dim ){
+            return new errorNode( "assembleMicroDeformation",
+                                  "The micro degrees of freedom must be 3D" );
+        }
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        microDeformation = microDisplacement + eye;
+
+        return NULL;
+    }
+
+    errorOut assembleMicroGradient( const variableMatrix &gradientMicroDisplacement, variableVector &gradientMicroDeformation ){
+        /*!
+         * Assemble the gradient of the micro deforamtion from the gradient of the micro displacement
+         * in the reference configuration
+         *
+         * :param const variableVector &gradientMicroDisplacement: The gradient of the micro displacement
+         * :param variableVector &gradientMicroDeformation: The gradient of the micro deformation.
+         */
+
+        //Assume 3D
+        unsigned int dim = 3;
+
+        if ( gradientMicroDisplacement.size() != dim * dim ){
+            return new errorNode( "assembleMicroGradient",
+                                  "The gradient of the micro displacement must be 3D" );
+        }
+
+        for ( unsigned int i = 0; i < dim; i++ ){
+            if ( gradientMicroDisplacement[ i ].size() != dim ){
+                return new errorNode( "assembleMicroGradient",
+                                      "The gradient of the micro displacement must be 3D" );
+            }
+        }
+
+        gradientMicroDeformation = variableVector( dim * dim * dim, 0 );
+
+        for ( unsigned int i = 0; i < dim; i++ ){
+            for ( unsigned int I = 0; I < dim; I++ ){
+                for ( unsigned int J = 0; J < dim; J++ ){
+                    gradientMicroDeformation[ dim * dim * i + dim * I + J ] = gradientMicroDisplacement[ dim * i + I ][ J ];
+                }
+            }
+        }
+
+        return NULL;
+    } 
 }
