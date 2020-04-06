@@ -278,11 +278,11 @@ namespace micromorphicTools{
     errorOut assembleMicroDeformation( const variableVector &microDisplacement, variableVector &microDeformation,
                                        variableMatrix &dChidPhi );
 
-    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
-                                               variableVector &microDeformationGradient );
+    errorOut assembleGradientMicroDeformation( const variableMatrix &gradientMicroDisplacement,
+                                               variableVector &gradientMicroDeformation );
 
-    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
-                                               variableVector &microDeformationGradient, variableMatrix &dGradChidGradPhi );
+    errorOut assembleGradientMicroDeformation( const variableMatrix &gradientMicroDisplacement,
+                                               variableVector &gradientMicroDeformation, variableMatrix &dGradChidGradPhi );
 }
 
 #endif

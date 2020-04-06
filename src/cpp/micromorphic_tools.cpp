@@ -2252,37 +2252,37 @@ namespace micromorphicTools{
         return NULL;
     }
 
-    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
-                                               variableVector &microDeformationGradient ){
+    errorOut assembleGradientMicroDeformation( const variableMatrix &gradientMicroDisplacement,
+                                               variableVector &gradientMicroDeformation ){
         /*!
          * Assemble the gradient of the micro deformation from the gradient of the micro displacement
          * in the reference configuration
          *
-         * :param const variableVector &microDisplacementGradient: The gradient of the micro displacement
-         * :param variableVector &microDeformationGradient: The gradient of the micro deformation.
+         * :param const variableVector &gradientMicroDisplacement: The gradient of the micro displacement
+         * :param variableVector &gradientMicroDeformation: The gradient of the micro deformation.
          */
 
         //Assume 3D
         unsigned int dim = 3;
 
-        if ( microDisplacementGradient.size() != dim * dim ){
-            return new errorNode( "assembleMicroGradient",
+        if ( gradientMicroDisplacement.size() != dim * dim ){
+            return new errorNode( "assembleGradientMicroDeformation",
                                   "The gradient of the micro displacement must be 3D" );
         }
 
         for ( unsigned int i = 0; i < dim; i++ ){
-            if ( microDisplacementGradient[ i ].size() != dim ){
-                return new errorNode( "assembleMicroGradient",
+            if ( gradientMicroDisplacement[ i ].size() != dim ){
+                return new errorNode( "assembleGradientMicroDeformation",
                                       "The gradient of the micro displacement must be 3D" );
             }
         }
 
-        microDeformationGradient = variableVector( dim * dim * dim, 0 );
+        gradientMicroDeformation = variableVector( dim * dim * dim, 0 );
 
         for ( unsigned int i = 0; i < dim; i++ ){
             for ( unsigned int I = 0; I < dim; I++ ){
                 for ( unsigned int J = 0; J < dim; J++ ){
-                    microDeformationGradient[ dim * dim * i + dim * I + J ] = microDisplacementGradient[ dim * i + I ][ J ];
+                    gradientMicroDeformation[ dim * dim * i + dim * I + J ] = gradientMicroDisplacement[ dim * i + I ][ J ];
                 }
             }
         }
@@ -2290,15 +2290,15 @@ namespace micromorphicTools{
         return NULL;
     } 
 
-    errorOut assembleMicroDeformationGradient( const variableMatrix &microDisplacementGradient,
-                                               variableVector &microDeformationGradient,
+    errorOut assembleGradientMicroDeformation( const variableMatrix &gradientMicroDisplacement,
+                                               variableVector &gradientMicroDeformation,
                                                variableMatrix &dGradChidGradPhi ){
         /*!
          * Assemble the gradient of the micro deformation from the gradient of the micro displacement
          * in the reference configuration
          *
-         * :param const variableVector &microDisplacementGradient: The gradient of the micro displacement
-         * :param variableVector &microDeformationGradient: The gradient of the micro deformation.
+         * :param const variableVector &gradientMicroDisplacement: The gradient of the micro displacement
+         * :param variableVector &gradientMicroDeformation: The gradient of the micro deformation.
          * :param variableMatrix &dGradChidGradPhi: The gradient of the micro deformation gradient w.r.t.
          *     the micro displacement gradient.
          */
@@ -2306,10 +2306,10 @@ namespace micromorphicTools{
         //Assume 3D
         unsigned int dim = 3;
 
-        errorOut error = assembleMicroDeformationGradient( microDisplacementGradient, microDeformationGradient );
+        errorOut error = assembleGradientMicroDeformation( gradientMicroDisplacement, gradientMicroDeformation );
 
         if ( error ){
-            errorOut result = new errorNode( "assembleMicroDeformationGradient (jacobian)",
+            errorOut result = new errorNode( "assembleGradientMicroDeformation (jacobian)",
                                              "Error in the computation of the micro deformation gradient" );
             result->addNext( error );
             return result;

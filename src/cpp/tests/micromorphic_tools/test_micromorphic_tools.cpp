@@ -2406,14 +2406,14 @@ int test_assembleMicroDeformation( std::ofstream &results ){
     return 0;
 }
 
-int test_assembleMicroDeformationGradient( std::ofstream &results ){
+int test_assembleGradientMicroDeformation( std::ofstream &results ){
     /*!
      * Test the assembly of the micro deformation gradient
      *
      * :param std::ofstream &results: The output file.
      */
 
-    variableMatrix microDisplacementGradient = { {  1,  2,  3 },
+    variableMatrix gradientMicroDisplacement = { {  1,  2,  3 },
                                                  {  4,  5,  6 },
                                                  {  7,  8,  9 },
                                                  { 10, 11, 12 },
@@ -2429,16 +2429,16 @@ int test_assembleMicroDeformationGradient( std::ofstream &results ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient, result );
+    errorOut error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, result );
 
     if ( error ){
         error->print();
-        results << "test_assembleMicroDeformationGradient & False\n";
+        results << "test_assembleGradientMicroDeformation & False\n";
         return 1;
     }
 
     if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_assembleMicroDeformationGradient (test 1) & False\n";
+        results << "test_assembleGradientMicroDeformation (test 1) & False\n";
         return 1;
     }
 
@@ -2446,16 +2446,16 @@ int test_assembleMicroDeformationGradient( std::ofstream &results ){
     variableVector resultJ;
     variableMatrix dGradChidGradPhi;
 
-    error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient, resultJ, dGradChidGradPhi );
+    error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, resultJ, dGradChidGradPhi );
 
     if ( error ){
         error->print();
-        results << "test_assembleMicroDeformationGradient & False\n";
+        results << "test_assembleGradientMicroDeformation & False\n";
         return 1;
     }
 
     if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_assembleMicroDeformationGradient (test 2) & False\n";
+        results << "test_assembleGradientMicroDeformation (test 2) & False\n";
         return 1;
     }
 
@@ -2463,23 +2463,23 @@ int test_assembleMicroDeformationGradient( std::ofstream &results ){
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < 27; i++ ){
         constantMatrix delta( 9, constantVector( 3, 0 ) );
-        delta[ ( int )( i / 3 ) ][ i % 3 ] = eps * fabs( microDisplacementGradient[ ( int )( i / 3 ) ][ i % 3 ] ) + eps;
+        delta[ ( int )( i / 3 ) ][ i % 3 ] = eps * fabs( gradientMicroDisplacement[ ( int )( i / 3 ) ][ i % 3 ] ) + eps;
 
         variableVector P, M;
 
-        error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient + delta, P );
+        error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement + delta, P );
 
         if ( error ){
             error->print();
-            results << "test_assembleMicroDeformationGradient & False\n";
+            results << "test_assembleGradientMicroDeformation & False\n";
             return 1;
         }
 
-        error = micromorphicTools::assembleMicroDeformationGradient( microDisplacementGradient - delta, M );
+        error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement - delta, M );
 
         if ( error ){
             error->print();
-            results << "test_assembleMicroDeformationGradient & False\n";
+            results << "test_assembleGradientMicroDeformation & False\n";
             return 1;
         }
 
@@ -2487,13 +2487,13 @@ int test_assembleMicroDeformationGradient( std::ofstream &results ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
             if ( !vectorTools::fuzzyEquals( gradCol[ j ], dGradChidGradPhi[ j ][ i ] ) ){
-                results << "test_assembleMicroDeformationGradient (test 3) & False\n";
+                results << "test_assembleGradientMicroDeformation (test 3) & False\n";
                 return 1;
             }
         }
     }
 
-    results << "test_assembleMicroDeformationGradient & True\n";
+    results << "test_assembleGradientMicroDeformation & True\n";
     return 0;
 }
 
@@ -2527,7 +2527,7 @@ int main(){
     test_computeHigherOrderStressNorm( results );
     test_assembleDeformationGradient( results );
     test_assembleMicroDeformation( results );
-    test_assembleMicroDeformationGradient( results );
+    test_assembleGradientMicroDeformation( results );
 
     //Close the results file
     results.close();
