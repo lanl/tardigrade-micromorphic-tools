@@ -289,7 +289,7 @@ namespace micromorphicTools{
          *     mapping between configurations.
          * :param variableVector &cauchyStress: The Cauchy stress in the current 
          *     configuration.
-         * :param variableMatrix &CauchyStressdReferenceMicroStress: The jacobian of 
+         * :param variableMatrix &dCauchyStressdReferenceMicroStress: The jacobian of 
          *     the Cauchy w.r.t. the PK2 tress in the reference configuration.
          * :param variableMatrix &dCauchyStressdDeformationGradient: The jacobian of 
          *     the Cauchy stress w.r.t. the deformation gradient.
@@ -308,6 +308,65 @@ namespace micromorphicTools{
         return NULL;
     }
 
+    errorOut pullBackCauchyStress( const variableVector &cauchyStress,
+                                   const variableVector &deformationGradient,
+                                   variableVector &PK2Stress ){
+        /*!
+         * Pull back the Cauchy stress in the configuration indicated by the deformation gradient
+         * to the PK2 stress.
+         *
+         * S_{IJ} = J F_{Ii}^{-1} \sigma_{ij} F_{Jj}^{-1}
+         *
+         * :param const variableVector &cauchyStress: The Cauchy stress in the current configuration of
+         *     the provided deformation gradient.
+         * :param const variableVector &deformationGradient: The deformation gradient mapping between the 
+         *     reference configuration and the current configuration.
+         * :param variableVector &PK2Stress: The PK2 stress in the reference configuration.
+         */
+
+        errorOut error = pullBackMicroStress( cauchyStress, deformationGradient, PK2Stress );
+
+        if ( error ){
+            errorOut result = new errorNode( "pullBackCauchyStress",
+                                             "Error in pull-back operation (micro-stress and Cauchy stress are identical)" );
+            result->addNext( error );
+            return result;
+        }
+        return NULL;
+    }
+
+    errorOut pullBackCauchyStress( const variableVector &cauchyStress,
+                                   const variableVector &deformationGradient,
+                                   variableVector &PK2Stress, variableMatrix &dPK2StressdCauchyStress,
+                                   variableMatrix &dPK2StressdDeformationGradient ){
+        /*!
+         * Pull back the Cauchy stress in the configuration indicated by the deformation gradient
+         * to the PK2 stress.
+         *
+         * S_{IJ} = J F_{Ii}^{-1} \sigma_{ij} F_{Jj}^{-1}
+         *
+         * Also computes the Jacobians
+         *
+         * \frac{ \partial S_{IJ} }{ \partial \sigma_{kl} } = J F_{Ik}^{-1} F_{Jl}^{-1}
+         * \frac{ \partial S_{IJ} }{ \partial F_{kK} } = F_{Kk}^{-1} S_{IJ} - F_{Ik}^{-1} S_{KJ} - S_{IK} F_{Jk}^{-1}
+         *
+         * :param const variableVector &cauchyStress: The Cauchy stress in the current configuration of
+         *     the provided deformation gradient.
+         * :param const variableVector &deformationGradient: The deformation gradient mapping between the 
+         *     reference configuration and the current configuration.
+         * :param variableVector &PK2Stress: The PK2 stress in the reference configuration.
+         */
+
+        errorOut error = pullBackMicroStress( cauchyStress, deformationGradient, PK2Stress );
+
+        if ( error ){
+            errorOut result = new errorNode( "pullBackCauchyStress (jacobian)",
+                                             "Error in pull-back operation (micro-stress and Cauchy stress are identical)" );
+            result->addNext( error );
+            return result;
+        }
+        return NULL;
+    }
 
     errorOut pushForwardReferenceMicroStress( const variableVector &referenceMicroStress,
                                               const variableVector &deformationGradient,
@@ -455,6 +514,157 @@ namespace micromorphicTools{
 
                         dMicroStressdDeformationGradient[ dim * i + j ][ dim * k + K] -= microStress[ dim * i + j ] * dDetFdF[ dim * k + K ];
                         dMicroStressdDeformationGradient[ dim * i + j ][ dim * k + K] /= detF; 
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut pullBackMicroStress( const variableVector &microStress,
+                                  const variableVector &deformationGradient,
+                                  variableVector &referenceMicroStress ){
+        /*!
+         * Push forward the micro-stress in the reference configuration to the 
+         * configuration indicated by the deformation gradient.
+         *
+         * \Sigma_{IJ} = J F_{I i}^{-1} s_{ij} F_{J j}^{-1}
+         *
+         * :param const variableVector &microStress: The micro-stress in the current 
+         *     configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param variableVector &referenceMicroStress: The micro-stress in the 
+         *     reference configuration.
+         */
+
+        variableType detF;
+        variableVector inverseDeformationGradient;
+        return pullBackMicroStress( microStress, deformationGradient, 
+                                    detF, inverseDeformationGradient, referenceMicroStress );
+
+    }
+
+    errorOut pullBackMicroStress( const variableVector &microStress,
+                                  const variableVector &deformationGradient,
+                                  variableType &detF, variableVector &inverseDeformationGradient,
+                                  variableVector &referenceMicroStress ){
+        /*!
+         * Push forward the micro-stress in the reference configuration to the 
+         * configuration indicated by the deformation gradient.
+         *
+         * \Sigma_{IJ} = J F_{I i}^{-1} s_{ij} F_{J j}^{-1}
+         *
+         * :param const variableVector &microStress: The micro-stress in the current 
+         *     configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param const variableType &detF: The determinant of the deformation gradient.
+         * :param const variableVector &inverseDeformationGradient: The inverse of the deformation gradient.
+         * :param variableVector &referenceMicroStress: The micro-stress in the 
+         *     reference configuration.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        if ( microStress.size() != dim * dim ){
+            return new errorNode("pullBackdMicroStress", "The micro-stress has an incorrect size");
+        }
+
+        if ( deformationGradient.size() != dim * dim ){
+            return new errorNode("pullBackdMicroStress", "The deformation gradient has an incorrect size");
+        }
+
+        referenceMicroStress = variableVector( dim * dim, 0 );
+
+        detF = vectorTools::determinant( deformationGradient, dim, dim );
+        inverseDeformationGradient = vectorTools::inverse( deformationGradient, dim, dim );
+
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int i = 0; i < dim; i++ ){
+                    for ( unsigned int j = 0; j < dim; j++ ){
+                        referenceMicroStress[ dim * I + J ] += inverseDeformationGradient[ dim * I + i ]
+                                                             * microStress[ dim * i + j ]
+                                                             * inverseDeformationGradient[ dim * J + j ];
+                    }
+                }
+                referenceMicroStress[ dim * I + J ] *= detF;
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut pullBackMicroStress( const variableVector &microStress,
+                                  const variableVector &deformationGradient,
+                                  variableVector &referenceMicroStress,
+                                  variableMatrix &dReferenceMicroStressdMicroStress,
+                                  variableMatrix &dReferenceMicroStressdDeformationGradient ){
+        /*!
+         * Push forward the micro-stress in the reference configuration to the 
+         * configuration indicated by the deformation gradient.
+         *
+         * \Sigma_{IJ} = J F_{Ii}^{-1} s_{IJ} F_{Jj}^{-1}
+         *
+         * Also computes the jacobians:
+         * \frac{ \partial \Sigma_{IJ} }{ \partial s_{kl} } = J F_{Ik}^{-1} F_{Jl}^{-1}
+         * \frac{ \partial \Sigma_{IJ} }{ \partial F_{kK} } = F_{Kk}^{-1} \Sigma_{IJ} - F_{Ik}^{-1} \Sigma_{KJ} - \Sigma_{IK} F_{Jk}^{-1}
+         *
+         * :param const variableVector &microStress: The micro-stress in the current 
+         *     configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient 
+         *     mapping between configurations.
+         * :param variableVector &referenceMicroStress: The micro-stress in the 
+         *     reference configuration.
+         * :param variableMatrix &dReferenceMicroStressdMicroStress: The jacobian of 
+         *     the reference micro-stress w.r.t. the micro-stress in the reference configuration.
+         * :param variableMatrix &dReferenceMicroStressdDeformationGradient: The jacobian of 
+         *     the reference micro-stress w.r.t. the deformation gradient.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        variableType detF;
+        variableVector inverseDeformationGradient;
+        errorOut error = pullBackMicroStress( microStress, deformationGradient,
+                                              detF, inverseDeformationGradient, referenceMicroStress );
+
+        if (error){
+            errorOut result = new errorNode( "pullBackMicroStress (jacobian)", "Error in computation of pull back of micro-stress" );
+            result->addNext(error);
+            return result;
+        }
+
+        //Assemble the jacobian of the determinant of the deformation gradient
+        variableVector dDetFdF( dim * dim, 0 );
+
+        for (unsigned int i = 0; i < dim; i++ ){
+            for (unsigned int I = 0; I < dim; I++ ){
+                dDetFdF[ dim * i + I ] = inverseDeformationGradient[ dim * I + i ] * detF;
+            }
+        }
+
+        //Assemble the jacobians
+        dReferenceMicroStressdMicroStress = variableMatrix( referenceMicroStress.size(), variableVector( microStress.size(), 0 ) );
+        dReferenceMicroStressdDeformationGradient = variableMatrix( referenceMicroStress.size(), variableVector( deformationGradient.size(), 0 ) );
+
+        constantVector eye( dim * dim );
+        vectorTools::eye( eye );
+
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int k = 0; k < dim; k++ ){
+                    for ( unsigned int K = 0; K < dim; K++ ){
+                        dReferenceMicroStressdMicroStress[ dim * I + J ][ dim * k + K ]
+                            = detF * inverseDeformationGradient[ dim * I + k ] * inverseDeformationGradient[ dim * J + K ];
+                        dReferenceMicroStressdDeformationGradient[ dim * I + J ][ dim * k + K ]
+                            = inverseDeformationGradient[ dim * K + k ] * referenceMicroStress[ dim * I + J ]
+                            - inverseDeformationGradient[ dim * I + k ] * referenceMicroStress[ dim * K + J ]
+                            - inverseDeformationGradient[ dim * J + k ] * referenceMicroStress[ dim * I + K ];
                     }
                 }
             }

@@ -2497,6 +2497,131 @@ int test_assembleGradientMicroDeformation( std::ofstream &results ){
     return 0;
 }
 
+int test_pullBackMicroStress( std::ofstream &results ){
+    /*!
+     * Test the pull back operation on the micro stress
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector microStress = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    variableVector deformationGradient  = { -1.08831037, -0.66333427, -0.48239487,
+                                            -0.904554  ,  1.28942848, -0.02156112,
+                                            -0.08464824, -0.07730218,  0.86415668 };
+
+    variableVector answer = { -12.84536712,  -0.74608931,  13.40350133,
+                                0.10367879,   0.04818336,   0.22121131,
+                               20.04248815,   1.49351009, -18.33987341 };
+
+    variableVector result, resultPF;
+
+    errorOut error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient, result );
+
+    if ( error ){
+        error->print();
+        results << "test_pullBackMicroStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_pullBackMicroStress (test 1) & False\n";
+        return 1;
+    }
+
+    error = micromorphicTools::pushForwardReferenceMicroStress( result, deformationGradient, resultPF );
+
+    if ( !vectorTools::fuzzyEquals( resultPF, microStress ) ){
+        results << "test_pullBackMicroStress (test 2) & False\n";
+    }
+
+    //Test the Jacobians
+    variableVector resultJ;
+    variableMatrix dSigmads, dSigmadF;
+
+    error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient, resultJ, dSigmads, dSigmadF );
+
+    if ( error ){
+        error->print();
+        results << "test_pullBackMicroStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_pullBackMicroStress (test 3) & False\n";
+        return 1;
+    }
+
+
+    //Test the Jacobian w.r.t. the micro stress
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < microStress.size(); i++ ){
+        constantVector delta( microStress.size(), 0 );
+        delta[i] = eps * fabs( microStress[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::pullBackMicroStress( microStress + delta, deformationGradient, P );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackMicroStress & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::pullBackMicroStress( microStress - delta, deformationGradient, M );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackMicroStress & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dSigmads[ j ][ i ] ) ){
+                results << "test_pullBackMicroStress (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    for ( unsigned int i = 0; i < deformationGradient.size(); i++ ){
+        constantVector delta( deformationGradient.size(), 0 );
+        delta[i] = eps * fabs( deformationGradient[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient + delta, P );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackMicroStress & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient - delta, M );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackMicroStress & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dSigmadF[ j ][ i ] ) ){
+                results << "test_pullBackMicroStress (test 5) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_pullBackMicroStress & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -2516,6 +2641,7 @@ int main(){
     test_pushForwardPK2Stress( results );
     test_pushForwardReferenceMicroStress( results );
     test_pushForwardHigherOrderStress( results );
+    test_pullBackMicroStress( results );
     test_computeDeviatoricHigherOrderStress( results );
     test_computeDeviatoricReferenceHigherOrderStress( results );
     test_computeReferenceSecondOrderStressPressure( results );
