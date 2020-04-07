@@ -357,7 +357,8 @@ namespace micromorphicTools{
          * :param variableVector &PK2Stress: The PK2 stress in the reference configuration.
          */
 
-        errorOut error = pullBackMicroStress( cauchyStress, deformationGradient, PK2Stress );
+        errorOut error = pullBackMicroStress( cauchyStress, deformationGradient, PK2Stress,
+                                              dPK2StressdCauchyStress, dPK2StressdDeformationGradient );
 
         if ( error ){
             errorOut result = new errorNode( "pullBackCauchyStress (jacobian)",

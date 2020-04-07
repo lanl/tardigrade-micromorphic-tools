@@ -2497,6 +2497,133 @@ int test_assembleGradientMicroDeformation( std::ofstream &results ){
     return 0;
 }
 
+int test_pullBackCauchyStress( std::ofstream &results ){
+    /*!
+     * Test the pull back operation on the Cauchy stress
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector cauchyStress = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    variableVector deformationGradient  = { -1.08831037, -0.66333427, -0.48239487,
+                                            -0.904554  ,  1.28942848, -0.02156112,
+                                            -0.08464824, -0.07730218,  0.86415668 };
+
+    variableVector answer = { -12.84536712,  -0.74608931,  13.40350133,
+                                0.10367879,   0.04818336,   0.22121131,
+                               20.04248815,   1.49351009, -18.33987341 };
+
+    variableVector result, resultPF;
+
+    errorOut error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, result );
+
+    if ( error ){
+        error->print();
+        results << "test_pullBackCauchyStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( result, answer ) ){
+        results << "test_pullBackCauchyStress (test 1) & False\n";
+        return 1;
+    }
+
+    error = micromorphicTools::pushForwardPK2Stress( result, deformationGradient, resultPF );
+
+    if ( !vectorTools::fuzzyEquals( resultPF, cauchyStress ) ){
+        results << "test_pullBackCauchyStress (test 2) & False\n";
+        return 1;
+    }
+
+    //Test the Jacobians
+    variableVector resultJ;
+    variableMatrix dPK2dCauchy, dPK2dF;
+
+    error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, resultJ, dPK2dCauchy, dPK2dF );
+
+    if ( error ){
+        error->print();
+        results << "test_pullBackCauchyStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
+        results << "test_pullBackCauchyStress (test 3) & False\n";
+        return 1;
+    }
+
+
+    //Test the Jacobian w.r.t. the Cauchy stress
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < cauchyStress.size(); i++ ){
+        constantVector delta( cauchyStress.size(), 0 );
+        delta[i] = eps * fabs( cauchyStress[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::pullBackCauchyStress( cauchyStress + delta, deformationGradient, P );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackCauchyStress & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::pullBackCauchyStress( cauchyStress - delta, deformationGradient, M );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackCauchyStress & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dPK2dCauchy[ j ][ i ] ) ){
+                results << "test_pullBackCauchyStress (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    //Test the Jacobian w.r.t. the deformation gradient
+    for ( unsigned int i = 0; i < deformationGradient.size(); i++ ){
+        constantVector delta( deformationGradient.size(), 0 );
+        delta[i] = eps * fabs( deformationGradient[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient + delta, P );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackCauchyStress & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient - delta, M );
+
+        if ( error ){
+            error->print();
+            results << "test_pullBackCauchyStress & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dPK2dF[ j ][ i ] ) ){
+                results << "test_pullBackCauchyStress (test 5) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_pullBackCauchyStress & True\n";
+    return 0;
+}
+
 int test_pullBackMicroStress( std::ofstream &results ){
     /*!
      * Test the pull back operation on the micro stress
@@ -2532,6 +2659,7 @@ int test_pullBackMicroStress( std::ofstream &results ){
 
     if ( !vectorTools::fuzzyEquals( resultPF, microStress ) ){
         results << "test_pullBackMicroStress (test 2) & False\n";
+        return 1;
     }
 
     //Test the Jacobians
@@ -2586,6 +2714,7 @@ int test_pullBackMicroStress( std::ofstream &results ){
         }
     }
 
+    //Test the Jacobian w.r.t. the deformation gradient
     for ( unsigned int i = 0; i < deformationGradient.size(); i++ ){
         constantVector delta( deformationGradient.size(), 0 );
         delta[i] = eps * fabs( deformationGradient[ i ] ) + eps;
@@ -2641,6 +2770,7 @@ int main(){
     test_pushForwardPK2Stress( results );
     test_pushForwardReferenceMicroStress( results );
     test_pushForwardHigherOrderStress( results );
+    test_pullBackCauchyStress( results );
     test_pullBackMicroStress( results );
     test_computeDeviatoricHigherOrderStress( results );
     test_computeDeviatoricReferenceHigherOrderStress( results );
