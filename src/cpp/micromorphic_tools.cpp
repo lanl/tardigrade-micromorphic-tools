@@ -431,9 +431,10 @@ namespace micromorphicTools{
                     for ( unsigned int J = 0; J < dim; J++ ){
                         microStress[ dim * i + j ] += deformationGradient[ dim * i + I ]
                                                     * referenceMicroStress[ dim * I + J ]
-                                                    * deformationGradient[ dim * j + J ] / detF;
+                                                    * deformationGradient[ dim * j + J ];
                     }
                 }
+                microStress[ dim * i + j ] /= detF;
             }
         }
 
@@ -832,6 +833,165 @@ namespace micromorphicTools{
                             dHigherOrderStressdDeformationGradient[ dim * dim * i + dim * j + k ][ dim * l + M ] -= higherOrderStress[ dim * dim * i + dim * j + k ] * dDetFdF[ dim * l + M ];
                             dHigherOrderStressdDeformationGradient[ dim * dim * i + dim * j + k ][ dim * l + M ] /= detF;
                             dHigherOrderStressdMicroDeformation[ dim * dim * i + dim * j + k ][ dim * l + M ] /= detF;
+                        }
+                    }
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut pullBackHigherOrderStress( const variableVector &higherOrderStress,
+                                        const variableVector &deformationGradient,
+                                        const variableVector &microDeformation,
+                                        variableVector &referenceHigherOrderStress ){
+        /*!
+         * Compute the pull back operation on the higher order stress.
+         *
+         * M_{IJK} = J F_{Ii}^{-1} F_{Jj}^{-1} \chi_{Kk}^{-1} m_{ijk}
+         *
+         * :param const variableVector &higherOrderStress: The higher order stress in the current configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient which maps 
+         *     between the reference and current configurations.
+         * :param const variableVector &microDeformation: The micro-deformation tensor.
+         * :param variableVector &referenceHigherOrderStress: The higher order stress in the reference configuration.
+         */
+
+        variableType detF;
+        variableType inverseDeformationGradient, inverseMicroDeformation;
+        return pullBackHigherOrderStress( referenceHigherOrderStress, deformationGradient,
+                                          microDeformation, detF, inverseDeformationGradient,
+                                          inverseMicroDeformation, higherOrderStress );
+    }
+
+    errorOut pullBackHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                           const variableVector &deformationGradient,
+                                           const variableVector &microDeformation,
+                                           variableType &detF, variableVector &inverseDeformationGradient,
+                                           variableVector &higherOrderStress ){
+        /*!
+         * Compute the push-forward operation on the higher order stress.
+         *
+         * M_{IJK} = J F_{Ii}^{-1} F_{Jj}^{-1} \chi_{Kk}^{-1} m_{ijk}
+         *
+         * :param const variableVector &higherOrderStress: The higher order stress in the current configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient which maps 
+         *     between the reference and current configurations.
+         * :param const variableVector &microDeformation: The micro-deformation tensor.
+         * :param const variableType &detF: The determinant of the deformation gradient.
+         * :param variableVector &referenceHigherOrderStress: The higher order stress in the reference configuration.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        if ( higherOrderStress.size() != dim * dim * dim ){
+            return new errorNode( "pullBackHigherOrderStress", "The current higher order stress doesn't have the correct size" );
+        }
+
+        if ( deformationGradient.size() != dim * dim ){
+            return new errorNode( "pushForwardHigherOrderStress", "The deformation gradient doesn't have the correct size" );
+        }
+
+        if ( microDeformation.size() != dim * dim ){
+            return new errorNode( "pushForwardHigherOrderStress", "The micro-deformation doesn't have the correct size" );
+        }
+
+        detF = vectorTools::determinant( deformationGradient, dim, dim );
+        inverseDeformationGradient = vectorTools::inverse( deformationGradient, dim, dim );
+        inverseMicroDeformation = vectorTools::inverse( microDeformation, dim, dim );
+
+        referenceHigherOrderStress = variableVector( dim * dim * dim, 0 );
+
+        for ( unsigned int I = 0; I < dim; I++ ){
+            for ( unsigned int J = 0; J < dim; J++ ){
+                for ( unsigned int K = 0; K < dim; K++ ){
+                    for ( unsigned int i = 0; i < dim; i++ ){
+                        for ( unsigned int j = 0; j < dim; j++ ){
+                            for ( unsigned int k = 0; k < dim; k++ ){
+                                referenceHigherOrderStress[ dim * dim * I + dim * J + K ]
+                                    += inverseDeformationGradient[ dim * I + i ]
+                                     * inverseDeformationGradient[ dim * J + j ]
+                                     * inverseMicroDeformation[ dim * K + k ]
+                                     * higherOrderStress[ dim * dim * i + dim * j + k ];
+                            }
+                        }
+                    }
+                    referenceHigherOrderStress[ dim * dim * I + dim * J + K ] /= detF;
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    errorOut pullBackHigherOrderStress( const variableVector &referenceHigherOrderStress,
+                                        const variableVector &deformationGradient,
+                                        const variableVector &microDeformation,
+                                        variableVector &higherOrderStress,
+                                        variableMatrix &dReferenceHigherOrderStressdHigherOrderStress,
+                                        variableMatrix &dReferenceHigherOrderStressdDeformationGradient,
+                                        variableMatrix &dReferenceHigherOrderStressdMicroDeformation ){
+        /*!
+         * Compute the pull back operation on the higher order stress.
+         *
+         * M_{IJK} = J F_{Ii}^{-1} F_{Jj}^{-1} \chi_{Kk}^{-1} m_{ijk}
+         *
+         * Also returns the Jacobians
+         *
+         * \frac{ \partial M_{IJK} }{ \partial m_{lmn} } = J F_{Il}^{-1} F_{Jm}^{-1} \chi_{Kn}^{-1}
+         * \frac{ \partial M_{IJK} }{ \partial F_{lL} } = F_{Ll}^{-1} M_{IJK} - F_{Il}^{-1} M_{LJK} - F_{Jl}^{-1} M_{ILK}
+         * \frac{ \partial M_{IJK} }{ \partial \chi_{lL} } = -\chi_{Kl}^{-1} M_{IJL}
+         *
+         * :param const variableVector &referenceHigherOrderStress: The higher order stress in the 
+         *     reference configuration.
+         * :param const variableVector &deformationGradient: The deformation gradient which maps 
+         *     between the reference and current configurations.
+         * :param const variableVector &microDeformation: The micro-deformation tensor.
+         * :param variableVector &higherOrderStress: The higher order stress in the current configuration.
+         */
+
+        //Assume 3d
+        unsigned int dim = 3;
+
+        variableType detF;
+        variableVector inverseDeformationGradient, inverseMicroDeformation;
+
+        errorOut error = pullBackReferenceHigherOrderStress( higherOrderStress, deformationGradient, microDeformation,
+                                                             detF, inverseDeformationGradient, inverseMicroDeformation,
+                                                             referenceHigherOrderStress );
+        
+        if (error){
+            errorOut result = new errorNode( "pullBackHigherOrderStress (jacobian)", "Error in computation of pull back of the higher order stress" );
+            result->addNext(error);
+            return result;
+        }
+
+        dReferenceHigherOrderStressdHigherOrderStress   = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
+        dReferenceHigherOrderStressdDeformationGradient = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
+        dReferenceHigherOrderStressdMicroDeformation    = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
+
+        for ( unsigned int I = 0; I < dim; I++){
+            for ( unsigned int J = 0; J < dim; J++){
+                for ( unsigned int K = 0; K < dim; K++){
+                    for ( unsigned int l = 0; l < dim; l++){
+                        for ( unsigned int m = 0; m < dim; m++){
+                            dReferenceHigherOrderStressdDeformationGradient[ dim * dim * I + dim * J + K ][ dim * l + m ]
+                                += inverseDeformationGradient[ dim * m + l ] * referenceHigherOrderStress[ dim * dim * I + dim * J + K ]
+                                 - inverseDeformationGradient[ dim * I + l ] * referenceHigherOrderStress[ dim * dim * m + dim * J + K ]
+                                 - inverseDeformationGradient[ dim * J + l ] * referenceHigherOrderStress[ dim * dim * I + dim * m + K ];
+
+                            dReferenceHigherOrderStressdMicroDeformation[ dim * dim * I + dim * J + K ][ dim * l + m ]
+                                -= inverseMicroDeformation[ dim * K + l ] * referenceHigherOrderStress[ dim * dim * I + dim * K + m ];
+
+                            for ( unsigned int n = 0; n < dim; m++){
+
+                                dReferenceHigherOrderStressdHigherOrderStress[ dim * dim * I + dim * J + K ][ dim * dim * l + dim * m + n ]
+                                    += detF * inverseDeformationGradient[ dim * I + l ]
+                                     * inverseDeformationGradient[ dim * J + m ]
+                                     * inverseMicroDeformation[ dim * K + k ];
+                            }
                         }
                     }
                 }

@@ -119,6 +119,26 @@ namespace micromorphicTools{
                                            variableMatrix &dHigherOrderStressdDeformationGradient,
                                            variableMatrix &dHigherOrderStressdMicroDeformation );
 
+    errorOut pullBackHigherOrderStress( const variableVector &higherOrderStress,
+                                        const variableVector &deformationGradient,
+                                        const variableVector &microDeformation,
+                                        variableVector &referenceHigherOrderStress );
+
+    errorOut pullBackHigherOrderStress( const variableVector &higherOrderStress,
+                                        const variableVector &deformationGradient,
+                                        const variableVector &microDeformation,
+                                        variableType &detF, variableVector &inverseDeformationGradient,
+                                        variableVector &inverseMicroDeformation,
+                                        variableVector &referenceHigherOrderStress );
+
+    errorOut pullBackHigherOrderStress( const variableVector &higherOrderStress,
+                                        const variableVector &deformationGradient,
+                                        const variableVector &microDeformation,
+                                        variableVector &referenceHigherOrderStress,
+                                        variableMatrix &dHigherOrderStressdReferenceHigherOrderStress,
+                                        variableMatrix &dHigherOrderStressdDeformationGradient,
+                                        variableMatrix &dHigherOrderStressdMicroDeformation );
+
     errorOut computeDeviatoricSecondOrderStress( const variableVector &secondOrderStress,
                                                  variableVector &deviatoricSecondOrderStress );
 
