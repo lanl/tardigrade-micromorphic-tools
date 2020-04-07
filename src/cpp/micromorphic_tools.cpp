@@ -405,7 +405,7 @@ namespace micromorphicTools{
          *     reference configuration.
          * :param const variableVector &deformationGradient: The deformation gradient 
          *     mapping between configurations.
-         * :param const variableType &detF: The determinant of the deformation gradient.
+         * :param variableType &detF: The determinant of the deformation gradient.
          * :param variableVector &microStress: The micro-stress in the current 
          *     configuration.
          */
@@ -562,8 +562,8 @@ namespace micromorphicTools{
          *     configuration.
          * :param const variableVector &deformationGradient: The deformation gradient 
          *     mapping between configurations.
-         * :param const variableType &detF: The determinant of the deformation gradient.
-         * :param const variableVector &inverseDeformationGradient: The inverse of the deformation gradient.
+         * :param variableType &detF: The determinant of the deformation gradient.
+         * :param variableVector &inverseDeformationGradient: The inverse of the deformation gradient.
          * :param variableVector &referenceMicroStress: The micro-stress in the 
          *     reference configuration.
          */
@@ -712,7 +712,7 @@ namespace micromorphicTools{
          * :param const variableVector &deformationGradient: The deformation gradient which maps 
          *     between the reference and current configurations.
          * :param const variableVector &microDeformation: The micro-deformation tensor.
-         * :param const variableType &detF: The determinant of the deformation gradient.
+         * :param variableType &detF: The determinant of the deformation gradient.
          * :param variableVector &higherOrderStress: The higher order stress in the current configuration.
          */
 
@@ -859,17 +859,18 @@ namespace micromorphicTools{
          */
 
         variableType detF;
-        variableType inverseDeformationGradient, inverseMicroDeformation;
-        return pullBackHigherOrderStress( referenceHigherOrderStress, deformationGradient,
+        variableVector inverseDeformationGradient, inverseMicroDeformation;
+        return pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                           microDeformation, detF, inverseDeformationGradient,
-                                          inverseMicroDeformation, higherOrderStress );
+                                          inverseMicroDeformation, referenceHigherOrderStress );
     }
 
-    errorOut pullBackHigherOrderStress( const variableVector &referenceHigherOrderStress,
-                                           const variableVector &deformationGradient,
-                                           const variableVector &microDeformation,
-                                           variableType &detF, variableVector &inverseDeformationGradient,
-                                           variableVector &higherOrderStress ){
+    errorOut pullBackHigherOrderStress( const variableVector &higherOrderStress,
+                                        const variableVector &deformationGradient,
+                                        const variableVector &microDeformation,
+                                        variableType &detF, variableVector &inverseDeformationGradient,
+                                        variableVector &inverseMicroDeformation,
+                                        variableVector &referenceHigherOrderStress ){
         /*!
          * Compute the push-forward operation on the higher order stress.
          *
@@ -879,7 +880,9 @@ namespace micromorphicTools{
          * :param const variableVector &deformationGradient: The deformation gradient which maps 
          *     between the reference and current configurations.
          * :param const variableVector &microDeformation: The micro-deformation tensor.
-         * :param const variableType &detF: The determinant of the deformation gradient.
+         * :param variableType &detF: The determinant of the deformation gradient.
+         * :param variableVector &inverseDeformationGradient: The inverse of the deformation gradient.
+         * :param variableVector &inverseMicroDeformation: The inverse of the micro deformation.
          * :param variableVector &referenceHigherOrderStress: The higher order stress in the reference configuration.
          */
 
@@ -918,7 +921,7 @@ namespace micromorphicTools{
                             }
                         }
                     }
-                    referenceHigherOrderStress[ dim * dim * I + dim * J + K ] /= detF;
+                    referenceHigherOrderStress[ dim * dim * I + dim * J + K ] *= detF;
                 }
             }
         }
@@ -926,10 +929,10 @@ namespace micromorphicTools{
         return NULL;
     }
 
-    errorOut pullBackHigherOrderStress( const variableVector &referenceHigherOrderStress,
+    errorOut pullBackHigherOrderStress( const variableVector &higherOrderStress,
                                         const variableVector &deformationGradient,
                                         const variableVector &microDeformation,
-                                        variableVector &higherOrderStress,
+                                        variableVector &referenceHigherOrderStress,
                                         variableMatrix &dReferenceHigherOrderStressdHigherOrderStress,
                                         variableMatrix &dReferenceHigherOrderStressdDeformationGradient,
                                         variableMatrix &dReferenceHigherOrderStressdMicroDeformation ){
@@ -958,9 +961,9 @@ namespace micromorphicTools{
         variableType detF;
         variableVector inverseDeformationGradient, inverseMicroDeformation;
 
-        errorOut error = pullBackReferenceHigherOrderStress( higherOrderStress, deformationGradient, microDeformation,
-                                                             detF, inverseDeformationGradient, inverseMicroDeformation,
-                                                             referenceHigherOrderStress );
+        errorOut error = pullBackHigherOrderStress( higherOrderStress, deformationGradient, microDeformation,
+                                                    detF, inverseDeformationGradient, inverseMicroDeformation,
+                                                    referenceHigherOrderStress );
         
         if (error){
             errorOut result = new errorNode( "pullBackHigherOrderStress (jacobian)", "Error in computation of pull back of the higher order stress" );
@@ -983,14 +986,14 @@ namespace micromorphicTools{
                                  - inverseDeformationGradient[ dim * J + l ] * referenceHigherOrderStress[ dim * dim * I + dim * m + K ];
 
                             dReferenceHigherOrderStressdMicroDeformation[ dim * dim * I + dim * J + K ][ dim * l + m ]
-                                -= inverseMicroDeformation[ dim * K + l ] * referenceHigherOrderStress[ dim * dim * I + dim * K + m ];
+                                -= inverseMicroDeformation[ dim * K + l ] * referenceHigherOrderStress[ dim * dim * I + dim * J + m ];
 
-                            for ( unsigned int n = 0; n < dim; m++){
+                            for ( unsigned int n = 0; n < dim; n++){
 
                                 dReferenceHigherOrderStressdHigherOrderStress[ dim * dim * I + dim * J + K ][ dim * dim * l + dim * m + n ]
                                     += detF * inverseDeformationGradient[ dim * I + l ]
                                      * inverseDeformationGradient[ dim * J + m ]
-                                     * inverseMicroDeformation[ dim * K + k ];
+                                     * inverseMicroDeformation[ dim * K + n ];
                             }
                         }
                     }

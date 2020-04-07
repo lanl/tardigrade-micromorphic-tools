@@ -2751,6 +2751,192 @@ int test_pullBackMicroStress( std::ofstream &results ){
     return 0;
 }
 
+int test_pullBackHigherOrderStress( std::ofstream &results ){
+    /*!
+     * Test the push forward operation on the higher order stress tensor.
+     *
+     * :param std::ofstream &results: The output file.
+     */
+
+    variableVector higherOrderStress = {  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                         10, 11, 12, 13, 14, 15, 16, 17, 18,
+                                         19, 20, 21, 22, 23, 24, 25, 26, 27 };
+
+    variableVector deformationGradient = { 0.29524861, -0.25221581, -1.60534711,
+                                          -0.08817703,  0.28447808,  0.06451703,
+                                           0.39849454,  0.38681512,  0.87840084 };
+
+    variableVector microDeformation = { -0.25781969, -0.39826899, -0.79493259,
+                                         0.38104724, -0.00830511, -0.51985409,
+                                        -0.36415661, -0.6871168 ,  0.54018665 };
+
+    variableVector answer = {   12.16637846,  -17.55206802,   -2.44609546,   46.49442604,
+                               -66.93990198,   -9.1624221 ,  -11.22600619,   16.12630462,
+                                 2.16292349,   36.56411317,  -52.34132435,   -6.7949869 ,
+                               133.6526827 , -190.51226706,  -23.73373276,  -30.65330414,
+                                43.46860157,    5.13634497,   -6.18698921,    8.71843323,
+                                 0.96159717,  -20.55921994,   28.62926331,    2.72986588,
+                                 4.14350171,   -5.66535471,   -0.40778148 };
+
+    variableVector result;
+
+    errorOut error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+                                                                   microDeformation, result );
+
+    if ( error ){
+        error->print();
+        results << "test_pullBackHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, result ) ){
+        results << "test_pullBackHigherOrderStress (test 1) & False\n";
+        return 1;
+    }
+
+    variableVector resultPF;
+
+    error = micromorphicTools::pushForwardHigherOrderStress( result, deformationGradient, microDeformation, resultPF );
+
+    if ( error ){
+        error->print();
+        results << "test_pullBackHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( higherOrderStress, resultPF ) ){
+        results << "test_pullBackHigherOrderStress (test 2) & False\n";
+        return 1;
+    }
+
+    //Test the Jacobian
+    variableVector resultJ;
+    variableMatrix dMdm, dMdF, dMdChi;
+
+    error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+                                                          microDeformation, resultJ, dMdm, dMdF, dMdChi );
+
+    if ( error ){
+        error->print();
+        results << "test_pullBackHigherOrderStress & False\n";
+        return 1;
+    }
+
+    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
+        results << "test_pullBackHigherOrderStress (test 3) & False\n";
+        return 1;
+    }
+
+    //Test the jacobian w.r.t. the higher order stress
+    constantType eps = 1e-6;
+    for ( unsigned int i = 0; i < higherOrderStress.size(); i++ ){
+        constantVector delta( higherOrderStress.size(), 0 );
+        delta[ i ] = eps * fabs( higherOrderStress[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress + delta, deformationGradient,
+                                                              microDeformation, P );
+    
+        if ( error ){
+            error->print();
+            results << "test_pullBackHigherOrderStress & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress - delta, deformationGradient,
+                                                              microDeformation, M );
+    
+        if ( error ){
+            error->print();
+            results << "test_pullBackHigherOrderStress & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dMdm[ j ][ i ] ) ){
+                results << "test_pullBackHigherOrderStress (test 4) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    //Test the jacobian w.r.t. the deformation gradient
+    for ( unsigned int i = 0; i < deformationGradient.size(); i++ ){
+        constantVector delta( deformationGradient.size(), 0 );
+        delta[ i ] = eps * fabs( deformationGradient[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient + delta,
+                                                              microDeformation, P );
+    
+        if ( error ){
+            error->print();
+            results << "test_pullBackHigherOrderStress & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient - delta,
+                                                              microDeformation, M );
+    
+        if ( error ){
+            error->print();
+            results << "test_pullBackHigherOrderStress & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dMdF[ j ][ i ] ) ){
+                results << "test_pullBackHigherOrderStress (test 5) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    //Test the jacobian w.r.t. the micro deformation
+    for ( unsigned int i = 0; i < microDeformation.size(); i++ ){
+        constantVector delta( microDeformation.size(), 0 );
+        delta[ i ] = eps * fabs( microDeformation[ i ] ) + eps;
+
+        variableVector P, M;
+
+        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+                                                              microDeformation + delta, P );
+    
+        if ( error ){
+            error->print();
+            results << "test_pullBackHigherOrderStress & False\n";
+            return 1;
+        }
+
+        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+                                                              microDeformation - delta, M );
+    
+        if ( error ){
+            error->print();
+            results << "test_pullBackHigherOrderStress & False\n";
+            return 1;
+        }
+
+        variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dMdChi[ j ][ i ] ) ){
+                results << "test_pullBackHigherOrderStress (test 6) & False\n";
+                return 1;
+            }
+        }
+    }
+
+    results << "test_pullBackHigherOrderStress & True\n";
+    return 0;
+}
+
 int main(){
     /*!
     The main loop which runs the tests defined in the 
@@ -2772,6 +2958,7 @@ int main(){
     test_pushForwardHigherOrderStress( results );
     test_pullBackCauchyStress( results );
     test_pullBackMicroStress( results );
+    test_pullBackHigherOrderStress( results );
     test_computeDeviatoricHigherOrderStress( results );
     test_computeDeviatoricReferenceHigherOrderStress( results );
     test_computeReferenceSecondOrderStressPressure( results );
