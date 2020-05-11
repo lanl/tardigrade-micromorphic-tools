@@ -307,11 +307,13 @@ namespace micromorphicTools{
     errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm );
 
     errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
-                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress );
+                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress,
+                                           double tol = 1e-9 );
 
     errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
                                            variableMatrix &dHigherOrderStressNormdHigherOrderStress,
-                                           variableMatrix &d2HigherOrderStressNormdHigherOrderStress2 );
+                                           variableMatrix &d2HigherOrderStressNormdHigherOrderStress2,
+                                           double tol = 1e-9 );
 
     errorOut assembleDeformationGradient( const variableMatrix &displacementGradient, variableVector &deformationGradient );
 

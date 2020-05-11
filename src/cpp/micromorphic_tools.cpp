@@ -2409,7 +2409,8 @@ namespace micromorphicTools{
     }
 
     errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
-                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress ){
+                                           variableMatrix &dHigherOrderStressNormdHigherOrderStress,
+                                           double tol ){
         /*!
          * Compute the norm of the higher order stress which is defined as
          * || M ||_K = \sqrt{ M_{IJK} M_{IJK} }
@@ -2426,6 +2427,8 @@ namespace micromorphicTools{
          * :param variableVector &higherOrderStressNorm: The norm of the higher order stress.
          * :param variableMatrix &dHigherOrderSTressNormdHigherOrderStress: The Jacobian of the higher order
          *     stress norm w.r.t. the higher order stress.
+         * :param double tol: The tolerance of the higher order stress norm when computing the derivative.
+         *     Prevents nans.
          */
 
         //Assume 3D
@@ -2447,7 +2450,7 @@ namespace micromorphicTools{
             for ( unsigned int L = 0; L < 3; L++ ){
                 for ( unsigned int M = 0; M < 3; M++ ){
                     for ( unsigned int N = 0; N < 3; N++ ){
-                        dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * L + dim * M + N ] = higherOrderStress[ dim * dim * L + dim * M + K ]  * eye[ dim * K + N ] / higherOrderStressNorm[ K ];
+                        dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * L + dim * M + N ] = higherOrderStress[ dim * dim * L + dim * M + K ]  * eye[ dim * K + N ] / ( higherOrderStressNorm[ K ] + tol );
                     }
                 }
             }
@@ -2458,7 +2461,8 @@ namespace micromorphicTools{
 
     errorOut computeHigherOrderStressNorm( const variableVector &higherOrderStress, variableVector &higherOrderStressNorm,
                                            variableMatrix &dHigherOrderStressNormdHigherOrderStress,
-                                           variableMatrix &d2HigherOrderStressNormdHigherOrderStress2 ){
+                                           variableMatrix &d2HigherOrderStressNormdHigherOrderStress2,
+                                           double tol ){
         /*!
          * Compute the norm of the higher order stress which is defined as
          * || M ||_K = \sqrt{ M_{IJK} M_{IJK} }
@@ -2478,12 +2482,14 @@ namespace micromorphicTools{
          *     stress norm w.r.t. the higher order stress.
          * :param variableMatrix &d2HigherOrderStressNormdHigherOrderStress2: The second order Jacobian of the 
          *     higher order stress norm w.r.t. the higher order stress.
+         * :param double tol: The tolerance of the higher order stress norm when computing the derivatives.
+         *     Prevents nans.
          */
 
         //Assume 3D
         unsigned int dim = 3;
 
-        errorOut error = computeHigherOrderStressNorm( higherOrderStress, higherOrderStressNorm, dHigherOrderStressNormdHigherOrderStress );
+        errorOut error = computeHigherOrderStressNorm( higherOrderStress, higherOrderStressNorm, dHigherOrderStressNormdHigherOrderStress, tol );
 
         if ( error ){
             errorOut result = new errorNode( "computeHigherOrderStressNorm (second order jacobian)",
@@ -2508,7 +2514,7 @@ namespace micromorphicTools{
                                         = ( eye[ dim * L + O ] * eye[ dim * M + P ] * eye[ dim * K + Q ] * eye[ dim * K + N ]
                                         -   dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * L + dim * M + N ]
                                         *   dHigherOrderStressNormdHigherOrderStress[ K ][ dim * dim * O + dim * P + Q ] )
-                                        / higherOrderStressNorm[ K ];
+                                        / ( higherOrderStressNorm[ K ] + tol );
                                 }
                             }
                         }
