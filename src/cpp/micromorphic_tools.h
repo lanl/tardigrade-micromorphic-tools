@@ -9,7 +9,7 @@
  */
 
 #ifndef MICROMORPHIC_TOOLS_H
-#define MICROMORHPIC_TOOLS_H
+#define MICROMORPHIC_TOOLS_H
 
 #include<error_tools.h>
 #define USE_EIGEN
