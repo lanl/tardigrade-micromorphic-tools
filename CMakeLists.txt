@@ -1,17 +1,12 @@
 #===================================================================================================== PROJECT SETUP ===
 cmake_minimum_required(VERSION 3.14)
-project(cpp_stub)
+project(micromorphic_tools)
 
 # Set common project paths relative to project root directory
 set(CPP_SRC_PATH "src/cpp")
 set(CPP_TEST_PATH "${CPP_SRC_PATH}/tests")
 set(CMAKE_SRC_PATH "src/cmake")
-set(ABAQUS_SRC_PATH "src/abaqus")
-set(ABAQUS_TEST_PATH "${ABAQUS_SRC_PATH}/tests")
 set(DOCUMENTATION_SRC_PATH "docs")
-# Set some Abaqus integration variables
-set(UMAT "cpp_stub_umat")
-set(MISSING_INTEGRATION_DEPS_MESSAGE "Abaqus integration tests will be skipped.")
 
 # Add the cmake folder to locate project CMake module(s)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}" ${CMAKE_MODULE_PATH})
@@ -52,16 +47,6 @@ else()
     message(STATUS "bash not found. ${MISSING_INTEGRATION_DEPS_MESSAGE}")
 endif()
 
-# Find Abaqus (Required for abaqus integration tests)
-find_program(ABAQUS_PROGRAM
-             NAMES abaqus abq2020 abq2019hf4 abq2019 abq2018hf11 abq2018 abq2017hf2 abq2017
-             HINTS /apps/abaqus/Commands
-            )
-if(ABAQUS_PROGRAM)
-    message(STATUS "Found Abaqus: ${ABAQUS_PROGRAM}")
-else()
-    message(STATUS "Abaqus not found. ${MISSING_INTEGRATION_DEPS_MESSAGE}")
-endif()
 
 # Set build type checks
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower)
@@ -104,33 +89,26 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Add c++ tests and docs
     add_subdirectory(${CPP_TEST_PATH})
     add_subdirectory(${DOCUMENTATION_SRC_PATH})
-    add_subdirectory(${ABAQUS_SRC_PATH})
-    # Abaqus integration tests
-    if(BASH_PROGRAM AND ABAQUS_PROGRAM)
-        add_subdirectory(${ABAQUS_TEST_PATH})
-    endif()
 endif()
 
-#==================================================================================== SETUP INSTALLATION CMAKE FILES ===
-foreach(package ${PROJECT_NAME} ${UMAT})
-    include(CMakePackageConfigHelpers)
-    write_basic_package_version_file("${package}ConfigVersion.cmake"
-                                     VERSION ${PROJECT_VERSION}
-                                     COMPATIBILITY SameMajorVersion)
-    configure_package_config_file(
-      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
-      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-      INSTALL_DESTINATION
-      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+#==================================================================================== SETUP INSTALLATION CMAKE FILES ==
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${package}ConfigVersion.cmake"
+                                 VERSION ${PROJECT_VERSION}
+                                 COMPATIBILITY SameMajorVersion)
+configure_package_config_file(
+  "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION
+  ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
-    # CMake won't build the targets for local builds of upstream projects
-    if(cmake_build_type_lower STREQUAL release)
-        install(EXPORT ${package}_Targets
-                FILE ${package}Targets.cmake
-                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-    endif()
-
-    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
+# CMake won't build the targets for local builds of upstream projects
+if(cmake_build_type_lower STREQUAL release)
+    install(EXPORT ${package}_Targets
+            FILE ${package}Targets.cmake
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-endforeach(package)
+endif()
+
+install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+              "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
