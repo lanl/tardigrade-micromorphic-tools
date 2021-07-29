@@ -39,14 +39,6 @@ if(EIGEN3_FOUND)
     message(STATUS "Found Eigen3: ${EIGEN3_INCLUDE_DIR}")
 endif()
 
-find_program(BASH_PROGRAM bash)
-if(BASH_PROGRAM)
-    message(STATUS "Found bash: ${BASH_PROGRAM}")
-else()
-    message(STATUS "bash not found. ${MISSING_INTEGRATION_DEPS_MESSAGE}")
-endif()
-
-
 # Set build type checks
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower)
 set(upstream_required "")
