@@ -39,7 +39,6 @@ if(EIGEN3_FOUND)
     message(STATUS "Found Eigen3: ${EIGEN3_INCLUDE_DIR}")
 endif()
 
-# Find bash (Required for abaqus integration tests)
 find_program(BASH_PROGRAM bash)
 if(BASH_PROGRAM)
     message(STATUS "Found bash: ${BASH_PROGRAM}")
@@ -57,7 +56,7 @@ endif()
 
 # Find related, but external, projects in installed environment
 include(FetchContent)
-set(upstream_packages "error_tools" "vector_tools" "abaqus_tools")
+set(upstream_packages "error_tools" "vector_tools" "constitutive_tools")
 foreach(package ${upstream_packages})
     string(TOUPPER "${package}" package_upper)
     find_package(${package} ${upstream_required} CONFIG)
