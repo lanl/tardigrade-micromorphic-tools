@@ -10,7 +10,7 @@
 .. _pipreqs: https://github.com/bndr/pipreqs 
 .. _LaTeX: https://www.latex-project.org/help/documentation/
 .. _W-13 DevOps Manual: https://xcp-confluence.lanl.gov/display/COM/W-13+DevOps
-.. _upstream repository: https://re-git.lanl.gov/aea/material-models/cpp_stub
+.. _upstream repository: https://re-git.lanl.gov/aea/material-models/micromorphic_tools
 .. _Material Models: https://re-git.lanl.gov/aea/material-models
 .. _UNIX group: https://ddw-confluence.lanl.gov/pages/viewpage.action?pageId=150929410
 
@@ -44,8 +44,8 @@ also includes template hooks for integrating C++ code as Abaqus subroutines.
 Information
 ===========
 
-* Documentation: https://aea.re-pages.lanl.gov/material-models/cpp_stub
-* Wiki: https://re-git.lanl.gov/aea/material-models/cpp_stub/-/wikis/home
+* Documentation: https://aea.re-pages.lanl.gov/material-models/micromorphic_tools
+* Wiki: https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/wikis/home
 
 Developers
 ==========
@@ -61,7 +61,7 @@ Setting up a new project from this stub repo
 
     The repository setup has moved out of the README and into the HTML
     documentation. You can find the Gitlab project setup guide here:
-    https://aea.re-pages.lanl.gov/material-models/cpp_stub/gitlab_setup.html
+    https://aea.re-pages.lanl.gov/material-models/micromorphic_tools/gitlab_setup.html
 
 ************
 Gitlab CI/CD
@@ -71,7 +71,7 @@ Gitlab CI/CD
 
     The repository setup has moved out of the README and into the HTML
     documentation. You can find the Gitlab project setup guide here:
-    https://aea.re-pages.lanl.gov/material-models/cpp_stub/gitlab_setup.html
+    https://aea.re-pages.lanl.gov/material-models/micromorphic_tools/gitlab_setup.html
 
 ************
 Dependencies
@@ -102,7 +102,7 @@ configuration inspection, e.g. the extension packages.
 .. code-block:: bash
 
    $ pwd
-   path/to/cpp_stub/
+   path/to/micromorphic_tools/
    $ pipreqs --use-local --print --no-pin .
 
 A minimal anaconda environment for building the documentation can be created
@@ -160,7 +160,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/
+      /path/to/micromorphic_tools/
 
       $ mkdir build
       $ cd build
@@ -176,7 +176,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
       $ cmake3 ..
 
 4) Build various portions of the project
@@ -187,7 +187,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # Build everything
       $ cmake3 --build .
@@ -203,7 +203,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # find c++ libraries and ignore intermediate files with similar extensions
       $ find . \( -name "*.o" -o -name "*.so" -o -name "*.a" \) | grep -vE "\.cpp\."
@@ -220,7 +220,7 @@ Build on sstelmo
        performed when the integration test target is requested in the cmake build
        command, e.g. ``cmake --build .`` or ``cmake --build src/abaqus/tests``. This
        operation is computationally inexpensive with respect to building the
-       ``cpp_stub`` source code.
+       ``micromorphic_tools`` source code.
       
        Input files are registered in the ``src/abaqus/tests/CMakeLists.txt`` file
        under the ``ABAQUS_INPUT_FILES`` CMake variable.
@@ -228,7 +228,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       $ make clean
 
@@ -240,7 +240,7 @@ Test on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # Build c++ tests
       $ cmake3 --build src/cpp/tests
@@ -253,7 +253,7 @@ Test on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # Run ctest
       $ ctest
@@ -278,7 +278,7 @@ configuration from scratch.
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/
+      /path/to/micromorphic_tools/
 
       # Just perform the build (pick one)
       $ ./new_build.sh <cmake build type>
@@ -286,7 +286,7 @@ configuration from scratch.
       $ ./new_build.sh Release
 
       # Perform tests from PWD
-      $ ./build/src/cpp/tests/test_cpp_stub
+      $ ./build/src/cpp/tests/test_micromorphic_tools
 
       # Build and perform tests
       $ ./jenkins_build.sh
@@ -330,7 +330,7 @@ To build just the documentation pick up the steps here:
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/
+      /path/to/micromorphic_tools/
       $ mkdir build/
       $ cd build/
 
@@ -339,7 +339,7 @@ To build just the documentation pick up the steps here:
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build/
+      /path/to/micromorphic_tools/build/
       $ cmake3 ..
 
 4) Build the docs
@@ -352,14 +352,14 @@ To build just the documentation pick up the steps here:
 
    .. code-block:: bash
 
-      cpp_stub/build/docs/sphinx/html/index.html
+      micromorphic_tools/build/docs/sphinx/html/index.html
 
 6) Display docs
 
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build/
+      /path/to/micromorphic_tools/build/
       $ firefox docs/sphinx/html/index.html &
 
 7) While the Sphinx API is still a WIP, try the doxygen API
@@ -367,7 +367,7 @@ To build just the documentation pick up the steps here:
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build/
+      /path/to/micromorphic_tools/build/
       $ firefox docs/doxygen/html/index.html &
 
 *******************
@@ -381,7 +381,7 @@ Build the entire before performing the installation.
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
       $ cmake3 --build .
 
 5) Install the library
@@ -389,7 +389,7 @@ Build the entire before performing the installation.
    .. code-block:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
       $ cmake --install . --prefix path/to/root/install
 
       # Example local user (non-admin) Linux install
