@@ -15,14 +15,17 @@
 .. _UNIX group: https://ddw-confluence.lanl.gov/pages/viewpage.action?pageId=150929410
 
 ###################
-C++ Stub repository
+micromorphic\_tools
 ###################
 
 *******************
 Project Description
 *******************
 
-A stub repository for C++ development projects in W-13.
+A collection of useful tools and utilities for micromorphic continuum 
+mechanics. These utilities are intended to reduce the implementation time of  
+constitutive model development by providing a library of functions which are 
+verified and ready to be implemented.
 
 Information
 ===========
