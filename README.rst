@@ -175,6 +175,7 @@ Build on sstelmo
       $ find . \( -name "*.o" -o -name "*.so" -o -name "*.a" \) | grep -vE "\.cpp\."
 
 6) Clean build directory to force a re-build
+
    .. code-block:: bash
 
       $ pwd
