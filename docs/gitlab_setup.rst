@@ -21,7 +21,7 @@ Clone cpp\_stub into a local repository
 
    .. code-block:: bash
 
-      ssh://git@re-git.lanl.gov:10022/aea/material-models/cpp_stub.git
+      ssh://git@re-git.lanl.gov:10022/aea/material-models/micromorphic_tools.git
 
 3. Navigate to your preferred repository directory on your local computer. In a
    terminal, you can follow the example ``sstelmo`` session below
@@ -52,7 +52,7 @@ Clone cpp\_stub into a local repository
       /projects/<moniker>/w13repos
 
       # Clone the stub repository
-      $ git clone ssh://git@re-git.lanl.gov:10022/aea/material-models/cpp_stub.git
+      $ git clone ssh://git@re-git.lanl.gov:10022/aea/material-models/micromorphic_tools.git
 
 5. Rename the local repository directory for your project.
 
@@ -63,15 +63,15 @@ Clone cpp\_stub into a local repository
       /projects/<moniker>/w13repos
 
       # Observe the stub repo directory name
-      $ ls cpp_stub -d
-      cpp_stub
+      $ ls micromorphic_tools -d
+      micromorphic_tools
 
       # Rename the stub repo directory after your project
-      $ mv cpp_stub my_project
+      $ mv micromorphic_tools my_project
 
       # Observe that the stub repo directory no longer exists
-      $ ls cpp_stub -d
-      ls: cannot access 'cpp_stub': No such file or directory
+      $ ls micromorphic_tools -d
+      ls: cannot access 'micromorphic_tools': No such file or directory
 
       # Observe that your project directory exists
       $ ls my_project -d
@@ -115,7 +115,7 @@ Create a new upstream repository
    .. note::
 
       Gitlab offers a feature to create template projects that may make this
-      guide much simpler in the future. Contact the ``cpp_stub`` developers and `AEA
+      guide much simpler in the future. Contact the ``micromorphic_tools`` developers and `AEA
       Gitlab group`_ owners to discuss progress on simplified repository setup using
       templates.
 
@@ -140,7 +140,7 @@ Create a new upstream repository
    the left hand side bar "Repository" > "Branches" menu and the Git tags from the
    "Repository" > "Tags" menu.
 
-6. Remove any issue branches from the ``cpp_stub`` project on the "Repository" >
+6. Remove any issue branches from the ``micromorphic_tools`` project on the "Repository" >
    "Branches" menu. You should keep only the "master" and "dev" branches.
 
 7. If everything looks correct on Gitlab project, you can clean up your local
@@ -150,17 +150,17 @@ Create a new upstream repository
 
       WARNING: the ``-D`` option FORCE deletes branches. Triple check the
       command and use with caution. If you're uncertain about this step, contact the
-      cpp_stub developers for help.
+      micromorphic_tools developers for help.
 
    .. code-block:: bash
 
-      # Remove the cpp_stub remote
+      # Remove the micromorphic_tools remote
       $ git remote remove old-origin
 
       # Ensure that you're on the master branch
       $ git checkout master
 
-      # Remove ALL cpp_stub branches except master and dev
+      # Remove ALL micromorphic_tools branches except master and dev
       $ git branch | grep -v "master\|dev" | xargs git branch -D
 
 ***********************************
@@ -209,7 +209,7 @@ only a small number of settings must be updated.
 Enable project CI/CD
 ********************
 
-The ``cpp_stub`` project comes pre-configured to perform continuous integration
+The ``micromorphic_tools`` project comes pre-configured to perform continuous integration
 (CI) and continuous deployment (CD) on W-13's compute server ``sstelmo`` with
 testing performed in and deployment to the `W-13 Python Environments`_.
 
@@ -258,7 +258,7 @@ deploy`` attribute and shell commands indicating the CD job definition, e.g.
 
 The ``pages`` job is a special deploy stage job that builds and deploys
 documentation to your project's Gitlab Pages, e.g.
-https://aea.re-pages.lanl.gov/material-models/cpp_stub. This job should be
+https://aea.re-pages.lanl.gov/material-models/micromorphic_tools. This job should be
 retained for building and deploying documentation for your project users.
 
 The ``git`` operations automate micro version bumps during master branch
@@ -361,7 +361,7 @@ Update project name
       * feature/project-name-updates
         master
 
-2. Search for all instances of ``cpp_stub``. The list of occurrences will look
+2. Search for all instances of ``micromorphic_tools``. The list of occurrences will look
    quite long, but we can search and replace with ``sed`` to avoid manual file
    edits. The session below is an example, the exact output may change but the
    commands should work regardless of project re-organization or evolving features.
@@ -373,23 +373,23 @@ Update project name
       /projects/<moniker>/w13repos/my_project
 
       # Recursive, case-insensitive search and count occurrences
-      $ grep -ri cpp_stub . --exclude-dir={build,.git} | wc -l
+      $ grep -ri micromorphic_tools . --exclude-dir={build,.git} | wc -l
       57
 
       # Recursive, case-insensitive search and display
-      $ grep -ri cpp_stub . --exclude-dir={build,.git}
+      $ grep -ri micromorphic_tools . --exclude-dir={build,.git}
       ...
 
       # Clean list of files with project name
-      $ grep -ri cpp_stub . --exclude-dir={build,.git} -l
+      $ grep -ri micromorphic_tools . --exclude-dir={build,.git} -l
       ./CMakeLists.txt
       ./docs/api.rst
       ./docs/devops.rst
       ./README.md
       ./set_vars.sh
-      ./src/cpp/cpp_stub.cpp
-      ./src/cpp/cpp_stub.h
-      ./src/cpp/tests/test_cpp_stub.cpp
+      ./src/cpp/micromorphic_tools.cpp
+      ./src/cpp/micromorphic_tools.h
+      ./src/cpp/tests/test_micromorphic_tools.cpp
 
 3. Search and replace from command line
 
@@ -399,34 +399,34 @@ Update project name
       /projects/<moniker>/w13repos/my_project
 
       # Replace lower case occurrences in place
-      $ sed -i 's/cpp_stub/my_project/g' $(grep -ri cpp_stub . --exclude-dir={build,.git} -l)
-      $ grep -ri cpp_stub . --exclude-dir={build,.git} -l
-      ./src/cpp/cpp_stub.h
+      $ sed -i 's/micromorphic_tools/my_project/g' $(grep -ri micromorphic_tools . --exclude-dir={build,.git} -l)
+      $ grep -ri micromorphic_tools . --exclude-dir={build,.git} -l
+      ./src/cpp/micromorphic_tools.h
 
       # Replace upper case occurrences in place
-      $ sed -i 's/CPP_STUB/MY_PROJECT/g' $(grep -ri cpp_stub . --exclude-dir={build,.git} -l)
+      $ sed -i 's/MY_PROJECT/MY_PROJECT/g' $(grep -ri micromorphic_tools . --exclude-dir={build,.git} -l)
 
-4. Verify no more occurrences of project name ``cpp_stub``
+4. Verify no more occurrences of project name ``micromorphic_tools``
 
    .. code-block:: bash
 
       $ pwd
       /projects/<moniker>/w13repos/my_project
-      $ grep -ri cpp_stub . --exclude-dir={build,.git} | wc -l
+      $ grep -ri micromorphic_tools . --exclude-dir={build,.git} | wc -l
       0
-      $ grep -ri cpp_stub . --exclude-dir={build,.git}
+      $ grep -ri micromorphic_tools . --exclude-dir={build,.git}
       # no stdout to terminal because no occurrences found
-      $ grep -ri cpp_stub . --exclude-dir={build,.git} -l
+      $ grep -ri micromorphic_tools . --exclude-dir={build,.git} -l
       # no stdout to terminal because no files found
 
-5. Search and replace camelCase project name occurrences, e.g. ``cppStub``.
+5. Search and replace camelCase project name occurrences, e.g. ``myProject``.
 
    .. code-block:: bash
 
-      $ grep -r cppStub . --exclude-dir={build,.git}
+      $ grep -r myProject . --exclude-dir={build,.git}
       ...
-      $ sed -i 's/cppStub/myProject/g' $(grep -r cppStub . --exclude-dir={build,.git} -l)
-      $ grep -r cppStub . --exclude-dir={build,.git} -l
+      $ sed -i 's/myProject/myProject/g' $(grep -r myProject . --exclude-dir={build,.git} -l)
+      $ grep -r myProject . --exclude-dir={build,.git} -l
       # no stdout to terminal because no files found
 
 6. Find files containing the project in their file name
@@ -435,10 +435,10 @@ Update project name
 
       $ pwd
       /projects/<moniker>/w13repos/my_project
-      $ find . -type d \( -name .git -o -name build \) -prune -false -o -name "*cpp_stub*"
-      ./src/cpp/cpp_stub.cpp
-      ./src/cpp/cpp_stub.h
-      ./src/cpp/tests/test_cpp_stub.cpp
+      $ find . -type d \( -name .git -o -name build \) -prune -false -o -name "*micromorphic_tools*"
+      ./src/cpp/micromorphic_tools.cpp
+      ./src/cpp/micromorphic_tools.h
+      ./src/cpp/tests/test_micromorphic_tools.cpp
 
 7. Rename files after current project
 
@@ -451,7 +451,7 @@ Update project name
 
    .. code-block:: bash
 
-      $ rename 's/cpp_stub/myproject/' $(find . -type d \( -name .git -o -name build \) -prune -false -o -name "*cpp_stub*")
+      $ rename 's/micromorphic_tools/myproject/' $(find . -type d \( -name .git -o -name build \) -prune -false -o -name "*micromorphic_tools*")
 
 8. Commit and push your changes to your "remote" or "fork" repository
 
@@ -460,7 +460,7 @@ Update project name
       $ pwd
       /projects/<moniker>/w13repos/my_project
       # Add tracked files and message
-      $ git commit -a -m "FEAT: replace cpp_stub with my_project throughout repository"
+      $ git commit -a -m "FEAT: replace micromorphic_tools with my_project throughout repository"
       $ git push origin feature/project-name-updates
 
 You can also perform some cleanup in your documentation directory to remove this

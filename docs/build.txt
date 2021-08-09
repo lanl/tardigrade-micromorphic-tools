@@ -24,7 +24,7 @@ Build on sstelmo
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/
+      /path/to/micromorphic_tools/
 
       $ mkdir build
       $ cd build
@@ -40,7 +40,7 @@ Build on sstelmo
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
       $ cmake3 ..
 
 4) Build various portions of the project
@@ -53,7 +53,7 @@ Build on sstelmo
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # Build everything
       $ cmake3 --build .
@@ -71,7 +71,7 @@ Build on sstelmo
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # find c++ libraries and ignore intermediate files with similar extensions
       $ find . \( -name "*.o" -o -name "*.so" -o -name "*.a" \) | grep -vE "\.cpp\."
@@ -85,12 +85,12 @@ Build on sstelmo
       integration test target copies all registered input files and the integration test bash script from source to build
       directory. This means the file copy operation is always performed when the integration test target is requested in the
       cmake build command, e.g. ``cmake --build .`` or ``cmake --build src/abaqus/tests``. This operation is computationally
-      inexpensive with respect to building the ``cpp_stub`` source code.
+      inexpensive with respect to building the ``micromorphic_tools`` source code.
 
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       $ make clean
 
@@ -102,7 +102,7 @@ Test on sstelmo
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # Build c++ tests
       $ cmake3 --build src/cpp/tests
@@ -112,7 +112,7 @@ Test on sstelmo
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build
+      /path/to/micromorphic_tools/build
 
       # Run ctest
       $ ctest
@@ -137,7 +137,7 @@ configuration from scratch.
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/
+      /path/to/micromorphic_tools/
 
       # Just perform the build (pick one)
       $ ./new_build.sh <cmake build type>
@@ -146,7 +146,7 @@ configuration from scratch.
       $ ./new_build.sh  None
 
       # Perform tests from PWD
-      $ ./build/src/cpp/tests/test_cpp_stub
+      $ ./build/src/cpp/tests/test_micromorphic_tools
 
       # Build and perform tests
       $ ./BUILD.sh
@@ -191,7 +191,7 @@ To build just the documentation pick up the steps here:
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/
+      /path/to/micromorphic_tools/
       $ mkdir build/
       $ cd build/
 
@@ -200,7 +200,7 @@ To build just the documentation pick up the steps here:
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build/
+      /path/to/micromorphic_tools/build/
       $ cmake3 ..
 
 4) Build the docs
@@ -213,14 +213,14 @@ To build just the documentation pick up the steps here:
 
    .. code:: bash
 
-      cpp_stub/build/docs/sphinx/index.html
+      micromorphic_tools/build/docs/sphinx/index.html
 
 6) Display docs
 
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build/
+      /path/to/micromorphic_tools/build/
       $ firefox docs/sphinx/index.html &
 
 7) While the Sphinx API is still a WIP, try the doxygen API
@@ -228,7 +228,7 @@ To build just the documentation pick up the steps here:
    .. code:: bash
 
       $ pwd
-      /path/to/cpp_stub/build/
+      /path/to/micromorphic_tools/build/
       $ firefox docs/doxygen/html/index.html &
 
 Install
@@ -244,7 +244,7 @@ After building, the project can be installed with the CMake ``--install`` option
 .. code:: bash
 
    $ pwd
-   /path/to/cpp_stub/build/
+   /path/to/micromorphic_tools/build/
    $ cmake3 --install .
 
 Because CMake defaults to the system installation directories, the above command will probably require administrator
@@ -253,7 +253,7 @@ privileges. For non-default installation directories, use the CMake ``--prefix``
 .. code:: bash
 
    $ pwd
-   /path/to/cpp_stub/build/
+   /path/to/micromorphic_tools/build/
    $ cmake3 --install . --prefix /path/to/custom/install
 
 A common choice for non-admin installs on Linux systems is ``/home/$USER/.local/``. However, this project is intended to
@@ -264,7 +264,7 @@ active conda environment installations or as a template for custom installations
 .. code:: bash
 
    $ pwd
-   /path/to/cpp_stub/
+   /path/to/micromorphic_tools/
    $ grep "install\|conda_env_path" INSTALL.sh
    conda_env_path=$(conda info | grep "active env location" | cut -f 2 -d :)
    # Change to build directory and run cmake install

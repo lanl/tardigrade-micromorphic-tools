@@ -29,7 +29,7 @@ configuration inspection, e.g. the extension packages.
 .. code:: bash
 
    $ pwd
-   path/to/cpp_stub/
+   path/to/micromorphic_tools/
    $ pipreqs --use-local --print --no-pin .
 
 A minimal anaconda environment for building the documentation can be created

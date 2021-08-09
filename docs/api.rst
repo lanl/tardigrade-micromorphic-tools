@@ -11,28 +11,28 @@
 .. toctree::
     :maxdepth: 2
 
-.. _cpp_stub_source:
+.. _micromorphic_tools_source:
 
-cpp_stub.cpp
+micromorphic_tools.cpp
 ============
 
-.. doxygenfile:: cpp_stub.cpp
+.. doxygenfile:: micromorphic_tools.cpp
 
-cpp_stub.h
+micromorphic_tools.h
 ==========
 
-.. doxygenfile:: cpp_stub.h
+.. doxygenfile:: micromorphic_tools.h
 
 ****************
 Abaqus interface
 ****************
 
-cpp_stub_umat.cpp
+micromorphic_tools_umat.cpp
 =================
 
-.. doxygenfile:: cpp_stub_umat.cpp
+.. doxygenfile:: micromorphic_tools_umat.cpp
 
-cpp_stub_umat.h
+micromorphic_tools_umat.h
 ===============
 
-.. doxygenfile:: cpp_stub_umat.h
+.. doxygenfile:: micromorphic_tools_umat.h
