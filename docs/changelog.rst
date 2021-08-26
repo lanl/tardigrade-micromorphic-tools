@@ -7,9 +7,11 @@ Changelog
 
 
 ******************
-0.1.6 (unreleased)
+0.1.6 (2021-08-26)
 ******************
-
+Internal Changes
+================
+-upgrade build system to CMake3 
 
 ******************
 0.1.5 (2021-07-19)
