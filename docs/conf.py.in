@@ -56,11 +56,8 @@ breathe_default_project = project
 # Links to PRs, Jira issues.
 extlinks = {
      "merge": ("https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/merge_requests/%s", "MERGE-"),
-     "issue": ("https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/%s", "ISSUE-"),
-     # Maintain the old Atlassian links until the servers don't exist. Required for changelog entries.
-     "pull": ("https://xcp-stash.lanl.gov/projects/MM/repos/micromorphic_tools/pull-requests/%s/overview", "PR"),
-     "jira": ("https://xcp-jira.lanl.gov/browse/VIP-%s", "VIP-"),
-}
+     "issue": ("https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/%s", "ISSUE-")}
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
