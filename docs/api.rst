@@ -22,17 +22,3 @@ micromorphic_tools.h
 ==========
 
 .. doxygenfile:: micromorphic_tools.h
-
-****************
-Abaqus interface
-****************
-
-micromorphic_tools_umat.cpp
-=================
-
-.. doxygenfile:: micromorphic_tools_umat.cpp
-
-micromorphic_tools_umat.h
-===============
-
-.. doxygenfile:: micromorphic_tools_umat.h
