@@ -95,10 +95,7 @@ C++ Libraries
 * `BOOST`_ >= 1.59.0
 * error\_tools: https://re-git.lanl.gov/aea/material-models/error_tools
 * vector\_tools: https://re-git.lanl.gov/aea/material-models/vector_tools
-* abaqus\_tools: https://re-git.lanl.gov/aea/material-models/abaqus_tools
 * constitutive\_tools: https://re-git.lanl.gov/aea/material-models/constitutive_tools
-* stress\_tools: https://re-git.lanl.gov/aea/material-models/stress_tools
-* solver\_tools: https://re-git.lanl.gov/aea/material-models/solver_tools
 
 If not found on the current system or active Conda environment, all of the
 ``*_tools`` libraries are pulled from their git repos by branch name and built
