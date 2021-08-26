@@ -1,5 +1,9 @@
 .. _releasephilosophy:
 
+.. note::
+   Gitlab CI/CD is a work in progress. The version numbering and automated deployment features discussed in this section
+   are not yet implemented. 
+ 
 ##################
 Release Philosophy
 ##################
