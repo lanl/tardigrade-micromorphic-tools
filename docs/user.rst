@@ -8,10 +8,6 @@ User Manual
 Quick Start
 ***********
 
-This stub repo contains hooks for writing Abaqus :cite:`ABAQUS2019` subroutines, like those found in the `Abaqus UMAT
-documentation`_, and a template UMAT c++ interface. However, this template repository does not yet have a meaningful c++
-constitutive model to be the subject of a user manual.
-
 This project is built and deployed to the `W-13 Python Environments`_ with continuous integration (CI) and continuous
 deployment (CD). Most users will not need to build and install this project from source. Outside of the `W-13 Python
 Environments`_, users may need to build and install directly from source. In that case, users are directed to the
