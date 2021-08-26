@@ -54,11 +54,8 @@ C++ Libraries
 * `BOOST`_ >= 1.59.0
 * error\_tools: https://re-git.lanl.gov/aea/material-models/error_tools
 * vector\_tools: https://re-git.lanl.gov/aea/material-models/vector_tools
-* abaqus\_tools: https://re-git.lanl.gov/aea/material-models/abaqus_tools
 * constitutive\_tools: https://re-git.lanl.gov/aea/material-models/constitutive_tools
-* stress\_tools: https://re-git.lanl.gov/aea/material-models/stress_tools
-* solver\_tools: https://re-git.lanl.gov/aea/material-models/solver_tools
 
-All of the ``{error,vector,stress,solver,constitutive}_tools`` libraries are
+All of the ``{error,vector,constitutive}_tools`` libraries are
 pulled from their git repos by branch name and built with their respective cmake
 files as part of the cmake build for this project.
