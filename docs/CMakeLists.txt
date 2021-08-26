@@ -82,4 +82,4 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                    COMMENT "Generating ${PROJECT_NAME} Sphinx documentation")
 
 # Add sphinx target
-add_custom_target(Sphinx ALL DEPENDS Doxygen ${SPHINX_INDEX_FILE} test_abaqus_integration)
+add_custom_target(Sphinx ALL DEPENDS Doxygen ${SPHINX_INDEX_FILE})
