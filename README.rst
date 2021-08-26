@@ -193,9 +193,6 @@ Test on sstelmo
       # Build c++ tests
       $ cmake3 --build src/cpp/tests
 
-      # Build Abaqus integration tests
-      $ cmake3 --build src/abaqus/tests
-
 5) Run the tests
 
    .. code-block:: bash
