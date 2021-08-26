@@ -8,8 +8,6 @@
    :caption: Gitlab Project Setup
    :maxdepth: 1
 
-   gitlab_setup
-
 .. toctree::
    :maxdepth: 2
    :caption: Project Documentation
