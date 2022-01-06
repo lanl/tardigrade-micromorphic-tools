@@ -5,6 +5,9 @@
 #include<fstream>
 #include<iostream>
 
+#define BOOST_TEST_MODULE test_micromorphic_tools
+#include <boost/test/included/unit_test.hpp>
+
 typedef micromorphicTools::constantType constantType;
 typedef micromorphicTools::constantVector constantVector;
 typedef micromorphicTools::constantMatrix constantMatrix;
@@ -46,7 +49,7 @@ struct cerr_redirect{
         std::streambuf * old;
 };
 
-int test_computePsi( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computePsi ){
     /*!
      * Tests of the compute Psi function.
      *
@@ -62,15 +65,9 @@ int test_computePsi( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computePsi( F, Chi, result );
 
-    if ( error ){
-        error->print();
-        results << "test_computePsi & False\n";
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_computePsi (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobians
     variableVector resultJ;
@@ -78,16 +75,9 @@ int test_computePsi( std::ofstream &results ){
 
     error = micromorphicTools::computePsi( F, Chi, resultJ, dPsidF, dPsidChi );
 
-    if ( error ){
-        error->print();
-        results << "test_computePsi & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computePsi (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dPsidF
     
@@ -98,21 +88,16 @@ int test_computePsi( std::ofstream &results ){
 
         error = micromorphicTools::computePsi( F + delta, Chi, resultJ );
 
-        if ( error ){
-            error->print();
-            results << "test_computePsi & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         constantVector gradCol = ( resultJ - result ) / delta[i];
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dPsidF[j][i] ) ){
-                results << "test_computePsi (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPsidF[ j ][ i ] ) );
+
         }
+
     }
 
     for ( unsigned int i = 0; i < Chi.size(); i++ ){
@@ -121,28 +106,21 @@ int test_computePsi( std::ofstream &results ){
 
         error = micromorphicTools::computePsi( F, Chi + delta, resultJ );
 
-        if ( error ){
-            error->print();
-            results << "test_computePsi & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         constantVector gradCol = ( resultJ - result ) / delta[i];
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dPsidChi[j][i] ) ){
-                results << "test_computePsi (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPsidChi[ j ][ i ] ) );
         }
     }
 
-    results << "test_computePsi & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeMicroStrain( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeMicroStrain ){
     /*!
      * Test the computation of the micro-strain
      *
@@ -157,16 +135,9 @@ int test_computeMicroStrain( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeMicroStrain( Psi, result );
 
-    if ( error ){
-        error->print();
-        results << "test_computeMicroStrain & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_computeMicroStrain (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobians 
     
@@ -174,16 +145,9 @@ int test_computeMicroStrain( std::ofstream &results ){
     variableMatrix dMicroStraindPsi;
     error = micromorphicTools::computeMicroStrain( Psi, resultJ, dMicroStraindPsi );
 
-    if ( error ){
-        error->print();
-        results << "test_computeMicroStrain & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeMicroStrain (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < Psi.size(); i++ ){
@@ -192,28 +156,22 @@ int test_computeMicroStrain( std::ofstream &results ){
 
         error = micromorphicTools::computeMicroStrain( Psi + delta, resultJ );
 
-        if ( error ){
-            error->print();
-            results << "test_computeMicroStrain & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         constantVector gradCol = ( resultJ - result ) / delta[i];
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dMicroStraindPsi[j][i] ) ){
-                results << "test_computeMicroStrain (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMicroStraindPsi[ j ][ i ] ) );
+
         }
+
     }
 
-    results << "test_computeMicroStrain & True\n";
-    return 0;
+    return;
 }
 
-int test_pushForwardPK2Stress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_pushForwardPK2Stress ){
     /*!
      * Test the computation of the push-foward operation on the PK2 Stress.
      *
@@ -233,16 +191,9 @@ int test_pushForwardPK2Stress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, result );
 
-    if ( error ){
-        error->print();
-        results << "test_pushForwardPK2Stress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_pushForwardPK2Stress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
@@ -251,16 +202,9 @@ int test_pushForwardPK2Stress( std::ofstream &results ){
     error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, resultJ,
                                                      dCauchydPK2, dCauchydF );
 
-    if ( error ){
-        error->print();
-        results << "test_pushForwardPK2Stress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_pushForwardPK2Stress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dCauchydPK2
     constantType eps = 1e-6;
@@ -270,20 +214,13 @@ int test_pushForwardPK2Stress( std::ofstream &results ){
 
         error = micromorphicTools::pushForwardPK2Stress( PK2Stress + delta, deformationGradient, resultJ );
 
-        if ( error ){
-            error->print();
-            results << "test_pushForwardPK2Stress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         constantVector gradCol = ( resultJ - result ) / delta[i];
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dCauchydPK2[j][i] ) ){
-                results << "test_pushForwardPK2Stress (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dCauchydPK2[ j ][ i ] ) );
         }
     }
 
@@ -291,30 +228,28 @@ int test_pushForwardPK2Stress( std::ofstream &results ){
         constantVector delta( deformationGradient.size(), 0 );
         delta[i] = eps * fabs( deformationGradient[i] ) + eps;
 
-        error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_pushForwardPK2Stress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient - delta, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dCauchydF[j][i], 1e-5, 1e-5 ) ){
-                results << "test_pushForwardPK2Stress (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dCauchydF[ j ][ i ] ) );
         }
     }
 
-    results << "test_pushForwardPK2Stress & True\n";
-    return 0;
+    return;
 }
 
-int test_pushForwardReferenceMicroStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_pushForwardReferenceMicroStress ){
     /*!
      * Test the computation of the push-foward operation on the reference micro-stress.
      *
@@ -334,16 +269,9 @@ int test_pushForwardReferenceMicroStress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, result );
 
-    if ( error ){
-        error->print();
-        results << "test_pushForwardReferenceMicroStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_pushForwardReferenceMicroStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
@@ -352,16 +280,9 @@ int test_pushForwardReferenceMicroStress( std::ofstream &results ){
     error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, resultJ,
                                                                 dsdS, dsdF );
 
-    if ( error ){
-        error->print();
-        results << "test_pushForwardReferenceMicroStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_pushForwardReferenceMicroStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dsdS
     constantType eps = 1e-6;
@@ -371,20 +292,14 @@ int test_pushForwardReferenceMicroStress( std::ofstream &results ){
 
         error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress + delta, deformationGradient, resultJ );
 
-        if ( error ){
-            error->print();
-            results << "test_pushForwardReferenceMicroStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         constantVector gradCol = ( resultJ - result ) / delta[i];
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dsdS[j][i] ) ){
-                results << "test_pushForwardReferenceMicroStress (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dsdS[ j ][ i ] ) );
+
         }
     }
 
@@ -392,30 +307,28 @@ int test_pushForwardReferenceMicroStress( std::ofstream &results ){
         constantVector delta( deformationGradient.size(), 0 );
         delta[i] = eps * fabs( deformationGradient[i] ) + eps;
 
-        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_pushForwardReferenceMicroStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient - delta, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dsdF[j][i], 1e-5, 1e-5 ) ){
-                results << "test_pushForwardReferenceMicroStress (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dsdF[ j ][ i ] ) );
         }
     }
 
-    results << "test_pushForwardReferenceMicroStress & True\n";
-    return 0;
+    return;
 }
 
-int test_computeGamma( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeGamma ){
     /*!
      * Test the computation of the deformation gradient Gamma
      *
@@ -435,16 +348,9 @@ int test_computeGamma( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeGamma( deformationGradient, gradChi, result );
 
-    if ( error ){
-        error->print();
-        results << "test_computeGamma & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_computeGamma (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
@@ -453,16 +359,9 @@ int test_computeGamma( std::ofstream &results ){
     error = micromorphicTools::computeGamma( deformationGradient, gradChi, resultJ, 
                                              dGammadF, dGammadGradChi );
 
-    if ( error ){
-        error->print();
-        results << "test_computeGamma & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeGamma (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dGammadF
     constantType eps = 1e-6;
@@ -470,22 +369,22 @@ int test_computeGamma( std::ofstream &results ){
         constantVector delta( deformationGradient.size(), 0 );
         delta[i] = eps * fabs( deformationGradient[i] ) + eps;
 
-        error = micromorphicTools::computeGamma( deformationGradient + delta, gradChi, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeGamma & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeGamma( deformationGradient + delta, gradChi, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeGamma( deformationGradient - delta, gradChi, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dGammadF[j][i] ) ){
-                results << "test_computeGamma (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dGammadF[ j ][ i ] ) );
+
         }
     }
 
@@ -494,30 +393,29 @@ int test_computeGamma( std::ofstream &results ){
         constantVector delta( gradChi.size(), 0 );
         delta[i] = eps * fabs( gradChi[i] ) + eps;
 
-        error = micromorphicTools::computeGamma( deformationGradient, gradChi + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeGamma & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeGamma( deformationGradient, gradChi + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeGamma( deformationGradient, gradChi - delta, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dGammadGradChi[j][i] ) ){
-                results << "test_computeGamma (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dGammadGradChi[ j ][ i ] ) );
         }
     }
 
-    results << "test_computeGamma & True\n";
-    return 0;
+    return;
+
 }
 
-int test_pushForwardHigherOrderStress( std::ofstream &results){
+BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
     /*!
      * Tests for the push-forward operation of the higher order stress.
      *
@@ -549,16 +447,9 @@ int test_pushForwardHigherOrderStress( std::ofstream &results){
     errorOut error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress, deformationGradient,
                                                                       microDeformation, result );
 
-    if ( error ){
-        error->print();
-        results << "test_pushForwardHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_pushForwardHigherOrderStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
@@ -573,16 +464,9 @@ int test_pushForwardHigherOrderStress( std::ofstream &results){
                                                              dHigherOrderStressdDeformationGradient,
                                                              dHigherOrderStressdMicroDeformation );
 
-    if ( error ){
-        error->print();
-        results << "test_pushForwardHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_pushForwardHigherOrderStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dHigherOrderStressdReferenceHigherOrderStress
     constantType eps = 1e-6;
@@ -590,25 +474,28 @@ int test_pushForwardHigherOrderStress( std::ofstream &results){
         constantVector delta( referenceHigherOrderStress.size(), 0 );
         delta[i] = eps * fabs( referenceHigherOrderStress[i] ) + eps;
 
+        variableVector resultp, resultm;
+
         error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress + delta,
                                                                  deformationGradient, microDeformation,
-                                                                 resultJ );
+                                                                 resultp );
 
-        if ( error ){
-            error->print();
-            results << "test_pushForwardHigherOrderStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress - delta,
+                                                                 deformationGradient, microDeformation,
+                                                                 resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dHigherOrderStressdReferenceHigherOrderStress[j][i] ) ){
-                results << "test_pushForwardHigherOrderStress (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ],  dHigherOrderStressdReferenceHigherOrderStress[ j ][ i ] ) );
+
         }
+
     }
 
     //Test dHigherOrderStressdDeformationGradient
@@ -616,25 +503,28 @@ int test_pushForwardHigherOrderStress( std::ofstream &results){
         constantVector delta( deformationGradient.size(), 0 );
         delta[i] = eps * fabs( deformationGradient[i] ) + eps;
 
+        variableVector resultp, resultm;
+
         error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
                                                                  deformationGradient + delta, microDeformation,
-                                                                 resultJ );
+                                                                 resultp );
 
-        if ( error ){
-            error->print();
-            results << "test_pushForwardHigherOrderStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
+                                                                 deformationGradient - delta, microDeformation,
+                                                                 resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dHigherOrderStressdDeformationGradient[j][i], 1e-5, 1e-5 ) ){
-                results << "test_pushForwardHigherOrderStress (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dHigherOrderStressdDeformationGradient[ j ][ i ] ) );
+
         }
+
     }
 
     //Test dHigherOrderStressdMicroDeformation
@@ -642,32 +532,35 @@ int test_pushForwardHigherOrderStress( std::ofstream &results){
         constantVector delta( microDeformation.size(), 0 );
         delta[i] = eps * fabs( microDeformation[i] ) + eps;
 
+        variableVector resultp, resultm;
+
         error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
                                                                  deformationGradient, microDeformation + delta,
-                                                                 resultJ );
+                                                                 resultp );
 
-        if ( error ){
-            error->print();
-            results << "test_pushForwardHigherOrderStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
+                                                                 deformationGradient, microDeformation - delta,
+                                                                 resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dHigherOrderStressdMicroDeformation[j][i] ) ){
-                results << "test_pushForwardHigherOrderStress (test 5) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dHigherOrderStressdMicroDeformation[ j ][ i ] ) );
+
         }
+
     }
 
-    results << "test_pushForwardHigherOrderStress & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeDeviatoricHigherOrderStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeDeviatoricHigherOrderStress ){
     /*!
      * Test the computation of the deviatoric higher order stress.
      *
@@ -686,15 +579,9 @@ int test_computeDeviatoricHigherOrderStress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, result );
 
-    if ( error ){
-        results << "test_computeDeviatoricHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_computeDeviatoricHigherOrderStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     //Test Jacobians
     
@@ -704,46 +591,40 @@ int test_computeDeviatoricHigherOrderStress( std::ofstream &results ){
     error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, resultJ,
                                                                    dDeviatoricHigherOrderStressdHigherOrderStress );
 
-    if ( error ){
-        results << "test_computeDeviatoricHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_computeDeviatoricHigherOrderStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < higherOrderStress.size(); i++ ){
         constantVector delta( higherOrderStress.size(), 0 );
         delta[i] = eps * fabs( higherOrderStress[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeDeviatoricHigherOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress - delta, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDeviatoricHigherOrderStressdHigherOrderStress[j][i] ) ){
-                results << "test_pushForwardHigherOrderStress (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals(  gradCol[ j ], dDeviatoricHigherOrderStressdHigherOrderStress[ j ][ i ] ) );
+
         }
+
     }
 
+    return;
 
-    results << "test_computeDeviatoricHigherOrderStress & True\n";
-    return 0;
 }
 
-int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
     /*!
      * Test the computation of the deviatoric part of the reference higher order stress.
      *
@@ -777,72 +658,42 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, result );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, result );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     variableVector resultJ;
     variableMatrix dDevMdM, dDevMdC;
 
     error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, resultJ, dDevMdM, dDevMdC );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress (test 3) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableVector resultJP;
     variableMatrix dDevMdMP, dDevMdCP;
 
     error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, resultJP, dDevMdMP, dDevMdCP );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJP, answer ) ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress (test 4) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJP, answer ) );
 
     variableVector resultJ2;
     variableMatrix dDevMdMJ2, dDevMdCJ2, d2DevMdMdC;
 
     error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, resultJ2, dDevMdMJ2, dDevMdCJ2, d2DevMdMdC );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress (test 5) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableVector resultJ2P;
     variableMatrix dDevMdMJ2P, dDevMdCJ2P, d2DevMdMdCP;
@@ -850,16 +701,9 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
     error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, d2pdMdC,
                                                                             resultJ2P, dDevMdMJ2P, dDevMdCJ2P, d2DevMdMdCP );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ2P, answer ) ){
-        results << "test_computeDeviatoricReferenceHigherOrderStress (test 6) & False\n";
-        return 1;
-    }
-
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2P, answer ) );
 
     //Test dDevMdM
     constantType eps = 1e-6;
@@ -867,47 +711,42 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         constantVector delta( M.size(), 0 );
         delta[i] = eps * fabs( M[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M + delta, C, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M + delta, C, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M - delta, C, resultm );
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdM[j][i] ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 7) & False\n";
-                return 1;
-            }
-        }
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdMP[j][i] ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 8) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdM[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdMJ2[j][i] ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 9) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdMP[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdMJ2P[j][i] ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 10) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdMJ2[ j ][ i ] ) );
+
         }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdMJ2P[ j ][ i ] ) );
+
+        }
+
     }
 
     //Test dDevMdC
@@ -915,47 +754,42 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C - delta, resultm );
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdC[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 11) & False\n";
-                return 1;
-            }
-        }
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCP[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 12) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdC[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCJ2[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 13) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdCP[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevMdCJ2P[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceHigherOrderStress (test 14) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdCJ2[ j ][ i ] ) );
+
         }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdCJ2P[ j ][ i ] ) );
+
+        }
+
     }
 
     //Test d2DevMdMdC
@@ -963,15 +797,17 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultJ2, dDevMdMJ2, dDevMdCJ2 );
+        variableMatrix resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeDeviatoricReferenceHigherOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultJ2, resultp, dDevMdCJ2 );
 
-        constantMatrix gradCol = ( dDevMdMJ2 - dDevMdM ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C - delta, resultJ2, resultm, dDevMdCJ2 );
+
+        BOOST_CHECK( !error );
+
+        constantMatrix gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < 3; j++ ){
             for ( unsigned int k = 0; k < 3; k++ ){
@@ -979,18 +815,11 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
                     for ( unsigned int m = 0; m < 3; m++ ){
                         for ( unsigned int n = 0; n < 3; n++ ){
                             for ( unsigned int o = 0; o < 3; o++ ){
-                                if ( !vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
-                                    d2DevMdMdC[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ], 1e-4, 1e-4 ) ){
+                                BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                                                       d2DevMdMdC[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ] ) );
 
-                                    results << "test_computeDeviatoricReferenceHigherOrderStress (test 15) & False\n";
-                                    return 1;
-                                }
-                                if ( !vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
-                                    d2DevMdMdCP[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ], 1e-4, 1e-4 ) ){
-
-                                    results << "test_computeDeviatoricReferenceHigherOrderStress (test 16) & False\n";
-                                    return 1;
-                                }
+                                BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                                                       d2DevMdMdCP[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ] ) );
                             }
                         }
                     }
@@ -999,11 +828,11 @@ int test_computeDeviatoricReferenceHigherOrderStress( std::ofstream &results ){
         }
     }
 
-    results << "test_computeDeviatoricReferenceHigherOrderStress & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeDeviatoricSecondOrderStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeDeviatoricSecondOrderStress ){
     /*!
      * Test the computation the deviatoric part of a second order 
      * stress tensor in the current configuration.
@@ -1019,59 +848,49 @@ int test_computeDeviatoricSecondOrderStress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeDeviatoricSecondOrderStress( stress, result );
 
-    if ( error ){
-        results << "test_computeDeviatoricSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_computeDeviatoricSecondOrderStress (test 1) & False\n";
-        return 0;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     variableVector resultJ;
     variableMatrix jacobian;
 
     error = micromorphicTools::computeDeviatoricSecondOrderStress( stress, resultJ, jacobian );
 
-    if ( error ){
-        results << "test_computeDeviatoricSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_computeDeviatoricSecondOrderStress (test 2) & False\n";
-        return 0;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < stress.size(); i++ ){
         constantVector delta( stress.size(), 0 );
         delta[i] = eps * fabs( stress[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricSecondOrderStress( stress + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            results << "test_computeDeviatoricSecondOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricSecondOrderStress( stress + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeDeviatoricSecondOrderStress( stress - delta, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], jacobian[j][i] ) ){
-                results << "test_computeDeviatoricSecondOrderStress (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], jacobian[ j ][ i ] ) );
+
         }
+
     }
 
-    results << "test_computeDeviatoricSecondOrderStress & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeReferenceSecondOrderStressPressure ){
     /*!
      * Test the computation of the pressure of a second order stress in the 
      * reference configuration.
@@ -1093,16 +912,9 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, result );
 
-    if ( error ){
-        error->print();
-        results << "test_computeReferenceSecondOrderStressPressure & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_computeReferenceSecondOrderStressPressure (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
 
@@ -1111,16 +923,9 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
     error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, resultJ, dpdS, dpdC );
 
-    if ( error ){
-        error->print();
-        results << "test_computeReferenceSecondOrderStressPressure & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeReferenceSecondOrderStressPressure (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableType resultJ2;
     variableVector dpdSJ2, dpdCJ2;
@@ -1128,17 +933,9 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
 
     error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, resultJ2, dpdSJ2, dpdCJ2, d2pdSdC );
 
-    if ( error ){
-        error->print();
-        results << "test_computeReferenceSecondOrderStressPressure & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ2, answer ) ){
-        results << "test_computeReferenceSecondOrderStressPressure (test 3) & False\n";
-        return 1;
-    }
-
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2, answer ) );
 
     //Test dpdS
     constantType eps = 1e-6;
@@ -1146,25 +943,21 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
         constantVector delta( S.size(), 0 );
         delta[i] = eps * fabs( S[i] ) + eps;
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S + delta, C, resultJ );
+        variableType resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeReferenceSecondOrderStressPressure & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S + delta, C, resultp );
 
-        constantType gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        if ( !vectorTools::fuzzyEquals( gradCol, dpdS[i] ) ){
-            results << "test_computeReferenceSecondOrderStressPressure (test 4) & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S - delta, C, resultm );
 
-        if ( !vectorTools::fuzzyEquals( gradCol, dpdSJ2[i] ) ){
-            results << "test_computeReferenceSecondOrderStressPressure (test 5) & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
+
+        constantType gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
+
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdS[ i ] ) );
+
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdSJ2[ i ] ) );
 
     }
 
@@ -1173,25 +966,22 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultJ );
+        variableType resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeReferenceSecondOrderStressPressure & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultp );
 
-        constantType gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        if ( !vectorTools::fuzzyEquals( gradCol, dpdC[i] ) ){
-            results << "test_computeReferenceSecondOrderStressPressure (test 6) & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C - delta, resultm );
 
-        if ( !vectorTools::fuzzyEquals( gradCol, dpdCJ2[i] ) ){
-            results << "test_computeReferenceSecondOrderStressPressure (test 7) & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
+
+        constantType gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
+
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdC[ i ] ) );
+
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdCJ2[ i ] ) );
+
     }
 
     //Test d2pdSdC
@@ -1199,29 +989,31 @@ int test_computeReferenceSecondOrderStressPressure( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultJ, dpdSJ2, dpdCJ2 );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeReferenceSecondOrderStressPressure & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultJ, resultp, dpdCJ2 );
 
-        constantVector gradCol = ( dpdSJ2 - dpdS ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C - delta, resultJ, resultm, dpdCJ2 );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], d2pdSdC[j][i] ) ){
-                results << "test_computeReferenceSecondOrderStressPressure (test 8) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], d2pdSdC[ j ][ i ] ) );
+
         }
+
     }
 
-    results << "test_computeReferenceSecondOrderStressPressure & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
     /*!
      * Test the computation of the deviatoric part of the second higher order stress.
      *
@@ -1246,36 +1038,21 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, pressure, dpdS, dpdC, d2pdSdC );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
     variableVector result;
 
     error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, result );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, result );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     //Test the jacobians
     variableVector resultJ;
@@ -1283,15 +1060,9 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
 
     error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, resultJ, dDevSdS, dDevSdC );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress (test 3) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableVector resultJP;
     variableMatrix dDevSdSJP, dDevSdCJP;
@@ -1299,30 +1070,18 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
     error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, dpdS, dpdC, 
                                                                             resultJP, dDevSdSJP, dDevSdCJP );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJP, answer ) ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress (test 4) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJP, answer ) );
 
     variableVector resultJ2;
     variableMatrix dDevSdSJ2, dDevSdCJ2, d2DevSdSdC;
 
     error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, resultJ2, dDevSdSJ2, dDevSdCJ2, d2DevSdSdC );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ2, answer ) ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress (test 5) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2, answer ) );
 
     variableVector resultJ2P;
     variableMatrix dDevSdSJ2P, dDevSdCJ2P, d2DevSdSdCP;
@@ -1330,15 +1089,9 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
     error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, dpdS, dpdC, d2pdSdC,
                                                                             resultJ2P, dDevSdSJ2P, dDevSdCJ2P, d2DevSdSdCP );
 
-    if ( error ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ2P, answer ) ){
-        results << "test_computeDeviatoricReferenceSecondOrderStress (test 6) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2P, answer ) );
 
     //Test of dpdS
     constantType eps = 1e-6;
@@ -1346,47 +1099,42 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
         constantVector delta( S.size(), 0 );
         delta[i] = eps * fabs( S[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S + delta, C, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S + delta, C, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S - delta, C, resultm );
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdS[j][i] ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 7) & False\n";
-                return 1;
-            }
-        }
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdSJP[j][i] ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 8) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdS[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdSJ2[j][i] ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 9) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJP[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdSJ2P[j][i] ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 10) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJ2[ j ][ i ] ) );
+
         }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJ2P[ j ][ i ] ) );
+
+        }
+
     }
 
     //Test of dpdC
@@ -1394,47 +1142,42 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C - delta, resultm );
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdC[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 11) & False\n";
-                return 1;
-            }
-        }
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdCJP[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 12) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdC[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdCJ2[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 13) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJP[ j ][ i ] ) );
+
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevSdCJ2P[j][i], 1e-4, 1e-5 ) ){
-                results << "test_computeDeviatoricReferenceSecondOrderStress (test 14) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJ2[ j ][ i ] ) );
+
         }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJ2P[ j ][ i ] ) );
+
+        }
+
     }
 
     //Test of d2pdSdC
@@ -1442,43 +1185,44 @@ int test_computeDeviatoricReferenceSecondOrderStress( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultJ, dDevSdSJ2, dDevSdCJ2 );
+        variableMatrix resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeDeviatoricReferenceSecondOrderStress & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultJ, resultp, dDevSdCJ2 );
 
-        constantMatrix gradCol = ( dDevSdSJ2 - dDevSdS ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C - delta, resultJ, resultm, dDevSdCJ2 );
+
+        BOOST_CHECK( !error );
+
+        constantMatrix gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < 3; j++ ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        if ( !vectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
-                                                        d2DevSdSdC[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ],
-                                                        1e-4, 1e-5 ) ){
-                            results << "test_computeDeviatoricReferenceSecondOrderStress (test 15) & False\n";
-                            return 1;
-                        }
-                        if ( !vectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
-                                                        d2DevSdSdCP[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ],
-                                                        1e-4, 1e-5 ) ){
-                            results << "test_computeDeviatoricReferenceSecondOrderStress (test 16) & False\n";
-                            return 1;
-                        }
+
+                        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
+                                                               d2DevSdSdC[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
+
+                        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
+                                                               d2DevSdSdCP[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
+
                     }
+
                 }
+
             }
+
         }
+
     }
 
-    results << "test_computeDeviatoricReferenceSecondOrderStress & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
     /*!
      * Test the computation of the deviatoric - volumetric (pressure) stress 
      * decomposition.
@@ -1505,21 +1249,11 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
 
     errorOut error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResult, pressureResult );
 
-    if ( error ){
-        error->print();
-        results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) ){
-        results << "test_computeSecondOrderReferenceStressDecomposition (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) );
 
-    if ( !vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) ){
-        results << "test_computeSecondOrderReferenceStressDecomposition (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) );
 
     //Test the Jacobians
     variableType pressureResultJ;
@@ -1532,21 +1266,11 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
                                                                                dDevStressdStress, dDevStressdRCG,
                                                                                dPressuredStress, dPressuredRCG );
 
-    if ( error ){
-        error->print();
-        results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) ){
-        results << "test_computeSecondOrderReferenceStressDecomposition (test 3) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) );
 
-    if ( !vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) ){
-        results << "test_computeSecondOrderReferenceStressDecomposition (test 4) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) );
 
     variableType pressureResultJ2;
     variableVector deviatoricResultJ2;
@@ -1561,21 +1285,11 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
                                                                                dPressuredStressJ2, dPressuredRCGJ2,
                                                                                d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2 );
 
-    if ( error ){
-        error->print();
-        results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) ){
-        results << "test_computeSecondOrderReferenceStressDecomposition (test 5) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) );
 
-    if ( !vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) ){
-        results << "test_computeSecondOrderReferenceStressDecomposition (test 6) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) );
 
     //Test deriatives w.r.t. the stress.
     constantType eps = 1e-6;
@@ -1583,38 +1297,33 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
         constantVector delta( S.size(), 0 );
         delta[i] = eps * fabs( S[i] ) + eps;
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S + delta, C, deviatoricResultJ, pressureResultJ );
+        variableVector vec_resultp, vec_resultm;
+        variableType   sca_resultp, sca_resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S + delta, C, vec_resultp, sca_resultp );
 
-        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S - delta, C, vec_resultm, sca_resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( vec_resultp - vec_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStress[j][i] ) ){
-                results << "test_computeSecondOrderReferenceStressDecomposition (test 7) & False\n";
-                return 1;
-            }
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStressJ2[j][i] ) ){
-                results << "test_computeSecondOrderReferenceStressDecomposition (test 8) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStress[ j ][ i ] ) );
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStressJ2[ j ][ i ] ) );
+
         }
 
-        constantType gradScalar = ( pressureResultJ - pressureResult ) / delta[i];
+        constantType gradScalar = ( sca_resultp - sca_resultm ) / ( 2 * delta[ i ] );
 
-        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredStress[i] ) ){
-            results << "test_computeSecondOrderReferenceStressDecomposition (test 9) & False\n";
-            return 1;
-        }
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredStress[ i ] ) );
 
-        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredStressJ2[i] ) ){
-            results << "test_computeSecondOrderReferenceStressDecomposition (test 10) & False\n";
-            return 1;
-        }
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredStressJ2[ i ] ) );
+
     }
 
     //Test deriatives w.r.t. the right Cauchy-Green deformation tensor
@@ -1624,81 +1333,77 @@ int test_computeSecondOrderReferenceStressDecomposition( std::ofstream &results 
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, deviatoricResultJ, pressureResultJ );
+        variableVector vec_resultp, vec_resultm;
+        variableType   sca_resultp, sca_resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, vec_resultp, sca_resultp );
 
-        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C - delta, vec_resultm, sca_resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( vec_resultp - vec_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCG[j][i], 1e-4 ) ){
-                results << "test_computeSecondOrderReferenceStressDecomposition (test 11) & False\n";
-                return 1;
-            }
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCGJ2[j][i], 1e-4 ) ){
-                results << "test_computeSecondOrderReferenceStressDecomposition (test 12) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCG[ j ][ i ] ) );
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCGJ2[ j ][ i ] ) );
+
         }
 
-        constantType gradScalar = ( pressureResultJ - pressureResult ) / delta[i];
+        constantType gradScalar = ( sca_resultp - sca_resultm ) / ( 2 * delta[i] );
 
-        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredRCG[i], 1e-4 ) ){
-            results << "test_computeSecondOrderReferenceStressDecomposition (test 13) & False\n";
-            return 1;
-        }
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredRCG[ i ] ) );
 
-        if ( !vectorTools::fuzzyEquals( gradScalar, dPressuredRCGJ2[i], 1e-4 ) ){
-            results << "test_computeSecondOrderReferenceStressDecomposition (test 14) & False\n";
-            return 1;
-        }
+        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredRCGJ2[ i ] ) );
+
+        variableMatrix mat_resultp, mat_resultm;
 
         error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, deviatoricResultJ, pressureResultJ,
-                                                                                   dDevStressdStressP, dDevStressdRCGP, 
-                                                                                   dPressuredStressP, dPressuredRCGP );
+                                                                                   mat_resultp, dDevStressdRCGP, 
+                                                                                   vec_resultp, dPressuredRCGP );
 
-        if ( error ){
-            error->print();
-            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
-        constantMatrix gradMat = ( dDevStressdStressP - dDevStressdStress ) / delta[i];
+        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C - delta, deviatoricResultJ, pressureResultJ,
+                                                                                   mat_resultm, dDevStressdRCGP, 
+                                                                                   vec_resultm, dPressuredRCGP );
+
+        BOOST_CHECK( !error );
+
+        constantMatrix gradMat = ( mat_resultp - mat_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < 3; j++ ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        if ( !vectorTools::fuzzyEquals( gradMat[ 3 * j + k ][ 3 * l + m ],
-                                                        d2DevStressdStressdRCGJ2[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ],
-                                                        1e-4, 1e-5 ) ){
-                            results << "test_computeSecondOrderReferenceStressDecomposition (test 15) & False\n";
-                            return 1;
-                        }
+                        
+                        BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ 3 * j + k ][ 3 * l + m ],
+                                                               d2DevStressdStressdRCGJ2[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
+
                     }
                 }
             }
         }
 
-        gradCol = ( dPressuredStressP - dPressuredStress ) / delta[i];
+        gradCol = ( vec_resultp - vec_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], d2PressuredStressdRCGJ2[j][i], 1e-4 ) ){
-                results << "test_computeSecondOrderReferenceStressDecomposition (test 16) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], d2PressuredStressdRCGJ2[ j ][ i ] ) );
+
         }
+
     }
 
-    results << "test_computeSecondOrderReferenceStressDecomposition & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
     /*!
      * Test the computation of the higher order stress pressure.
      *
@@ -1719,16 +1424,9 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, result );
 
-    if ( error ){
-        error->print();
-        results << "test_computeReferenceHigherOrderStressPressure & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_computeReferenceHigherOrderStressPressure (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     
@@ -1736,31 +1434,17 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
     variableMatrix dpdM, dpdC;
     error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, resultJ, dpdM, dpdC );
 
-    if ( error ){
-        error->print();
-        results << "test_computeReferenceHigherOrderStressPressure & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_computeReferenceHigherOrderStressPressure (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     variableVector resultJ2;
     variableMatrix dpdMJ2, dpdCJ2, d2pdMdC;
     error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, resultJ2, dpdMJ2, dpdCJ2, d2pdMdC );
 
-    if ( error ){
-        error->print();
-        results << "test_computeReferenceHigherOrderStressPressure & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ2 ) ){
-        results << "test_computeReferenceHigherOrderStressPressure (test 3) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ2 ) );
 
     //Test dpdM
     constantType eps = 1e-6;
@@ -1768,29 +1452,30 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
         constantVector delta( M.size(), 0 );
         delta[i] = eps * fabs( M[i] ) + eps;
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M + delta, C, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeReferenceHigherOrderStressPressure & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M + delta, C, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dpdM[j][i] ) ){
-                results << "test_computeReferenceHigherOrderStressPressure (test 4) & False\n";
-                return 1;
-            }
-        }
+        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M - delta, C, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dpdMJ2[j][i] ) ){
-                results << "test_computeReferenceHigherOrderStressPressure (test 5) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdM[ j ][ i ] ) );
+
         }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdMJ2[ j ][ i ] ) );
+
+        }
+
     }
 
     //Test dpdC
@@ -1798,29 +1483,30 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultJ );
+        variableVector resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeReferenceHigherOrderStressPressure & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultp );
 
-        constantVector gradCol = ( resultJ - result ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dpdC[j][i] ) ){
-                results << "test_computeReferenceHigherOrderStressPressure (test 6) & False\n";
-                return 1;
-            }
-        }
+        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C - delta, resultm );
+
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dpdCJ2[j][i] ) ){
-                results << "test_computeReferenceHigherOrderStressPressure (test 7) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdC[ j ][ i ] ) );
+
         }
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdCJ2[ j ][ i ] ) );
+
+        }
+
     }
 
     //Test d2pdMdC
@@ -1828,36 +1514,35 @@ int test_computeReferenceHigherOrderStressPressure( std::ofstream &results ){
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultJ, dpdMJ2, dpdCJ2 );
+        variableMatrix resultp, resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeReferenceHigherOrderStressPressure & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultJ, resultp, dpdCJ2 );
 
-        constantMatrix gradCol = ( dpdMJ2 - dpdM ) / delta[i];
+        BOOST_CHECK( !error );
+
+        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C - delta, resultJ, resultm, dpdCJ2 );
+
+        BOOST_CHECK( !error );
+
+        constantMatrix gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < 3; j++ ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        if ( !vectorTools::fuzzyEquals( gradCol[ j ][ 9 * k + 3 * l + m ], 
-                                                        d2pdMdC[ j ][ 81 * k + 27 * l + 9 * m + 3 * (int)( i / 3 ) + i % 3 ] ) ){
-                            results << "test_computeReferenceHigherOrderStressPressure (test 7) & False\n";
-                            return 1;
-                        }
+                        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ][ 9 * k + 3 * l + m ], 
+                                                               d2pdMdC[ j ][ 81 * k + 27 * l + 9 * m + 3 * (int)( i / 3 ) + i % 3 ] ) );
                     }
                 }
             }
         }
     }
 
-    results << "test_computeReferenceHigherOrderStressPressure & True\n";
-    return 0;
+    return;
+
 }
 
-int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
     /*!
      * Test the computation of the decomposition of the higher order stress
      * into deviatoric and volumetric (pressure) parts.
@@ -1889,21 +1574,11 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
     variableVector deviatoricResult, pressureResult;
     errorOut error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResult, pressureResult );
 
-    if ( error ){
-        error->print();
-        results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) ){
-        results << "test_computeHigherOrderReferenceStressDecomposition (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) );
 
-    if ( !vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) ){
-        results << "test_computeHigherOrderReferenceStressDecomposition (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) );
 
     //Test the Jacobians
     variableVector pressureResultJ;
@@ -1916,22 +1591,11 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
                                                                                dDevStressdStress, dDevStressdRCG,
                                                                                dPressuredStress, dPressuredRCG );
 
-    if ( error ){
-        error->print();
-        results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) ){
-        results << "test_computeHigherOrderReferenceStressDecomposition (test 3) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) );
 
-    if ( !vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) ){
-        results << "test_computeHigherOrderReferenceStressDecomposition (test 4) & False\n";
-        return 1;
-    }
-
+    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) );
 
     variableVector pressureResultJ2;
     variableVector deviatoricResultJ2;
@@ -1946,21 +1610,11 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
                                                                                dPressuredStressJ2, dPressuredRCGJ2,
                                                                                d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2 );
 
-    if ( error ){
-        error->print();
-        results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) ){
-        results << "test_computeHigherOrderReferenceStressDecomposition (test 5) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) );
 
-    if ( !vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) ){
-        results << "test_computeHigherOrderReferenceStressDecomposition (test 6) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) );
 
     //Test deriatives w.r.t. the stress.
     constantType eps = 1e-6;
@@ -1968,40 +1622,37 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
         constantVector delta( M.size(), 0 );
         delta[i] = eps * fabs( M[i] ) + eps;
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M + delta, C, deviatoricResultJ, pressureResultJ );
+        variableVector dev_resultp, dev_resultm;
+        variableVector pre_resultp, pre_resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M + delta, C, dev_resultp, pre_resultp );
 
-        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStress[j][i] ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 7) & False\n";
-                return 1;
-            }
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdStressJ2[j][i] ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 8) & False\n";
-                return 1;
-            }
-        }
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M - delta, C, dev_resultm, pre_resultm );
 
-        gradCol = ( pressureResultJ - pressureResult ) / delta[i];
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( dev_resultp - dev_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredStress[j][i] ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 9) & False\n";
-                return 1;
-            }
-    
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredStressJ2[j][i] ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 10) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStress[ j ][ i ] ) );
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStressJ2[ j ][ i ] ) );
+
         }
+
+        gradCol = ( pre_resultp - pre_resultm ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredStress[ j ][ i ] ) );
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredStressJ2[ j ][ i ] ) );
+
+        }
+
     }
 
     //Test deriatives w.r.t. the right Cauchy-Green deformation tensor
@@ -2011,52 +1662,53 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
         constantVector delta( C.size(), 0 );
         delta[i] = eps * fabs( C[i] ) + eps;
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, deviatoricResultJ, pressureResultJ );
+        variableVector dev_resultp, pre_resultp;
+        variableVector dev_resultm, pre_resultm;
 
-        if ( error ){
-            error->print();
-            results << "test_computeHigherOrderReferenceStressDecomposition & False\n";
-            return 1;
-        }
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, dev_resultp, pre_resultp );
 
-        constantVector gradCol = ( deviatoricResultJ - deviatoricResult ) / delta[i];
+        BOOST_CHECK( !error );
 
-        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCG[j][i], 1e-4 ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 11) & False\n";
-                return 1;
-            }
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dDevStressdRCGJ2[j][i], 1e-4 ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 12) & False\n";
-                return 1;
-            }
-        }
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C - delta, dev_resultm, pre_resultm );
 
-        gradCol = ( pressureResultJ - pressureResult ) / delta[i];
+        BOOST_CHECK( !error );
+
+        constantVector gradCol = ( dev_resultp - dev_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredRCG[j][i], 1e-4 ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 13) & False\n";
-                return 1;
-            }
-    
-            if ( !vectorTools::fuzzyEquals( gradCol[j], dPressuredRCGJ2[j][i], 1e-4 ) ){
-                results << "test_computeHigherOrderReferenceStressDecomposition (test 14) & False\n";
-                return 1;
-            }
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCG[ j ][ i ] ) );
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCGJ2[ j ][ i ] ) );
+
         }
+
+        gradCol = ( pre_resultp - pre_resultm ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < gradCol.size(); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredRCG[ j ][ i ] ) );
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredRCGJ2[ j ][ i ] ) );
+
+        }
+
+        variableMatrix dev_mat_resultp, pre_mat_resultp;
+        variableMatrix dev_mat_resultm, pre_mat_resultm;
 
         error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, deviatoricResultJ, pressureResultJ,
-                                                                                   dDevStressdStressP, dDevStressdRCGP, 
-                                                                                   dPressuredStressP, dPressuredRCGP );
+                                                                                   dev_mat_resultp, dDevStressdRCGP, 
+                                                                                   pre_mat_resultp, dPressuredRCGP );
 
-        if ( error ){
-            error->print();
-            results << "test_computeSecondOrderReferenceStressDecomposition & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
-        constantMatrix gradMat = ( dDevStressdStressP - dDevStressdStress ) / delta[i];
+        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C - delta, deviatoricResultJ, pressureResultJ,
+                                                                                   dev_mat_resultm, dDevStressdRCGP, 
+                                                                                   pre_mat_resultm, dPressuredRCGP );
+
+        BOOST_CHECK( !error );
+
+        constantMatrix gradMat = ( dev_mat_resultp - dev_mat_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < 3; j++ ){
             for ( unsigned int k = 0; k < 3; k++ ){
@@ -2064,12 +1716,8 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
                     for ( unsigned int m = 0; m < 3; m++ ){
                         for ( unsigned int n = 0; n < 3; n++ ){
                             for ( unsigned int o = 0; o < 3; o++ ){
-                                if ( !vectorTools::fuzzyEquals( gradMat[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
-                                                                d2DevStressdStressdRCGJ2[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + + 9 * o + 3 * ( int )( i / 3 ) + i % 3 ],
-                                                                1e-4, 1e-5 ) ){
-                                    results << "test_computeSecondOrderReferenceStressDecomposition (test 15) & False\n";
-                                    return 1;
-                                }
+                                BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                                                       d2DevStressdStressdRCGJ2[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + + 9 * o + 3 * ( int )( i / 3 ) + i % 3 ] ) );
                             }
                         }
                     }
@@ -2077,29 +1725,25 @@ int test_computeHigherOrderReferenceStressDecomposition( std::ofstream &results 
             }
         }
 
-        gradMat = ( dPressuredStressP - dPressuredStress ) / delta[i];
+        gradMat = ( pre_mat_resultp - pre_mat_resultm ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < 3; j++ ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        if ( !vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
-                                                        d2PressuredStressdRCGJ2[ j ][ 81 * k + 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ],
-                                                        1e-4 ) ){
-                            results << "test_computeSecondOrderReferenceStressDecomposition (test 16) & False\n";
-                            return 1;
-                        }
+                        BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
+                                                               d2PressuredStressdRCGJ2[ j ][ 81 * k + 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
                     }
                 }
             }
         }
     }
+
+    return;
     
-    results << "test_computeHigherOrderReferenceStressDecomposition & True\n";
-    return 0;
 }
 
-int test_computeHigherOrderStressNorm( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_computeHigherOrderStressNorm ){
     /*!
      * Test the computation of the special higher order stress norm.
      *
@@ -2119,15 +1763,9 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
 
     errorOut error = micromorphicTools::computeHigherOrderStressNorm( M, result );
 
-    if ( error ){
-        results << "test_computeHigherOrderStressNorm & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_computeHigherOrderStressNorm (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     variableVector resultJ;
@@ -2135,30 +1773,18 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
 
     error = micromorphicTools::computeHigherOrderStressNorm( M, resultJ, dNormMdMJ );
 
-    if ( error ){
-        results << "test_computeHigherOrderStressNorm & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_computeHigherOrderStressNorm (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     variableVector resultJ2;
     variableMatrix dNormMdMJ2, d2NormMdM2J2;
 
     error = micromorphicTools::computeHigherOrderStressNorm( M, resultJ2, dNormMdMJ2, d2NormMdM2J2 );
 
-    if ( error ){
-        results << "test_computeHigherOrderStressNorm & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ2 ) ){
-        results << "test_computeHigherOrderStressNorm (test 3) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ2 ) );
 
     //Test dNormMdM
     constantType eps = 1e-6;
@@ -2170,53 +1796,31 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
 
         error = micromorphicTools::computeHigherOrderStressNorm( M + delta, resultP );
 
-        if ( error ){
-            error->print();
-            results << "test_computeHigherOrderStressNorm & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::computeHigherOrderStressNorm( M - delta, resultM );
 
-        if ( error ){
-            error->print();
-            results << "test_computeHigherOrderStressNorm & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( resultP - resultM ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ[ j ][ i ] ) ){
-                results << "test_computeHigherOrderStressNorm (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ[ j ][ i ] ) );
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ2[ j ][ i ] ) ){
-                results << "test_computeHigherOrderStressNorm (test 5) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ2[ j ][ i ] ) );
         }
 
         variableMatrix derP, derM;
 
         error = micromorphicTools::computeHigherOrderStressNorm( M + delta, resultP, derP );
 
-        if ( error ){
-            error->print();
-            results << "test_computeHigherOrderStressNorm & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::computeHigherOrderStressNorm( M - delta, resultM, derM );
 
-        if ( error ){
-            error->print();
-            results << "test_computeHigherOrderStressNorm & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableMatrix gradMat = ( derP - derM ) / ( 2 * delta[i] );
 
@@ -2228,22 +1832,19 @@ int test_computeHigherOrderStressNorm( std::ofstream &results ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        if ( !vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
-                                                        d2NormMdM2J2[ j ][ 243 * k + 81 * l + 27 * m + 9 * n + 3 * o + p ] ) ){
-                            results << "test_computeHigherOrderStressNorm (test 6) & False\n";
-                            return 1;
-                        }
+                        BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
+                                                               d2NormMdM2J2[ j ][ 243 * k + 81 * l + 27 * m + 9 * n + 3 * o + p ] ) );
                     }
                 }
             }
         }
     }
 
-    results << "test_computeHigherOrderStressNorm & True\n";
-    return 0;
+    return;
+
 }
 
-int test_assembleDeformationGradient( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_assembleDeformationGradient ){
     /*!
      * Test the assembly of the deformation gradient from the gradient of the displacement.
      *
@@ -2260,32 +1861,18 @@ int test_assembleDeformationGradient( std::ofstream &results ){
 
     errorOut error = micromorphicTools::assembleDeformationGradient( displacementGradient, result );
 
-    if ( error ){
-        error->print();
-        results << "test_assembleDeformationGradient & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_assembleDeformationGradient (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     //Tests of the Jacobians
     variableVector resultJ;
     variableMatrix dFdGradU;
     error = micromorphicTools::assembleDeformationGradient( displacementGradient, resultJ, dFdGradU );
 
-    if ( error ){
-        error->print();
-        results << "test_assembleDeformationGradient & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_assembleDeformationGradient (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the Jacobian w.r.t. the displacement gradient
     constantType eps = 1e-6;
@@ -2297,35 +1884,24 @@ int test_assembleDeformationGradient( std::ofstream &results ){
 
         error = micromorphicTools::assembleDeformationGradient( displacementGradient + delta, P );
 
-        if ( error ){
-            error->print();
-            results << "test_assembleDeformationGradient & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::assembleDeformationGradient( displacementGradient - delta, M );
 
-        if ( error ){
-            error->print();
-            results << "test_assembleDeformationGradient & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ ( int )( i / 3 ) ][ i % 3 ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dFdGradU[ j ][ i ] ) ){
-                results << "test_assembledDeformationGradient (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dFdGradU[ j ][ i ] ) );
         }
     }
 
-    results << "test_assembleDeformationGradient & True\n";
-    return 0;
+    return;
+
 }
 
-int test_assembleMicroDeformation( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_assembleMicroDeformation ){
     /*!
      * Test the assembly of the micro deformation from the micro displacement
      *
@@ -2340,16 +1916,9 @@ int test_assembleMicroDeformation( std::ofstream &results ){
 
     errorOut error = micromorphicTools::assembleMicroDeformation( microDisplacement, result );
 
-    if ( error ){
-        error->print();
-        results << "test_assembleMicroDeformation & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_assembleMicroDeformation (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     variableVector resultJ;
@@ -2357,16 +1926,9 @@ int test_assembleMicroDeformation( std::ofstream &results ){
 
     error = micromorphicTools::assembleMicroDeformation( microDisplacement, resultJ, dChidPhi );
 
-    if ( error ){
-        error->print();
-        results << "test_assembleMicroDeformation & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_assembleMicroDeformation (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the jacobians w.r.t. phi
     constantType eps = 1e-6;
@@ -2378,35 +1940,24 @@ int test_assembleMicroDeformation( std::ofstream &results ){
 
         error = micromorphicTools::assembleMicroDeformation( microDisplacement + delta, P );
 
-        if ( error ){
-            error->print();
-            results << "test_assembleMicroDeformation & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::assembleMicroDeformation( microDisplacement - delta, M );
 
-        if ( error ){
-            error->print();
-            results << "test_assembleMicroDeformation & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dChidPhi[ j ][ i ] ) ){
-                results << "test_assembleMicroDeformation (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dChidPhi[ j ][ i ] ) );
         }
     }
 
-    results << "test_assembleMicroDeformation & True\n";
-    return 0;
+    return;
+
 }
 
-int test_assembleGradientMicroDeformation( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_assembleGradientMicroDeformation ){
     /*!
      * Test the assembly of the micro deformation gradient
      *
@@ -2431,16 +1982,9 @@ int test_assembleGradientMicroDeformation( std::ofstream &results ){
 
     errorOut error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, result );
 
-    if ( error ){
-        error->print();
-        results << "test_assembleGradientMicroDeformation & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_assembleGradientMicroDeformation (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     variableVector resultJ;
@@ -2448,16 +1992,9 @@ int test_assembleGradientMicroDeformation( std::ofstream &results ){
 
     error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, resultJ, dGradChidGradPhi );
 
-    if ( error ){
-        error->print();
-        results << "test_assembleGradientMicroDeformation & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_assembleGradientMicroDeformation (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the Jacobian w.r.t. the micro displacement gradient
     constantType eps = 1e-6;
@@ -2469,35 +2006,24 @@ int test_assembleGradientMicroDeformation( std::ofstream &results ){
 
         error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement + delta, P );
 
-        if ( error ){
-            error->print();
-            results << "test_assembleGradientMicroDeformation & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement - delta, M );
 
-        if ( error ){
-            error->print();
-            results << "test_assembleGradientMicroDeformation & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ ( int )( i / 3 ) ][ i % 3 ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dGradChidGradPhi[ j ][ i ] ) ){
-                results << "test_assembleGradientMicroDeformation (test 3) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dGradChidGradPhi[ j ][ i ] ) );
         }
     }
 
-    results << "test_assembleGradientMicroDeformation & True\n";
-    return 0;
+    return;
+
 }
 
-int test_pullBackCauchyStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_pullBackCauchyStress ){
     /*!
      * Test the pull back operation on the Cauchy stress
      *
@@ -2517,23 +2043,15 @@ int test_pullBackCauchyStress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, result );
 
-    if ( error ){
-        error->print();
-        results << "test_pullBackCauchyStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_pullBackCauchyStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     error = micromorphicTools::pushForwardPK2Stress( result, deformationGradient, resultPF );
 
-    if ( !vectorTools::fuzzyEquals( resultPF, cauchyStress ) ){
-        results << "test_pullBackCauchyStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
+
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultPF, cauchyStress ) );
 
     //Test the Jacobians
     variableVector resultJ;
@@ -2541,17 +2059,9 @@ int test_pullBackCauchyStress( std::ofstream &results ){
 
     error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, resultJ, dPK2dCauchy, dPK2dF );
 
-    if ( error ){
-        error->print();
-        results << "test_pullBackCauchyStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_pullBackCauchyStress (test 3) & False\n";
-        return 1;
-    }
-
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test the Jacobian w.r.t. the Cauchy stress
     constantType eps = 1e-6;
@@ -2563,27 +2073,16 @@ int test_pullBackCauchyStress( std::ofstream &results ){
 
         error = micromorphicTools::pullBackCauchyStress( cauchyStress + delta, deformationGradient, P );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackCauchyStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::pullBackCauchyStress( cauchyStress - delta, deformationGradient, M );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackCauchyStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dPK2dCauchy[ j ][ i ] ) ){
-                results << "test_pullBackCauchyStress (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPK2dCauchy[ j ][ i ] ) );
         }
     }
 
@@ -2596,35 +2095,24 @@ int test_pullBackCauchyStress( std::ofstream &results ){
 
         error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient + delta, P );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackCauchyStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient - delta, M );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackCauchyStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dPK2dF[ j ][ i ] ) ){
-                results << "test_pullBackCauchyStress (test 5) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPK2dF[ j ][ i ] ) );
         }
     }
 
-    results << "test_pullBackCauchyStress & True\n";
-    return 0;
+    return;
+
 }
 
-int test_pullBackMicroStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_pullBackMicroStress ){
     /*!
      * Test the pull back operation on the micro stress
      *
@@ -2644,23 +2132,15 @@ int test_pullBackMicroStress( std::ofstream &results ){
 
     errorOut error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient, result );
 
-    if ( error ){
-        error->print();
-        results << "test_pullBackMicroStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( result, answer ) ){
-        results << "test_pullBackMicroStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
 
     error = micromorphicTools::pushForwardReferenceMicroStress( result, deformationGradient, resultPF );
 
-    if ( !vectorTools::fuzzyEquals( resultPF, microStress ) ){
-        results << "test_pullBackMicroStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
+
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultPF, microStress ) );
 
     //Test the Jacobians
     variableVector resultJ;
@@ -2668,17 +2148,9 @@ int test_pullBackMicroStress( std::ofstream &results ){
 
     error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient, resultJ, dSigmads, dSigmadF );
 
-    if ( error ){
-        error->print();
-        results << "test_pullBackMicroStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( resultJ, answer ) ){
-        results << "test_pullBackMicroStress (test 3) & False\n";
-        return 1;
-    }
-
+    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test the Jacobian w.r.t. the micro stress
     constantType eps = 1e-6;
@@ -2690,27 +2162,16 @@ int test_pullBackMicroStress( std::ofstream &results ){
 
         error = micromorphicTools::pullBackMicroStress( microStress + delta, deformationGradient, P );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackMicroStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::pullBackMicroStress( microStress - delta, deformationGradient, M );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackMicroStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dSigmads[ j ][ i ] ) ){
-                results << "test_pullBackMicroStress (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dSigmads[ j ][ i ] ) );
         }
     }
 
@@ -2723,35 +2184,24 @@ int test_pullBackMicroStress( std::ofstream &results ){
 
         error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient + delta, P );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackMicroStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient - delta, M );
 
-        if ( error ){
-            error->print();
-            results << "test_pullBackMicroStress & False\n";
-            return 1;
-        }
+        BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dSigmadF[ j ][ i ] ) ){
-                results << "test_pullBackMicroStress (test 5) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dSigmadF[ j ][ i ] ) );
         }
     }
 
-    results << "test_pullBackMicroStress & True\n";
-    return 0;
+    return;
+
 }
 
-int test_pullBackHigherOrderStress( std::ofstream &results ){
+BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
     /*!
      * Test the push forward operation on the higher order stress tensor.
      *
@@ -2783,31 +2233,17 @@ int test_pullBackHigherOrderStress( std::ofstream &results ){
     errorOut error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                                    microDeformation, result );
 
-    if ( error ){
-        error->print();
-        results << "test_pullBackHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, result ) ){
-        results << "test_pullBackHigherOrderStress (test 1) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
 
     variableVector resultPF;
 
     error = micromorphicTools::pushForwardHigherOrderStress( result, deformationGradient, microDeformation, resultPF );
 
-    if ( error ){
-        error->print();
-        results << "test_pullBackHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( higherOrderStress, resultPF ) ){
-        results << "test_pullBackHigherOrderStress (test 2) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( higherOrderStress, resultPF ) );
 
     //Test the Jacobian
     variableVector resultJ;
@@ -2816,16 +2252,9 @@ int test_pullBackHigherOrderStress( std::ofstream &results ){
     error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                           microDeformation, resultJ, dMdm, dMdF, dMdChi );
 
-    if ( error ){
-        error->print();
-        results << "test_pullBackHigherOrderStress & False\n";
-        return 1;
-    }
+    BOOST_CHECK( !error );
 
-    if ( !vectorTools::fuzzyEquals( answer, resultJ ) ){
-        results << "test_pullBackHigherOrderStress (test 3) & False\n";
-        return 1;
-    }
+    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the jacobian w.r.t. the higher order stress
     constantType eps = 1e-6;
@@ -2837,29 +2266,18 @@ int test_pullBackHigherOrderStress( std::ofstream &results ){
 
         error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress + delta, deformationGradient,
                                                               microDeformation, P );
-    
-        if ( error ){
-            error->print();
-            results << "test_pullBackHigherOrderStress & False\n";
-            return 1;
-        }
+
+        BOOST_CHECK( !error );    
 
         error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress - delta, deformationGradient,
                                                               microDeformation, M );
-    
-        if ( error ){
-            error->print();
-            results << "test_pullBackHigherOrderStress & False\n";
-            return 1;
-        }
+
+        BOOST_CHECK( !error );    
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dMdm[ j ][ i ] ) ){
-                results << "test_pullBackHigherOrderStress (test 4) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMdm[ j ][ i ] ) );
         }
     }
 
@@ -2872,29 +2290,18 @@ int test_pullBackHigherOrderStress( std::ofstream &results ){
 
         error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient + delta,
                                                               microDeformation, P );
-    
-        if ( error ){
-            error->print();
-            results << "test_pullBackHigherOrderStress & False\n";
-            return 1;
-        }
 
+        BOOST_CHECK( !error );
+    
         error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient - delta,
                                                               microDeformation, M );
-    
-        if ( error ){
-            error->print();
-            results << "test_pullBackHigherOrderStress & False\n";
-            return 1;
-        }
+   
+        BOOST_CHECK( !error ); 
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dMdF[ j ][ i ] ) ){
-                results << "test_pullBackHigherOrderStress (test 5) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMdF[ j ][ i ] ) );
         }
     }
 
@@ -2907,73 +2314,21 @@ int test_pullBackHigherOrderStress( std::ofstream &results ){
 
         error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                               microDeformation + delta, P );
-    
-        if ( error ){
-            error->print();
-            results << "test_pullBackHigherOrderStress & False\n";
-            return 1;
-        }
+
+        BOOST_CHECK( !error );    
 
         error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                               microDeformation - delta, M );
-    
-        if ( error ){
-            error->print();
-            results << "test_pullBackHigherOrderStress & False\n";
-            return 1;
-        }
+
+        BOOST_CHECK( !error );    
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            if ( !vectorTools::fuzzyEquals( gradCol[ j ], dMdChi[ j ][ i ] ) ){
-                results << "test_pullBackHigherOrderStress (test 6) & False\n";
-                return 1;
-            }
+            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMdChi[ j ][ i ] ) );
         }
     }
 
-    results << "test_pullBackHigherOrderStress & True\n";
-    return 0;
-}
+    return;
 
-int main(){
-    /*!
-    The main loop which runs the tests defined in the 
-    accompanying functions. Each function should output
-    the function name followed by & followed by True or False 
-    if the test passes or fails respectively.
-    */
-
-    //Open the results file
-    std::ofstream results;
-    results.open("results.tex");
-
-    //Run the tests
-    test_computePsi( results );
-    test_computeGamma( results );
-    test_computeMicroStrain( results );
-    test_pushForwardPK2Stress( results );
-    test_pushForwardReferenceMicroStress( results );
-    test_pushForwardHigherOrderStress( results );
-    test_pullBackCauchyStress( results );
-    test_pullBackMicroStress( results );
-    test_pullBackHigherOrderStress( results );
-    test_computeDeviatoricHigherOrderStress( results );
-    test_computeDeviatoricReferenceHigherOrderStress( results );
-    test_computeReferenceSecondOrderStressPressure( results );
-    test_computeDeviatoricSecondOrderStress( results );
-    test_computeDeviatoricReferenceSecondOrderStress( results );
-    test_computeReferenceHigherOrderStressPressure( results );
-    test_computeSecondOrderReferenceStressDecomposition( results );
-    test_computeHigherOrderReferenceStressDecomposition( results );
-    test_computeHigherOrderStressNorm( results );
-    test_assembleDeformationGradient( results );
-    test_assembleMicroDeformation( results );
-    test_assembleGradientMicroDeformation( results );
-
-    //Close the results file
-    results.close();
-
-    return 0;
 }

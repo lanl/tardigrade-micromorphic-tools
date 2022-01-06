@@ -14,11 +14,11 @@
 .. _micromorphic_tools_source:
 
 micromorphic_tools.cpp
-============
+======================
 
 .. doxygenfile:: micromorphic_tools.cpp
 
 micromorphic_tools.h
-==========
+====================
 
 .. doxygenfile:: micromorphic_tools.h

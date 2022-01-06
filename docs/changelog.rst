@@ -5,6 +5,14 @@
 Changelog
 #########
 
+******************
+1.1.0 (unreleased)
+******************
+
+Internal Changes
+================
+- Updated tests to BOOST test (:merge:`2`). By `Nathan Miller`_.
+
 
 ******************
 0.1.6 (2021-08-26)
