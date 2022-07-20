@@ -6,8 +6,8 @@ project(micromorphic_tools)
 set(CPP_SRC_PATH "src/cpp")
 set(CPP_TEST_PATH "${CPP_SRC_PATH}/tests")
 set(CMAKE_SRC_PATH "src/cmake")
-set(DOCUMENTATION_SRC_PATH "docs")
-
+set(DOXYGEN_SRC_PATH "docs/doxygen")
+set(SPHINX_SRC_PATH "docs/sphinx")
 # Add the cmake folder to locate project CMake module(s)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}" ${CMAKE_MODULE_PATH})
 
@@ -26,7 +26,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Set the c++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic -O3 -fmax-errors=5 -ggdb")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ansi -pedantic -lrt")
 
 # Enable CTest
 enable_testing()
@@ -57,7 +57,7 @@ foreach(package ${upstream_packages})
     else()
         # Find related, but external, projects using FetchContent and building locally
         message(WARNING "Did not find an installed ${package} package. Attempting local build with FetchContent.")
-        # TODO: Decide how to handle master/dev build differences. bash env variables for GIT TAG?
+        # TODO: Decide how to handle main/dev build differences. bash env variables for GIT TAG?
         FetchContent_Declare(
             ${package}
             GIT_REPOSITORY ssh://git@re-git.lanl.gov:10022/aea/material-models/${package}.git
@@ -79,27 +79,30 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     find_package(Boost 1.53.0 REQUIRED COMPONENTS unit_test_framework)
     # Add c++ tests and docs
     add_subdirectory(${CPP_TEST_PATH})
-    add_subdirectory(${DOCUMENTATION_SRC_PATH})
+    add_subdirectory(${DOXYGEN_SRC_PATH})
+    add_subdirectory(${SPHINX_SRC_PATH})
 endif()
 
 #==================================================================================== SETUP INSTALLATION CMAKE FILES ==
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file("${package}ConfigVersion.cmake"
-                                 VERSION ${PROJECT_VERSION}
-                                 COMPATIBILITY SameMajorVersion)
-configure_package_config_file(
-  "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
-  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-  INSTALL_DESTINATION
-  ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
-
-# CMake won't build the targets for local builds of upstream projects
-if(cmake_build_type_lower STREQUAL release)
-    install(EXPORT ${package}_Targets
-            FILE ${package}Targets.cmake
+foreach(package ${PROJECT_NAME})
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file("${package}ConfigVersion.cmake"
+                                     VERSION ${PROJECT_VERSION}
+                                     COMPATIBILITY SameMajorVersion)
+    configure_package_config_file(
+      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
+      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+      INSTALL_DESTINATION
+      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+    
+    # CMake won't build the targets for local builds of upstream projects
+    if(cmake_build_type_lower STREQUAL release)
+        install(EXPORT ${package}_Targets
+                FILE ${package}Targets.cmake
+                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+    endif()
+    
+    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-endif()
-
-install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-              "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+endforeach(package)

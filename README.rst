@@ -36,8 +36,9 @@ Information
 Developers
 ==========
 
-* Kyle Brindley: kbrindley@lanl.gov
 * Nathan Miller: nathanm@lanl.gov
+* Kyle Brindley: kbrindley@lanl.gov
+* Peter Schaefferkoetter: Peter.Schaefferkoetter@colorado.edu
 
 ************
 Dependencies
