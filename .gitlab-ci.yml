@@ -96,7 +96,7 @@ pages:
     # Reference: https://gitlab.com/gitlab-org/gitlab/-/issues/33822
     - git fetch origin
     - git branch -a
-    - documentation_branches="main dev"
+    - documentation_branches="dev main"
     - |
         for ref in ${documentation_branches}; do
             git checkout $ref
