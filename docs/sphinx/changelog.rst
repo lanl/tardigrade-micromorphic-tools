@@ -5,66 +5,22 @@
 Changelog
 #########
 
-
 ******************
-0.1.9 (unreleased)
-******************
-
-Internal Changes
-================
-- Added SSL workaround to Pages job (:issue:`23`, :merge:`29`). By `Sergio Cordova`_.
-
-******************
-0.1.8 (2022-04-28)
+1.0.2 (unreleased)
 ******************
 
 Internal Changes
 ================
-- Remove the package deployment Gitlab-CI job because the AEA Compute environment no longer allows projects to directly
-  update the environment. Instead, projects must request that their package is added to the AEA Compute environment
-  build (:issue:`18`, :merge:`23`). By `Kyle Brindley`_.
-- Move the production release automatic microbumping to a dedicated Gitlab-CI job (:issue:`18`, :merge:`23`). By `Kyle
-  Brindley`_.
-- Added fix to avaid warnings treated as errors introduced in Sphinx 5 (:issue:`25`, :merge:`30`). By `Sergio Cordova`_.
+- Updated build to latest cpp_stub (:merge:`3`). By `Nathan Miller`_.
+- Updated tests to BOOST test (:merge:`2`). By `Nathan Miller`_.
 
 
 ******************
-0.1.7 (2022-03-24)
+0.1.6 (2021-08-26)
 ******************
-
 Internal Changes
 ================
-- Test and deploy against the "aea-release" and "aea-beta" environments for pending AEA Compute Environment changes:
-  https://ddw-confluence.lanl.gov/display/PYT/2022/02/08/AEA+Compute+environment+updates+coming+March+31%2C+2022
-  (:merge:`21`). By `Kyle Brindley`_.
-
-
-******************
-0.1.6 (2022-03-21)
-******************
-
-Bug fixes
-=========
-- Update the documentation ``cmake`` command to match the new documentation directory structure (:merge:`10`). By `Kyle
-  Brindley`_.
-- Re-enabled the Abaqus integration tests (:merge:`14`). By `Nathan Miller`_.
-
-Documentation
-=============
-- Update URLs for cpp stub repository (:issue:`22`, :merge:`28`). By `Prabhu Khalsa`_.
-- Deploy both ``master`` and ``dev`` branch documentation (:issue:`4`, :merge:`8`). By `Kyle Brindley`_.
-- Fix broken documentation URLs in README (:merge:`11`). By `Kyle Brindley`_.
-- Fix broken Gitlab documentation URLs in Gitlab setup (:merge:`12`). By `Kyle Brindley`_.
-- Fix broken ``rename`` command in Gitlab setup (:merge:`13`). By `Kyle Brindley`_.
-
-Internal Changes
-================
-- Removed unused myst-parser extension from the Sphinx configuration (:issue:`9`, :merge:`15`). By `Kyle Brindley`_.
-- Update the build configuration to handle conda environments than manage cpp compilers and libraries (:issue:`11`
-  :merge:`16`). By `Kyle Brindley`_.
-- Add back compiler flags related to code warnings for the project wide compile options (:issue:`12`, :merge:`18`). By
-  `Kyle Brindley`_.
-
+-upgrade build system to CMake3 
 
 ******************
 0.1.5 (2021-07-19)
