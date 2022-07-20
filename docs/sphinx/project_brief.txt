@@ -1,0 +1,5 @@
+The foundational library for micromorphic continuum mechanics.
+
+This library contains functions which perform fundamental operations required
+for micromorphic continuum mechanics. It is intended to support the development
+of advanced higher-order constitutive models and enable their rapid development.

@@ -6,11 +6,14 @@ Changelog
 #########
 
 ******************
-1.1.0 (unreleased)
+1.0.2 (unreleased)
 ******************
 
 Internal Changes
 ================
+- Updated build to build the `dev` documentation before `main` (:merge:`5`). By `Nathan Miller`_.
+- Updated build to enable documentation deployment (:merge:`4`). By `Nathan Miller`_.
+- Updated build to latest cpp_stub (:merge:`3`). By `Nathan Miller`_.
 - Updated tests to BOOST test (:merge:`2`). By `Nathan Miller`_.
 
 
