@@ -60,13 +60,13 @@ microbump:
     - git config user.email "${GITLAB_USER_EMAIL}"
     - git remote add oauth2-origin https://gitlab-ci-token:${GITLAB_ACCESS_TOKEN}@re-git.lanl.gov/${CI_PROJECT_PATH}.git
     - git tag -a ${production_version} -m "production release ${production_version}" || true
-    - last_merge_hash=$(git log --pretty=format:"%H" --merges -n 2 | tail -n 1)  # Assume last merge was dev->master. Pick previous
+    - last_merge_hash=$(git log --pretty=format:"%H" --merges -n 2 | tail -n 1)  # Assume last merge was dev->main. Pick previous
     - git tag -a ${developer_version} -m "developer release ${developer_version}" ${last_merge_hash} || true
     - git push oauth2-origin --tags
   tags:
     - sstelmo-shell-aea
   only:
-    - master
+    - main
 
 test_build:
   stage: test
@@ -96,7 +96,7 @@ pages:
     # Reference: https://gitlab.com/gitlab-org/gitlab/-/issues/33822
     - git fetch origin
     - git branch -a
-    - documentation_branches="master dev"
+    - documentation_branches="main dev"
     - |
         for ref in ${documentation_branches}; do
             git checkout $ref
@@ -113,5 +113,5 @@ pages:
   tags:
     - sstelmo-shell-aea
   only:
-    - master
+    - main
     - dev
