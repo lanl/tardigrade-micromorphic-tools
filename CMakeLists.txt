@@ -11,6 +11,8 @@ set(SPHINX_SRC_PATH "docs/sphinx")
 # Add the cmake folder to locate project CMake module(s)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}" ${CMAKE_MODULE_PATH})
 
+set(MICROMORPHIC_TOOLS_BUILD_PYTHON_BINDINGS ON CACHE BOOL "Flag for whether the python bindings should be built")
+
 # Get version number from Git
 set(VERSION_UPDATE_FROM_GIT True)
 # FIXME: Figure out why include() doesn't pick up CMAKE_MODULE_PATH correctly
@@ -51,6 +53,7 @@ include(FetchContent)
 set(upstream_packages "error_tools" "vector_tools" "constitutive_tools")
 foreach(package ${upstream_packages})
     string(TOUPPER "${package}" package_upper)
+    set(${package_upper}_BUILD_PYTHON_BINDINGS ${MICROMORPHIC_TOOLS_BUILD_PYTHON_BINDINGS})
     find_package(${package} ${upstream_required} CONFIG)
     if(${package}_FOUND)
         message(STATUS "Found ${package}: ${${package}_DIR}")
