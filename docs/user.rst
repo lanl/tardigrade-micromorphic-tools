@@ -34,9 +34,9 @@ For instance, with the W-13 "release" environment on ``sstelmo``
 
 .. code:: bash
 
-   $ find /projects/python/release -name "libmicromorphic_tools.so"
-   /projects/python/release/lib64/libmicromorphic_tools.so
-   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/python/release/lib64
+   $ find /projects/aea_compute/release -name "libmicromorphic_tools.so"
+   /projects/aea_compute/release/lib64/libmicromorphic_tools.so
+   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/aea_compute/release/lib64
 
 As a convenience, the following code may be used to determine the correct, active Conda environment at execution.
 The following bash code is provided as an example for end users and not supported by this project. End users who wish to
