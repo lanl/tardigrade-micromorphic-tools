@@ -237,7 +237,7 @@ Install
 In addition to the CMake build and test configuration, this project has a CMake install configuration. Users will most
 likely never need to perform a project installation from source. The project's CI/CD scripts deploy updates
 automatically to supported `W-13 Python Environments`_. Developers using this repository as a template for projects
-outside W-13 may be interested in the template ``{BUILD,TEST,INSTALL}.sh`` scripts used by the CI/CD jobs.
+outside W-13 may be interested in the template ``{BUILD,TEST}.sh`` scripts used by the CI/CD jobs.
 
 After building, the project can be installed with the CMake ``--install`` option.
 
@@ -256,16 +256,7 @@ privileges. For non-default installation directories, use the CMake ``--prefix``
    /path/to/micromorphic_tools/build/
    $ cmake3 --install . --prefix /path/to/custom/install
 
-A common choice for non-admin installs on Linux systems is ``/home/$USER/.local/``. However, this project is intended to
-be built and deployed to Conda Python environments. The CI/CD build for this project deploys to the `W-13 Python
-Environments`_ with the ``INSTALL.sh`` script. Developers building and deploying from source may use that script for
-active conda environment installations or as a template for custom installations.
-
-.. code:: bash
-
-   $ pwd
-   /path/to/micromorphic_tools/
-   $ grep "install\|conda_env_path" INSTALL.sh
-   conda_env_path=$(conda info | grep "active env location" | cut -f 2 -d :)
-   # Change to build directory and run cmake install
-   ${cmake_exec} --install . --prefix ${conda_env_path}
+A common choice for non-admin installs on Linux systems is
+``/home/$USER/.local/``. However, this project is intended to be built and
+deployed to Conda Python environments. The CI/CD build for this project deploys
+to the `W-13 Python Environments`_.
