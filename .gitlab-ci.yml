@@ -75,8 +75,11 @@ test_build:
   variables:
     GIT_STRATEGY: clone
   script:
+    - workdir=${PWD}
     - ./BUILD.sh
-    - ./TEST.sh
+    - cd build
+    - ctest --verbose --output-log results.tex
+    - cd ${workdir}
   artifacts:
     when: always
     paths:
