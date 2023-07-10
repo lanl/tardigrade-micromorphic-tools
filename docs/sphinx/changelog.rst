@@ -15,11 +15,15 @@ Internal Changes
 - Updated build to enable documentation deployment (:merge:`4`). By `Nathan Miller`_.
 - Updated build to latest cpp_stub (:merge:`3`). By `Nathan Miller`_.
 - Updated tests to BOOST test (:merge:`2`). By `Nathan Miller`_.
+- Removed the older build scripts in favor of documented, direct cmake commands (:issue:`4`, :merge:`12`). By `Kyle
+  Brindley`_.
+- Run CI tests with a project specific CI Conda environment (:issue:`3`, :merge:`13`). By `Kyle Brindley`_.
 
 
 ******************
 0.1.6 (2021-08-26)
 ******************
+
 Internal Changes
 ================
 -upgrade build system to CMake3 
