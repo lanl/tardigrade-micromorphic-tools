@@ -150,7 +150,9 @@ configuration from scratch.
 
       # Build and perform tests
       $ ./BUILD.sh
-      $ ./TEST.sh
+      $ mkdir build
+      $ cd build
+      $ ctest --verbose --output-log results.tex
 
 3) View test results
 
@@ -159,7 +161,7 @@ configuration from scratch.
       # As built directly to PWD
       $ cat results.tex
 
-      # As built by BUILD.sh and TEST.sh
+      # As built by BUILD.sh
       $ cat build/src/cpp/tests/*_results.tex
       $ cat *results.tex
 
@@ -237,7 +239,7 @@ Install
 In addition to the CMake build and test configuration, this project has a CMake install configuration. Users will most
 likely never need to perform a project installation from source. The project's CI/CD scripts deploy updates
 automatically to supported `W-13 Python Environments`_. Developers using this repository as a template for projects
-outside W-13 may be interested in the template ``{BUILD,TEST}.sh`` scripts used by the CI/CD jobs.
+outside W-13 may be interested in the template ``{BUILD}.sh`` scripts used by the CI/CD jobs.
 
 After building, the project can be installed with the CMake ``--install`` option.
 
