@@ -24,6 +24,8 @@ before_script:
   - module help "${environment}"
   - module load "${environment}"
   # Determine the CMake3 command
+  # TODO: remove when CI job runs in project specific CI environment with CMake
+  # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/3
   - cmake_program='cmake'
   - if [[ "$(command -v cmake3)" ]]; then cmake_program='cmake3'; fi
   - echo ${cmake_program}
@@ -68,19 +70,24 @@ microbump:
   only:
     - main
 
-test_build:
+fast-test:
   stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   variables:
     GIT_STRATEGY: clone
   script:
-    - ./BUILD.sh
-    - ./TEST.sh
+    - workdir=${PWD}
+    - mkdir build
+    - cd build
+    - ${cmake_program} .. -DCMAKE_BUILD_TYPE=Release
+    - ${cmake_program} --build . --target all --verbose
+    - ctest --verbose --output-log results.txt
+    - cd ${workdir}
   artifacts:
     when: always
     paths:
-      - build/results.tex
+      - build/results.txt
   tags:
     - sstelmo-shell-aea
 
@@ -90,6 +97,7 @@ pages:
   variables:
     GIT_STRATEGY: clone
   script:
+    - workdir=${PWD}
     - rm -rf public && mkdir -p public
     - cp docs/html/index.html public
     # Every documentation version must be re-built for *every* gitlab-pages job execution
@@ -101,10 +109,13 @@ pages:
         for ref in ${documentation_branches}; do
             git checkout $ref
             git reset --hard origin/$ref
-            mkdir -p public/$ref/doxygen
-            ./BUILD.sh
+            mkdir -p public/$ref/doxygen build
+            cd build
+            ${cmake_program} .. -DCMAKE_BUILD_TYPE=Release
+            ${cmake_program} --build . --target Sphinx --verbose
             cp -r build/docs/sphinx/html/* public/$ref
             cp -r build/docs/doxygen/html/* public/$ref/doxygen
+            cd ${workdir}
         done
   artifacts:
     paths:
