@@ -98,7 +98,7 @@ microbump:
     - git tag -a ${developer_version} -m "developer release ${developer_version}" ${last_merge_hash} || true
     - git push oauth2-origin --tags
   tags:
-    - sstelmo-shell-aea
+    - shell-aea
 
 fast-test:
   stage: test
@@ -124,7 +124,7 @@ fast-test:
     paths:
       - build/results.txt
   tags:
-    - sstelmo-shell-aea
+    - shell-aea
 
 # It MUST be called pages
 pages:
@@ -162,4 +162,4 @@ pages:
       # It MUST be called public
       - public
   tags:
-    - sstelmo-shell-aea
+    - shell-aea
