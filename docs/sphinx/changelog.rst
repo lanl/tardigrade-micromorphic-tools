@@ -17,6 +17,7 @@ Internal Changes
 - Updated tests to BOOST test (:merge:`2`). By `Nathan Miller`_.
 - Removed the older build scripts in favor of documented, direct cmake commands (:issue:`4`, :merge:`12`). By `Kyle
   Brindley`_.
+- Run CI tests with a project specific CI Conda environment (:issue:`3`, :merge:`13`). By `Kyle Brindley`_.
 
 
 ******************
