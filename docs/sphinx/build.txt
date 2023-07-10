@@ -124,50 +124,37 @@ Test on sstelmo
 Convenience build wrappers
 ==========================
 
-Two build scripts have been created for convenience, ``new_build.sh`` and
-``build_docs.sh``. The first will build everything including the library binary,
-the test binary, and the documentation. This is the same build script used by
-``CD.sh`` for Gitlab CD builds and testing. The ``build_docs.sh`` script
-only builds the documentation. Both build scripts clobber existing build
-directories, reset any bash environment variables, and run the cmake
-configuration from scratch.
-
 2) Build everything and run tests
 
    .. code:: bash
 
+      # Build
       $ pwd
       /path/to/micromorphic_tools/
-
-      # Just perform the build (pick one)
-      $ ./new_build.sh <cmake build type>
-      $ ./new_build.sh  None
-      $ ./new_build.sh  None
-      $ ./new_build.sh  None
-
-      # Perform tests from PWD
-      $ ./build/src/cpp/tests/test_micromorphic_tools
-
-      # Build and perform tests
-      $ ./BUILD.sh
       $ mkdir build
       $ cd build
+      $ cmake .. -DCMAKE_BUILD_TYPE=Release
+      $ cmake --build . --target all --verbose
+
+      # Perform tests
+      $ pwd
+      /path/to/micromorphic_tools/build
       $ ctest --verbose --output-log results.tex
 
 3) View test results
 
    .. code:: bash
 
-      # As built directly to PWD
+      $ pwd
+      /path/to/micromorphic_tools/build
       $ cat results.tex
-
-      # As built by BUILD.sh
-      $ cat build/src/cpp/tests/*_results.tex
-      $ cat *results.tex
 
 4) Display docs
 
    .. code:: bash
+
+      $ pwd
+      /path/to/micromorphic_tools
 
       # Sphinx
       $ firefox build/docs/sphinx/index.html &
@@ -182,9 +169,6 @@ Building the documentation
 
    **API Health Note**: The sphinx API docs are a work-in-progress. The doxygen
    API is much more useful.
-
-The documentation can be built with ``build_docs.sh``. The steps used in that
-shell script are repeated here.
 
 To build just the documentation pick up the steps here:
 
@@ -238,8 +222,7 @@ Install
 
 In addition to the CMake build and test configuration, this project has a CMake install configuration. Users will most
 likely never need to perform a project installation from source. The project's CI/CD scripts deploy updates
-automatically to supported `W-13 Python Environments`_. Developers using this repository as a template for projects
-outside W-13 may be interested in the template ``{BUILD}.sh`` scripts used by the CI/CD jobs.
+automatically to supported `W-13 Python Environments`_.
 
 After building, the project can be installed with the CMake ``--install`` option.
 
