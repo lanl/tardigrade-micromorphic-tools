@@ -25,8 +25,6 @@ if { [ string match "sn-rfe?.lanl.gov" $hostname ] ||
      [ string match "sn???.localdomain" $hostname ] } {
     set software_prefix "/usr/projects/hpcsoft/common/x86_64"
     set projects "/usr/projects/ea"
-
-    module load intel
 # W-13 machine cases
 } elseif { [ string match "*.lanl.gov" $hostname ] } {
     set software_prefix "/apps"
@@ -45,11 +43,6 @@ set environment_man "$environment_path/share/man"
 # Reference - sn-rfe.lanl.gov:/usr/projects/hpcsoft/modulefiles/toss3/snow/tools/python/3.9-anaconda-2021.11
 prepend-path PATH "$environment_bin:$anaconda_bin"
 prepend-path MANPATH "$environment_man"
-
-# Set some aliases similarly to W-13 compute servers
-# Reference - sstelmo.lanl.gov:/usr/share/Modules/modulefiles/python/2021.11-python-3.9
-set-alias ipy "ipython"
-set-alias nb "jupyter notebook"
 
 # Activate the Conda environment
 # Variables and functions from $anaconda_path/etc/profile.d/conda.sh initialization script that must be unset
@@ -98,9 +91,5 @@ proc ModulesHelp {} {
     puts stderr "\n\nModifies environment variables"
     puts stderr "PATH prepended with: $environment_bin:$anaconda_bin"
     puts stderr "MANPATH prepended with: $environment_man"
-
-    puts stderr "\n\nSets aliases:"
-    puts stderr "ipy\t\t open ipython"
-    puts stderr "nb\t\t open a jupyter notebook server"
 
 }
