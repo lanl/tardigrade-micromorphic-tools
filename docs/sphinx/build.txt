@@ -121,47 +121,6 @@ Test on sstelmo
       # View details of most recent test execution including failure messages
       $ less Testing/Temporary/LastTest.log
 
-Convenience build wrappers
-==========================
-
-2) Build everything and run tests
-
-   .. code:: bash
-
-      # Build
-      $ pwd
-      /path/to/micromorphic_tools/
-      $ mkdir build
-      $ cd build
-      $ cmake .. -DCMAKE_BUILD_TYPE=Release
-      $ cmake --build . --target all --verbose
-
-      # Perform tests
-      $ pwd
-      /path/to/micromorphic_tools/build
-      $ ctest --verbose --output-log results.tex
-
-3) View test results
-
-   .. code:: bash
-
-      $ pwd
-      /path/to/micromorphic_tools/build
-      $ cat results.tex
-
-4) Display docs
-
-   .. code:: bash
-
-      $ pwd
-      /path/to/micromorphic_tools
-
-      # Sphinx
-      $ firefox build/docs/sphinx/index.html &
-
-      # Doxygen
-      $ firefox build/docs/doxygen/html/index.html &
-
 Building the documentation
 ==========================
 
