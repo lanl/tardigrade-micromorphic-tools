@@ -6,6 +6,7 @@ constitutive_tools>=0.6
 doxygen>=1.9
 eigen>=3.3.7
 error_tools>=0.6
+setuptools_scm>=6.2
 sphinx>=3.0.4
 sphinx_rtd_theme>=0.4.3
 sphinxcontrib-bibtex
