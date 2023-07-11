@@ -4,10 +4,16 @@ package:
   version: {{ VERSION }}
 
 about:
-  home: https://re-git.lanl.gov/aea/stub-repositories/micromorphic_tools
-  summary: 'A stub repository for C++ development projects in W-13. Can serve as a Fortran+CMake starting point as well.'
-  doc_url: https://aea.re-pages.lanl.gov/stub-repositories/micromorphic_tools/
-  dev_url: https://re-git.lanl.gov/aea/stub-repositories/micromorphic_tools
+  home: https://github.com/lanl/tardigrade-micromorphic-tools
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: 'A collection of useful tools and utilities for micromorphic continuum mechanics'
+  description: |
+    tardigrade-micromorphic-tools (C20048 Tardigrade) A collection of useful tools and utilities for micromorphic
+    continuum mechanics. These utilities are intended to reduce the implementation time of  constitutive model
+    development by providing a library of functions which are verified and ready to be implemented.
+  doc_url: https://lanl.github.io/tardigrade-micromorphic-tools
+  dev_url: https://github.com/lanl/tardigrade-micromorphic-tools
 
 source:
   path: '..'
