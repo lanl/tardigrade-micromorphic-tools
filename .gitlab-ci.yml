@@ -73,7 +73,7 @@ environment:
     # place the common modulefiles in an accessible location
     - cp ${PWD}/modulefiles/* ${aea_modulefiles}
   tags:
-    - shell-aea
+    - sstelmo-shell-aea
 
 microbump:
   stage: version
@@ -109,7 +109,7 @@ microbump:
     - git tag -a ${developer_version} -m "developer pre-release ${developer_version}" ${last_merge_hash} || true
     - git push oauth2-origin --tags
   tags:
-    - shell-aea
+    - sstelmo-shell-aea
 
 fast-test:
   stage: test
@@ -135,7 +135,7 @@ fast-test:
     paths:
       - build/results.txt
   tags:
-    - shell-aea
+    - sstelmo-shell-aea
 
 # It MUST be called pages
 pages:
@@ -173,4 +173,4 @@ pages:
       # It MUST be called public
       - public
   tags:
-    - shell-aea
+    - sstelmo-shell-aea
