@@ -13,6 +13,17 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}" ${CMAKE_MODULE_P
 
 set(MICROMORPHIC_TOOLS_BUILD_PYTHON_BINDINGS ON CACHE BOOL "Flag for whether the python bindings should be built")
 
+# Set build type checks
+string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower)
+set(upstream_required "")
+set(not_conda_test "true")
+if(cmake_build_type_lower STREQUAL "release")
+    set(upstream_required "REQUIRED")
+elseif(cmake_build_type_lower STREQUAL "conda-test")
+    set(upstream_required "REQUIRED")
+    set(not_conda_test "false")
+endif()
+
 # Get version number from Git
 if(${not_conda_test} STREQUAL "true")
     # TODO: On osx-arm64 some c++ projects struggle to find $PREFIX/bin/python during conda-builds and others don't.
@@ -55,13 +66,6 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 include_directories(${EIGEN3_INCLUDE_DIR})
 if(EIGEN3_FOUND)
     message(STATUS "Found Eigen3: ${EIGEN3_INCLUDE_DIR}")
-endif()
-
-# Set build type checks
-string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower)
-set(upstream_required "")
-if(cmake_build_type_lower STREQUAL "release")
-    set(upstream_required "REQUIRED")
 endif()
 
 # Find related, but external, projects in installed environment
