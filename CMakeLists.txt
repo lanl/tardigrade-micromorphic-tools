@@ -13,11 +13,37 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}" ${CMAKE_MODULE_P
 
 set(MICROMORPHIC_TOOLS_BUILD_PYTHON_BINDINGS ON CACHE BOOL "Flag for whether the python bindings should be built")
 
+# Set build type checks
+string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower)
+set(upstream_required "")
+set(not_conda_test "true")
+if(cmake_build_type_lower STREQUAL "release")
+    set(upstream_required "REQUIRED")
+elseif(cmake_build_type_lower STREQUAL "conda-test")
+    set(upstream_required "REQUIRED")
+    set(not_conda_test "false")
+endif()
+
 # Get version number from Git
-set(VERSION_UPDATE_FROM_GIT True)
-# FIXME: Figure out why include() doesn't pick up CMAKE_MODULE_PATH correctly
-include(${CMAKE_SRC_PATH}/GetVersionFromGitTag.cmake)
-project(${PROJECT_NAME} VERSION ${${PROJECT_NAME}_VERSION})
+if(${not_conda_test} STREQUAL "true")
+    # TODO: On osx-arm64 some c++ projects struggle to find $PREFIX/bin/python during conda-builds and others don't.
+    # Trace the source and remove the hint when CMake configures with the correct python version during conda-build.
+    # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
+    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
+    if (DEFINED ENV{PREFIX})
+        set(Python_ROOT_DIR "$ENV{PREFIX}/bin")
+    endif()
+    find_package(Python COMPONENTS Interpreter REQUIRED)
+    execute_process(COMMAND ${Python_EXECUTABLE} -m setuptools_scm
+		            OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_STRING_FULL
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(${${PROJECT_NAME}_VERSION_STRING_FULL} STREQUAL "")
+        set(${PROJECT_NAME}_VERSION 0.0.0)
+    else()
+         string(REGEX MATCH "[0-9]+\.[0-9]+\.[0-9]+" ${PROJECT_NAME}_VERSION ${${PROJECT_NAME}_VERSION_STRING_FULL})
+    endif()
+    project(${PROJECT_NAME} VERSION ${${PROJECT_NAME}_VERSION})
+endif()
 
 # Add installation directory variables
 include(GNUInstallDirs)
@@ -42,13 +68,6 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 include_directories(${EIGEN3_INCLUDE_DIR})
 if(EIGEN3_FOUND)
     message(STATUS "Found Eigen3: ${EIGEN3_INCLUDE_DIR}")
-endif()
-
-# Set build type checks
-string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower)
-set(upstream_required "")
-if(cmake_build_type_lower STREQUAL "release")
-    set(upstream_required "REQUIRED")
 endif()
 
 # Find related, but external, projects in installed environment
@@ -100,14 +119,14 @@ foreach(package ${PROJECT_NAME})
       "${PROJECT_BINARY_DIR}/${package}Config.cmake"
       INSTALL_DESTINATION
       ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-    
+
     # CMake won't build the targets for local builds of upstream projects
     if(cmake_build_type_lower STREQUAL release)
         install(EXPORT ${package}_Targets
                 FILE ${package}Targets.cmake
                 DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
     endif()
-    
+
     install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
                   "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)

@@ -18,6 +18,7 @@ Internal Changes
 - Removed the older build scripts in favor of documented, direct cmake commands (:issue:`4`, :merge:`12`). By `Kyle
   Brindley`_.
 - Run CI tests with a project specific CI Conda environment (:issue:`3`, :merge:`13`). By `Kyle Brindley`_.
+- Use setuptools_scm for Git tag version number (:issue:`5`, :merge:`14`). By `Kyle Brindley`_.
 
 
 ******************
