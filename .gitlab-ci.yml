@@ -73,6 +73,8 @@ environment:
     # place the common modulefiles in an accessible location
     - cp ${PWD}/modulefiles/* ${aea_modulefiles}
   tags:
+    # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
+    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 microbump:
@@ -109,6 +111,8 @@ microbump:
     - git tag -a ${developer_version} -m "developer pre-release ${developer_version}" ${last_merge_hash} || true
     - git push oauth2-origin --tags
   tags:
+    # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
+    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 fast-test:
@@ -135,6 +139,8 @@ fast-test:
     paths:
       - build/results.txt
   tags:
+    # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
+    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 # It MUST be called pages
@@ -173,4 +179,6 @@ pages:
       # It MUST be called public
       - public
   tags:
+    # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
+    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
