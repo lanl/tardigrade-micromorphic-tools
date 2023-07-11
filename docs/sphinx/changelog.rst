@@ -6,7 +6,11 @@ Changelog
 #########
 
 ******************
-1.0.2 (unreleased)
+1.2.2 (unreleased)
+******************
+
+******************
+1.2.1 (2023-07-11)
 ******************
 
 Internal Changes
@@ -19,6 +23,7 @@ Internal Changes
   Brindley`_.
 - Run CI tests with a project specific CI Conda environment (:issue:`3`, :merge:`13`). By `Kyle Brindley`_.
 - Use setuptools_scm for Git tag version number (:issue:`5`, :merge:`14`). By `Kyle Brindley`_.
+- Add the tardigrade license and meta data (:issue:`10`, :merge:`16`). By `Kyle Brindley`_.
 
 
 ******************
@@ -27,7 +32,7 @@ Internal Changes
 
 Internal Changes
 ================
--upgrade build system to CMake3 
+-upgrade build system to CMake3
 
 ******************
 0.1.5 (2021-07-19)
