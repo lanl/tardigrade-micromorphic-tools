@@ -30,8 +30,6 @@ if(${not_conda_test} STREQUAL "true")
     # Trace the source and remove the hint when CMake configures with the correct python version during conda-build.
     if (DEFINED ENV{PREFIX})
         set(Python_ROOT_DIR "$ENV{PREFIX}/bin")
-    elseif (DEFINED ENV{CONDA_PREFIX})
-        set(Python_ROOT_DIR "$ENV{CONDA_PREFIX}/bin")
     endif()
     find_package(Python COMPONENTS Interpreter REQUIRED)
     execute_process(COMMAND ${Python_EXECUTABLE} -m setuptools_scm
