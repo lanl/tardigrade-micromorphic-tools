@@ -1,27 +1,27 @@
-//Tests for constitutive_tools
+//Tests for tardigrade_constitutive_tools
 
-#include<micromorphic_tools.h>
+#include<tardigrade_micromorphic_tools.h>
 #include<sstream>
 #include<fstream>
 #include<iostream>
 
-#define BOOST_TEST_MODULE test_micromorphic_tools
+#define BOOST_TEST_MODULE test_tardigrade_micromorphic_tools
 #include <boost/test/included/unit_test.hpp>
 
-typedef micromorphicTools::constantType constantType;
-typedef micromorphicTools::constantVector constantVector;
-typedef micromorphicTools::constantMatrix constantMatrix;
+typedef tardigradeMicromorphicTools::constantType constantType;
+typedef tardigradeMicromorphicTools::constantVector constantVector;
+typedef tardigradeMicromorphicTools::constantMatrix constantMatrix;
 
-typedef micromorphicTools::parameterType parameterType;
-typedef micromorphicTools::parameterVector parameterVector;
-typedef micromorphicTools::parameterMatrix parameterMatrix;
+typedef tardigradeMicromorphicTools::parameterType parameterType;
+typedef tardigradeMicromorphicTools::parameterVector parameterVector;
+typedef tardigradeMicromorphicTools::parameterMatrix parameterMatrix;
 
-typedef micromorphicTools::variableType variableType;
-typedef micromorphicTools::variableVector variableVector;
-typedef micromorphicTools::variableMatrix variableMatrix;
+typedef tardigradeMicromorphicTools::variableType variableType;
+typedef tardigradeMicromorphicTools::variableVector variableVector;
+typedef tardigradeMicromorphicTools::variableMatrix variableMatrix;
 
-typedef micromorphicTools::errorNode errorNode;
-typedef micromorphicTools::errorOut errorOut;
+typedef tardigradeMicromorphicTools::errorNode errorNode;
+typedef tardigradeMicromorphicTools::errorOut errorOut;
 
 struct cout_redirect{
     cout_redirect( std::streambuf * new_buffer)
@@ -63,21 +63,21 @@ BOOST_AUTO_TEST_CASE( test_computePsi ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computePsi( F, Chi, result );
+    errorOut error = tardigradeMicromorphicTools::computePsi( F, Chi, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobians
     variableVector resultJ;
     variableMatrix dPsidF, dPsidChi;
 
-    error = micromorphicTools::computePsi( F, Chi, resultJ, dPsidF, dPsidChi );
+    error = tardigradeMicromorphicTools::computePsi( F, Chi, resultJ, dPsidF, dPsidChi );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dPsidF
     
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_computePsi ){
         constantVector delta( F.size(), 0 );
         delta[i] = eps * fabs( F[i] ) + eps;
 
-        error = micromorphicTools::computePsi( F + delta, Chi, resultJ );
+        error = tardigradeMicromorphicTools::computePsi( F + delta, Chi, resultJ );
 
         BOOST_CHECK( !error );
 
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( test_computePsi ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPsidF[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPsidF[ j ][ i ] ) );
 
         }
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( test_computePsi ){
         constantVector delta( Chi.size(), 0 );
         delta[i] = eps * fabs( Chi[i] ) + eps;
 
-        error = micromorphicTools::computePsi( F, Chi + delta, resultJ );
+        error = tardigradeMicromorphicTools::computePsi( F, Chi + delta, resultJ );
 
         BOOST_CHECK( !error );
 
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( test_computePsi ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPsidChi[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPsidChi[ j ][ i ] ) );
         }
     }
 
@@ -133,28 +133,28 @@ BOOST_AUTO_TEST_CASE( test_computeMicroStrain ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeMicroStrain( Psi, result );
+    errorOut error = tardigradeMicromorphicTools::computeMicroStrain( Psi, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobians 
     
     variableVector resultJ;
     variableMatrix dMicroStraindPsi;
-    error = micromorphicTools::computeMicroStrain( Psi, resultJ, dMicroStraindPsi );
+    error = tardigradeMicromorphicTools::computeMicroStrain( Psi, resultJ, dMicroStraindPsi );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < Psi.size(); i++ ){
         constantVector delta( Psi.size(), 0 );
         delta[i] = eps * fabs( Psi[i] ) + eps;
 
-        error = micromorphicTools::computeMicroStrain( Psi + delta, resultJ );
+        error = tardigradeMicromorphicTools::computeMicroStrain( Psi + delta, resultJ );
 
         BOOST_CHECK( !error );
 
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( test_computeMicroStrain ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMicroStraindPsi[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dMicroStraindPsi[ j ][ i ] ) );
 
         }
 
@@ -189,22 +189,22 @@ BOOST_AUTO_TEST_CASE( test_pushForwardPK2Stress ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, result );
+    errorOut error = tardigradeMicromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
     variableMatrix dCauchydPK2, dCauchydF;
 
-    error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, resultJ,
+    error = tardigradeMicromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient, resultJ,
                                                      dCauchydPK2, dCauchydF );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dCauchydPK2
     constantType eps = 1e-6;
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardPK2Stress ){
         constantVector delta( PK2Stress.size(), 0 );
         delta[i] = eps * fabs( PK2Stress[i] ) + eps;
 
-        error = micromorphicTools::pushForwardPK2Stress( PK2Stress + delta, deformationGradient, resultJ );
+        error = tardigradeMicromorphicTools::pushForwardPK2Stress( PK2Stress + delta, deformationGradient, resultJ );
 
         BOOST_CHECK( !error );
 
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardPK2Stress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dCauchydPK2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dCauchydPK2[ j ][ i ] ) );
         }
     }
 
@@ -230,11 +230,11 @@ BOOST_AUTO_TEST_CASE( test_pushForwardPK2Stress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient + delta, resultp );
+        error = tardigradeMicromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient - delta, resultm );
+        error = tardigradeMicromorphicTools::pushForwardPK2Stress( PK2Stress, deformationGradient - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardPK2Stress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dCauchydF[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dCauchydF[ j ][ i ] ) );
         }
     }
 
@@ -267,22 +267,22 @@ BOOST_AUTO_TEST_CASE( test_pushForwardReferenceMicroStress ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, result );
+    errorOut error = tardigradeMicromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
     variableMatrix dsdS, dsdF;
 
-    error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, resultJ,
+    error = tardigradeMicromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient, resultJ,
                                                                 dsdS, dsdF );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dsdS
     constantType eps = 1e-6;
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardReferenceMicroStress ){
         constantVector delta( referenceMicroStress.size(), 0 );
         delta[i] = eps * fabs( referenceMicroStress[i] ) + eps;
 
-        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress + delta, deformationGradient, resultJ );
+        error = tardigradeMicromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress + delta, deformationGradient, resultJ );
 
         BOOST_CHECK( !error );
 
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardReferenceMicroStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dsdS[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dsdS[ j ][ i ] ) );
 
         }
     }
@@ -309,11 +309,11 @@ BOOST_AUTO_TEST_CASE( test_pushForwardReferenceMicroStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient + delta, resultp );
+        error = tardigradeMicromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient - delta, resultm );
+        error = tardigradeMicromorphicTools::pushForwardReferenceMicroStress( referenceMicroStress, deformationGradient - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardReferenceMicroStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dsdF[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dsdF[ j ][ i ] ) );
         }
     }
 
@@ -346,22 +346,22 @@ BOOST_AUTO_TEST_CASE( test_computeGamma ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeGamma( deformationGradient, gradChi, result );
+    errorOut error = tardigradeMicromorphicTools::computeGamma( deformationGradient, gradChi, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
     variableMatrix dGammadF, dGammadGradChi;
 
-    error = micromorphicTools::computeGamma( deformationGradient, gradChi, resultJ, 
+    error = tardigradeMicromorphicTools::computeGamma( deformationGradient, gradChi, resultJ, 
                                              dGammadF, dGammadGradChi );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dGammadF
     constantType eps = 1e-6;
@@ -371,11 +371,11 @@ BOOST_AUTO_TEST_CASE( test_computeGamma ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeGamma( deformationGradient + delta, gradChi, resultp );
+        error = tardigradeMicromorphicTools::computeGamma( deformationGradient + delta, gradChi, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeGamma( deformationGradient - delta, gradChi, resultm );
+        error = tardigradeMicromorphicTools::computeGamma( deformationGradient - delta, gradChi, resultm );
 
         BOOST_CHECK( !error );
 
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE( test_computeGamma ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dGammadF[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dGammadF[ j ][ i ] ) );
 
         }
     }
@@ -395,11 +395,11 @@ BOOST_AUTO_TEST_CASE( test_computeGamma ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeGamma( deformationGradient, gradChi + delta, resultp );
+        error = tardigradeMicromorphicTools::computeGamma( deformationGradient, gradChi + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeGamma( deformationGradient, gradChi - delta, resultm );
+        error = tardigradeMicromorphicTools::computeGamma( deformationGradient, gradChi - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE( test_computeGamma ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dGammadGradChi[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dGammadGradChi[ j ][ i ] ) );
         }
     }
 
@@ -444,12 +444,12 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress, deformationGradient,
+    errorOut error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress, deformationGradient,
                                                                       microDeformation, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     //Test Jacobian
     variableVector resultJ;
@@ -457,7 +457,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
     variableMatrix dHigherOrderStressdDeformationGradient;
     variableMatrix dHigherOrderStressdMicroDeformation;
 
-    error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
+    error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
                                                              deformationGradient, microDeformation,
                                                              resultJ,
                                                              dHigherOrderStressdReferenceHigherOrderStress,
@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test dHigherOrderStressdReferenceHigherOrderStress
     constantType eps = 1e-6;
@@ -476,13 +476,13 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress + delta,
+        error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress + delta,
                                                                  deformationGradient, microDeformation,
                                                                  resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress - delta,
+        error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress - delta,
                                                                  deformationGradient, microDeformation,
                                                                  resultm );
 
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ],  dHigherOrderStressdReferenceHigherOrderStress[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ],  dHigherOrderStressdReferenceHigherOrderStress[ j ][ i ] ) );
 
         }
 
@@ -505,13 +505,13 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
+        error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
                                                                  deformationGradient + delta, microDeformation,
                                                                  resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
+        error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
                                                                  deformationGradient - delta, microDeformation,
                                                                  resultm );
 
@@ -521,7 +521,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dHigherOrderStressdDeformationGradient[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dHigherOrderStressdDeformationGradient[ j ][ i ] ) );
 
         }
 
@@ -534,13 +534,13 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
+        error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
                                                                  deformationGradient, microDeformation + delta,
                                                                  resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
+        error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( referenceHigherOrderStress,
                                                                  deformationGradient, microDeformation - delta,
                                                                  resultm );
 
@@ -550,7 +550,7 @@ BOOST_AUTO_TEST_CASE( test_pushForwardHigherOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dHigherOrderStressdMicroDeformation[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dHigherOrderStressdMicroDeformation[ j ][ i ] ) );
 
         }
 
@@ -577,23 +577,23 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricHigherOrderStress ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, result );
+    errorOut error = tardigradeMicromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     //Test Jacobians
     
     variableVector resultJ;
     variableMatrix dDeviatoricHigherOrderStressdHigherOrderStress;
 
-    error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, resultJ,
+    error = tardigradeMicromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress, resultJ,
                                                                    dDeviatoricHigherOrderStressdHigherOrderStress );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < higherOrderStress.size(); i++ ){
@@ -602,11 +602,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricHigherOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress + delta, resultp );
+        error = tardigradeMicromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress - delta, resultm );
+        error = tardigradeMicromorphicTools::computeDeviatoricHigherOrderStress( higherOrderStress - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -614,7 +614,7 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricHigherOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals(  gradCol[ j ], dDeviatoricHigherOrderStressdHigherOrderStress[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals(  gradCol[ j ], dDeviatoricHigherOrderStressdHigherOrderStress[ j ][ i ] ) );
 
         }
 
@@ -652,58 +652,58 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
 
     variableVector pressure;
     variableMatrix dpdM, dpdC, d2pdMdC;
-    micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, pressure, dpdM, dpdC, d2pdMdC );
+    tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C, pressure, dpdM, dpdC, d2pdMdC );
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, result );
+    errorOut error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
-    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, result );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     variableVector resultJ;
     variableMatrix dDevMdM, dDevMdC;
 
-    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, resultJ, dDevMdM, dDevMdC );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, resultJ, dDevMdM, dDevMdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableVector resultJP;
     variableMatrix dDevMdMP, dDevMdCP;
 
-    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, resultJP, dDevMdMP, dDevMdCP );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, resultJP, dDevMdMP, dDevMdCP );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJP, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJP, answer ) );
 
     variableVector resultJ2;
     variableMatrix dDevMdMJ2, dDevMdCJ2, d2DevMdMdC;
 
-    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, resultJ2, dDevMdMJ2, dDevMdCJ2, d2DevMdMdC );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, resultJ2, dDevMdMJ2, dDevMdCJ2, d2DevMdMdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableVector resultJ2P;
     variableMatrix dDevMdMJ2P, dDevMdCJ2P, d2DevMdMdCP;
 
-    error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, d2pdMdC,
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C, pressure, dpdM, dpdC, d2pdMdC,
                                                                             resultJ2P, dDevMdMJ2P, dDevMdCJ2P, d2DevMdMdCP );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2P, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ2P, answer ) );
 
     //Test dDevMdM
     constantType eps = 1e-6;
@@ -713,11 +713,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M + delta, C, resultp );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M + delta, C, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M - delta, C, resultm );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M - delta, C, resultm );
 
         BOOST_CHECK( !error );
 
@@ -725,25 +725,25 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdM[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdM[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdMP[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdMP[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdMJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdMJ2[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdMJ2P[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdMJ2P[ j ][ i ] ) );
 
         }
 
@@ -756,11 +756,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultp );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C - delta, resultm );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -768,25 +768,25 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdC[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdC[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdCP[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdCP[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdCJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdCJ2[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevMdCJ2P[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevMdCJ2P[ j ][ i ] ) );
 
         }
 
@@ -799,11 +799,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
 
         variableMatrix resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultJ2, resultp, dDevMdCJ2 );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C + delta, resultJ2, resultp, dDevMdCJ2 );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C - delta, resultJ2, resultm, dDevMdCJ2 );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceHigherOrderStress( M, C - delta, resultJ2, resultm, dDevMdCJ2 );
 
         BOOST_CHECK( !error );
 
@@ -815,10 +815,10 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceHigherOrderStress ){
                     for ( unsigned int m = 0; m < 3; m++ ){
                         for ( unsigned int n = 0; n < 3; n++ ){
                             for ( unsigned int o = 0; o < 3; o++ ){
-                                BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
                                                                        d2DevMdMdC[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ] ) );
 
-                                BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
                                                                        d2DevMdMdCP[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + 9 * o + 3 * (int)( i / 3 ) + i % 3 ] ) );
                             }
                         }
@@ -846,20 +846,20 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricSecondOrderStress ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeDeviatoricSecondOrderStress( stress, result );
+    errorOut error = tardigradeMicromorphicTools::computeDeviatoricSecondOrderStress( stress, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     variableVector resultJ;
     variableMatrix jacobian;
 
-    error = micromorphicTools::computeDeviatoricSecondOrderStress( stress, resultJ, jacobian );
+    error = tardigradeMicromorphicTools::computeDeviatoricSecondOrderStress( stress, resultJ, jacobian );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     constantType eps = 1e-6;
     for ( unsigned int i = 0; i < stress.size(); i++ ){
@@ -868,11 +868,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricSecondOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricSecondOrderStress( stress + delta, resultp );
+        error = tardigradeMicromorphicTools::computeDeviatoricSecondOrderStress( stress + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricSecondOrderStress( stress - delta, resultm );
+        error = tardigradeMicromorphicTools::computeDeviatoricSecondOrderStress( stress - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -880,7 +880,7 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricSecondOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], jacobian[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], jacobian[ j ][ i ] ) );
 
         }
 
@@ -910,32 +910,32 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceSecondOrderStressPressure ){
 
     variableType result;
 
-    errorOut error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, result );
+    errorOut error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
 
     variableType resultJ;
     variableVector dpdS, dpdC;
 
-    error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, resultJ, dpdS, dpdC );
+    error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C, resultJ, dpdS, dpdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableType resultJ2;
     variableVector dpdSJ2, dpdCJ2;
     variableMatrix d2pdSdC;
 
-    error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, resultJ2, dpdSJ2, dpdCJ2, d2pdSdC );
+    error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C, resultJ2, dpdSJ2, dpdCJ2, d2pdSdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ2, answer ) );
 
     //Test dpdS
     constantType eps = 1e-6;
@@ -945,19 +945,19 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceSecondOrderStressPressure ){
 
         variableType resultp, resultm;
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S + delta, C, resultp );
+        error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S + delta, C, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S - delta, C, resultm );
+        error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S - delta, C, resultm );
 
         BOOST_CHECK( !error );
 
         constantType gradCol = ( resultp - resultm ) / ( 2 * delta[i] );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdS[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol, dpdS[ i ] ) );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdSJ2[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol, dpdSJ2[ i ] ) );
 
     }
 
@@ -968,19 +968,19 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceSecondOrderStressPressure ){
 
         variableType resultp, resultm;
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultp );
+        error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C - delta, resultm );
+        error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C - delta, resultm );
 
         BOOST_CHECK( !error );
 
         constantType gradCol = ( resultp - resultm ) / ( 2 * delta[ i ] );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdC[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol, dpdC[ i ] ) );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol, dpdCJ2[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol, dpdCJ2[ i ] ) );
 
     }
 
@@ -991,11 +991,11 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceSecondOrderStressPressure ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultJ, resultp, dpdCJ2 );
+        error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C + delta, resultJ, resultp, dpdCJ2 );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C - delta, resultJ, resultm, dpdCJ2 );
+        error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C - delta, resultJ, resultm, dpdCJ2 );
 
         BOOST_CHECK( !error );
 
@@ -1003,7 +1003,7 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceSecondOrderStressPressure ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], d2pdSdC[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], d2pdSdC[ j ][ i ] ) );
 
         }
 
@@ -1036,62 +1036,62 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
     variableVector dpdS, dpdC;
     variableMatrix d2pdSdC;
 
-    errorOut error = micromorphicTools::computeReferenceSecondOrderStressPressure( S, C, pressure, dpdS, dpdC, d2pdSdC );
+    errorOut error = tardigradeMicromorphicTools::computeReferenceSecondOrderStressPressure( S, C, pressure, dpdS, dpdC, d2pdSdC );
 
     BOOST_CHECK( !error );
 
     variableVector result;
 
-    error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, result );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
-    error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, result );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
     //Test the jacobians
     variableVector resultJ;
     variableMatrix dDevSdS, dDevSdC;
 
-    error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, resultJ, dDevSdS, dDevSdC );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, resultJ, dDevSdS, dDevSdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     variableVector resultJP;
     variableMatrix dDevSdSJP, dDevSdCJP;
 
-    error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, dpdS, dpdC, 
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, dpdS, dpdC, 
                                                                             resultJP, dDevSdSJP, dDevSdCJP );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJP, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJP, answer ) );
 
     variableVector resultJ2;
     variableMatrix dDevSdSJ2, dDevSdCJ2, d2DevSdSdC;
 
-    error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, resultJ2, dDevSdSJ2, dDevSdCJ2, d2DevSdSdC );
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, resultJ2, dDevSdSJ2, dDevSdCJ2, d2DevSdSdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ2, answer ) );
 
     variableVector resultJ2P;
     variableMatrix dDevSdSJ2P, dDevSdCJ2P, d2DevSdSdCP;
 
-    error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, dpdS, dpdC, d2pdSdC,
+    error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C, pressure, dpdS, dpdC, d2pdSdC,
                                                                             resultJ2P, dDevSdSJ2P, dDevSdCJ2P, d2DevSdSdCP );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ2P, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ2P, answer ) );
 
     //Test of dpdS
     constantType eps = 1e-6;
@@ -1101,11 +1101,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S + delta, C, resultp );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S + delta, C, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S - delta, C, resultm );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S - delta, C, resultm );
 
         BOOST_CHECK( !error );
 
@@ -1113,25 +1113,25 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdS[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdS[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJP[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJP[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJ2[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJ2P[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdSJ2P[ j ][ i ] ) );
 
         }
 
@@ -1144,11 +1144,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultp );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C - delta, resultm );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -1156,25 +1156,25 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdC[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdC[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJP[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJP[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJ2[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJ2P[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevSdCJ2P[ j ][ i ] ) );
 
         }
 
@@ -1187,11 +1187,11 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
 
         variableMatrix resultp, resultm;
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultJ, resultp, dDevSdCJ2 );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C + delta, resultJ, resultp, dDevSdCJ2 );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C - delta, resultJ, resultm, dDevSdCJ2 );
+        error = tardigradeMicromorphicTools::computeDeviatoricReferenceSecondOrderStress( S, C - delta, resultJ, resultm, dDevSdCJ2 );
 
         BOOST_CHECK( !error );
 
@@ -1202,10 +1202,10 @@ BOOST_AUTO_TEST_CASE( test_computeDeviatoricReferenceSecondOrderStress ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
 
-                        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
+                        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
                                                                d2DevSdSdC[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
 
-                        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
+                        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ 3 * j + k ][ 3 * l + m ],
                                                                d2DevSdSdCP[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
 
                     }
@@ -1247,13 +1247,13 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
     variableType pressureResult;
     variableVector deviatoricResult;
 
-    errorOut error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResult, pressureResult );
+    errorOut error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResult, pressureResult );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( pressureResult, pressureAnswer ) );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) );
 
     //Test the Jacobians
     variableType pressureResultJ;
@@ -1262,15 +1262,15 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
     variableVector dPressuredStress, dPressuredRCG;
     variableMatrix dDevStressdStress, dDevStressdRCG;
 
-    error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResultJ, pressureResultJ,
+    error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResultJ, pressureResultJ,
                                                                                dDevStressdStress, dDevStressdRCG,
                                                                                dPressuredStress, dPressuredRCG );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) );
 
     variableType pressureResultJ2;
     variableVector deviatoricResultJ2;
@@ -1280,16 +1280,16 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
 
     variableMatrix d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2;
 
-    error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResultJ2, pressureResultJ2,
+    error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C, deviatoricResultJ2, pressureResultJ2,
                                                                                dDevStressdStressJ2, dDevStressdRCGJ2,
                                                                                dPressuredStressJ2, dPressuredRCGJ2,
                                                                                d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2 );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) );
 
     //Test deriatives w.r.t. the stress.
     constantType eps = 1e-6;
@@ -1300,11 +1300,11 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
         variableVector vec_resultp, vec_resultm;
         variableType   sca_resultp, sca_resultm;
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S + delta, C, vec_resultp, sca_resultp );
+        error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S + delta, C, vec_resultp, sca_resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S - delta, C, vec_resultm, sca_resultm );
+        error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S - delta, C, vec_resultm, sca_resultm );
 
         BOOST_CHECK( !error );
 
@@ -1312,17 +1312,17 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStress[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStress[ j ][ i ] ) );
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStressJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStressJ2[ j ][ i ] ) );
 
         }
 
         constantType gradScalar = ( sca_resultp - sca_resultm ) / ( 2 * delta[ i ] );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredStress[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradScalar, dPressuredStress[ i ] ) );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredStressJ2[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradScalar, dPressuredStressJ2[ i ] ) );
 
     }
 
@@ -1336,11 +1336,11 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
         variableVector vec_resultp, vec_resultm;
         variableType   sca_resultp, sca_resultm;
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, vec_resultp, sca_resultp );
+        error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, vec_resultp, sca_resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C - delta, vec_resultm, sca_resultm );
+        error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C - delta, vec_resultm, sca_resultm );
 
         BOOST_CHECK( !error );
 
@@ -1348,27 +1348,27 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCG[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCG[ j ][ i ] ) );
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCGJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCGJ2[ j ][ i ] ) );
 
         }
 
         constantType gradScalar = ( sca_resultp - sca_resultm ) / ( 2 * delta[i] );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredRCG[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradScalar, dPressuredRCG[ i ] ) );
 
-        BOOST_CHECK( vectorTools::fuzzyEquals( gradScalar, dPressuredRCGJ2[ i ] ) );
+        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradScalar, dPressuredRCGJ2[ i ] ) );
 
         variableMatrix mat_resultp, mat_resultm;
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, deviatoricResultJ, pressureResultJ,
+        error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C + delta, deviatoricResultJ, pressureResultJ,
                                                                                    mat_resultp, dDevStressdRCGP, 
                                                                                    vec_resultp, dPressuredRCGP );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C - delta, deviatoricResultJ, pressureResultJ,
+        error = tardigradeMicromorphicTools::computeSecondOrderReferenceStressDecomposition( S, C - delta, deviatoricResultJ, pressureResultJ,
                                                                                    mat_resultm, dDevStressdRCGP, 
                                                                                    vec_resultm, dPressuredRCGP );
 
@@ -1381,7 +1381,7 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
                         
-                        BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ 3 * j + k ][ 3 * l + m ],
+                        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradMat[ 3 * j + k ][ 3 * l + m ],
                                                                d2DevStressdStressdRCGJ2[ 3 * j + k ][ 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
 
                     }
@@ -1393,7 +1393,7 @@ BOOST_AUTO_TEST_CASE( test_computeSecondOrderReferenceStressDecomposition ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], d2PressuredStressdRCGJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], d2PressuredStressdRCGJ2[ j ][ i ] ) );
 
         }
 
@@ -1422,29 +1422,29 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, result );
+    errorOut error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     
     variableVector resultJ;
     variableMatrix dpdM, dpdC;
-    error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, resultJ, dpdM, dpdC );
+    error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C, resultJ, dpdM, dpdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     variableVector resultJ2;
     variableMatrix dpdMJ2, dpdCJ2, d2pdMdC;
-    error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C, resultJ2, dpdMJ2, dpdCJ2, d2pdMdC );
+    error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C, resultJ2, dpdMJ2, dpdCJ2, d2pdMdC );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ2 ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ2 ) );
 
     //Test dpdM
     constantType eps = 1e-6;
@@ -1454,11 +1454,11 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M + delta, C, resultp );
+        error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M + delta, C, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M - delta, C, resultm );
+        error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M - delta, C, resultm );
 
         BOOST_CHECK( !error );
 
@@ -1466,13 +1466,13 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdM[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dpdM[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdMJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dpdMJ2[ j ][ i ] ) );
 
         }
 
@@ -1485,11 +1485,11 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
 
         variableVector resultp, resultm;
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultp );
+        error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C - delta, resultm );
+        error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C - delta, resultm );
 
         BOOST_CHECK( !error );
 
@@ -1497,13 +1497,13 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdC[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dpdC[ j ][ i ] ) );
 
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dpdCJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dpdCJ2[ j ][ i ] ) );
 
         }
 
@@ -1516,11 +1516,11 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
 
         variableMatrix resultp, resultm;
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultJ, resultp, dpdCJ2 );
+        error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C + delta, resultJ, resultp, dpdCJ2 );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeReferenceHigherOrderStressPressure( M, C - delta, resultJ, resultm, dpdCJ2 );
+        error = tardigradeMicromorphicTools::computeReferenceHigherOrderStressPressure( M, C - delta, resultJ, resultm, dpdCJ2 );
 
         BOOST_CHECK( !error );
 
@@ -1530,7 +1530,7 @@ BOOST_AUTO_TEST_CASE( test_computeReferenceHigherOrderStressPressure ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ][ 9 * k + 3 * l + m ], 
+                        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ][ 9 * k + 3 * l + m ], 
                                                                d2pdMdC[ j ][ 81 * k + 27 * l + 9 * m + 3 * (int)( i / 3 ) + i % 3 ] ) );
                     }
                 }
@@ -1572,13 +1572,13 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
     variableVector pressureAnswer = { 0.56778037,  0.11342234, -0.43082224 };
 
     variableVector deviatoricResult, pressureResult;
-    errorOut error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResult, pressureResult );
+    errorOut error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResult, pressureResult );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( deviatoricResult, deviatoricAnswer ) );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResult, pressureAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( pressureResult, pressureAnswer ) );
 
     //Test the Jacobians
     variableVector pressureResultJ;
@@ -1587,15 +1587,15 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
     variableMatrix dPressuredStress, dPressuredRCG;
     variableMatrix dDevStressdStress, dDevStressdRCG;
 
-    error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResultJ, pressureResultJ,
+    error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResultJ, pressureResultJ,
                                                                                dDevStressdStress, dDevStressdRCG,
                                                                                dPressuredStress, dPressuredRCG );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( pressureResultJ, pressureAnswer ) );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( deviatoricResultJ, deviatoricAnswer ) );
 
     variableVector pressureResultJ2;
     variableVector deviatoricResultJ2;
@@ -1605,16 +1605,16 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
 
     variableMatrix d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2;
 
-    error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResultJ2, pressureResultJ2,
+    error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C, deviatoricResultJ2, pressureResultJ2,
                                                                                dDevStressdStressJ2, dDevStressdRCGJ2,
                                                                                dPressuredStressJ2, dPressuredRCGJ2,
                                                                                d2DevStressdStressdRCGJ2, d2PressuredStressdRCGJ2 );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( pressureResultJ2, pressureAnswer ) );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( deviatoricResultJ2, deviatoricAnswer ) );
 
     //Test deriatives w.r.t. the stress.
     constantType eps = 1e-6;
@@ -1625,11 +1625,11 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
         variableVector dev_resultp, dev_resultm;
         variableVector pre_resultp, pre_resultm;
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M + delta, C, dev_resultp, pre_resultp );
+        error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M + delta, C, dev_resultp, pre_resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M - delta, C, dev_resultm, pre_resultm );
+        error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M - delta, C, dev_resultm, pre_resultm );
 
         BOOST_CHECK( !error );
 
@@ -1637,9 +1637,9 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStress[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStress[ j ][ i ] ) );
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStressJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdStressJ2[ j ][ i ] ) );
 
         }
 
@@ -1647,9 +1647,9 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredStress[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPressuredStress[ j ][ i ] ) );
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredStressJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPressuredStressJ2[ j ][ i ] ) );
 
         }
 
@@ -1665,11 +1665,11 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
         variableVector dev_resultp, pre_resultp;
         variableVector dev_resultm, pre_resultm;
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, dev_resultp, pre_resultp );
+        error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, dev_resultp, pre_resultp );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C - delta, dev_resultm, pre_resultm );
+        error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C - delta, dev_resultm, pre_resultm );
 
         BOOST_CHECK( !error );
 
@@ -1677,9 +1677,9 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCG[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCG[ j ][ i ] ) );
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCGJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dDevStressdRCGJ2[ j ][ i ] ) );
 
         }
 
@@ -1687,22 +1687,22 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredRCG[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPressuredRCG[ j ][ i ] ) );
 
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPressuredRCGJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPressuredRCGJ2[ j ][ i ] ) );
 
         }
 
         variableMatrix dev_mat_resultp, pre_mat_resultp;
         variableMatrix dev_mat_resultm, pre_mat_resultm;
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, deviatoricResultJ, pressureResultJ,
+        error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C + delta, deviatoricResultJ, pressureResultJ,
                                                                                    dev_mat_resultp, dDevStressdRCGP, 
                                                                                    pre_mat_resultp, dPressuredRCGP );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C - delta, deviatoricResultJ, pressureResultJ,
+        error = tardigradeMicromorphicTools::computeHigherOrderReferenceStressDecomposition( M, C - delta, deviatoricResultJ, pressureResultJ,
                                                                                    dev_mat_resultm, dDevStressdRCGP, 
                                                                                    pre_mat_resultm, dPressuredRCGP );
 
@@ -1716,7 +1716,7 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
                     for ( unsigned int m = 0; m < 3; m++ ){
                         for ( unsigned int n = 0; n < 3; n++ ){
                             for ( unsigned int o = 0; o < 3; o++ ){
-                                BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
+                                BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradMat[ 9 * j + 3 * k + l ][ 9 * m + 3 * n + o ],
                                                                        d2DevStressdStressdRCGJ2[ 9 * j + 3 * k + l ][ 81 * m + 27 * n + + 9 * o + 3 * ( int )( i / 3 ) + i % 3 ] ) );
                             }
                         }
@@ -1731,7 +1731,7 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderReferenceStressDecomposition ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
+                        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
                                                                d2PressuredStressdRCGJ2[ j ][ 81 * k + 27 * l + 9 * m + 3 * ( int )( i / 3 ) + i % 3 ] ) );
                     }
                 }
@@ -1761,30 +1761,30 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderStressNorm ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::computeHigherOrderStressNorm( M, result );
+    errorOut error = tardigradeMicromorphicTools::computeHigherOrderStressNorm( M, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     variableVector resultJ;
     variableMatrix dNormMdMJ;
 
-    error = micromorphicTools::computeHigherOrderStressNorm( M, resultJ, dNormMdMJ );
+    error = tardigradeMicromorphicTools::computeHigherOrderStressNorm( M, resultJ, dNormMdMJ );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     variableVector resultJ2;
     variableMatrix dNormMdMJ2, d2NormMdM2J2;
 
-    error = micromorphicTools::computeHigherOrderStressNorm( M, resultJ2, dNormMdMJ2, d2NormMdM2J2 );
+    error = tardigradeMicromorphicTools::computeHigherOrderStressNorm( M, resultJ2, dNormMdMJ2, d2NormMdM2J2 );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ2 ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ2 ) );
 
     //Test dNormMdM
     constantType eps = 1e-6;
@@ -1794,31 +1794,31 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderStressNorm ){
 
         variableVector resultP, resultM;
 
-        error = micromorphicTools::computeHigherOrderStressNorm( M + delta, resultP );
+        error = tardigradeMicromorphicTools::computeHigherOrderStressNorm( M + delta, resultP );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeHigherOrderStressNorm( M - delta, resultM );
+        error = tardigradeMicromorphicTools::computeHigherOrderStressNorm( M - delta, resultM );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( resultP - resultM ) / ( 2 * delta[i] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ[ j ][ i ] ) );
         }
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ2[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dNormMdMJ2[ j ][ i ] ) );
         }
 
         variableMatrix derP, derM;
 
-        error = micromorphicTools::computeHigherOrderStressNorm( M + delta, resultP, derP );
+        error = tardigradeMicromorphicTools::computeHigherOrderStressNorm( M + delta, resultP, derP );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::computeHigherOrderStressNorm( M - delta, resultM, derM );
+        error = tardigradeMicromorphicTools::computeHigherOrderStressNorm( M - delta, resultM, derM );
 
         BOOST_CHECK( !error );
 
@@ -1832,7 +1832,7 @@ BOOST_AUTO_TEST_CASE( test_computeHigherOrderStressNorm ){
             for ( unsigned int k = 0; k < 3; k++ ){
                 for ( unsigned int l = 0; l < 3; l++ ){
                     for ( unsigned int m = 0; m < 3; m++ ){
-                        BOOST_CHECK( vectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
+                        BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradMat[ j ][ 9 * k + 3 * l + m ],
                                                                d2NormMdM2J2[ j ][ 243 * k + 81 * l + 27 * m + 9 * n + 3 * o + p ] ) );
                     }
                 }
@@ -1859,20 +1859,20 @@ BOOST_AUTO_TEST_CASE( test_assembleDeformationGradient ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::assembleDeformationGradient( displacementGradient, result );
+    errorOut error = tardigradeMicromorphicTools::assembleDeformationGradient( displacementGradient, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     //Tests of the Jacobians
     variableVector resultJ;
     variableMatrix dFdGradU;
-    error = micromorphicTools::assembleDeformationGradient( displacementGradient, resultJ, dFdGradU );
+    error = tardigradeMicromorphicTools::assembleDeformationGradient( displacementGradient, resultJ, dFdGradU );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the Jacobian w.r.t. the displacement gradient
     constantType eps = 1e-6;
@@ -1882,18 +1882,18 @@ BOOST_AUTO_TEST_CASE( test_assembleDeformationGradient ){
 
         variableVector P, M;
 
-        error = micromorphicTools::assembleDeformationGradient( displacementGradient + delta, P );
+        error = tardigradeMicromorphicTools::assembleDeformationGradient( displacementGradient + delta, P );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::assembleDeformationGradient( displacementGradient - delta, M );
+        error = tardigradeMicromorphicTools::assembleDeformationGradient( displacementGradient - delta, M );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ ( int )( i / 3 ) ][ i % 3 ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dFdGradU[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dFdGradU[ j ][ i ] ) );
         }
     }
 
@@ -1914,21 +1914,21 @@ BOOST_AUTO_TEST_CASE( test_assembleMicroDeformation ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::assembleMicroDeformation( microDisplacement, result );
+    errorOut error = tardigradeMicromorphicTools::assembleMicroDeformation( microDisplacement, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     variableVector resultJ;
     variableMatrix dChidPhi;
 
-    error = micromorphicTools::assembleMicroDeformation( microDisplacement, resultJ, dChidPhi );
+    error = tardigradeMicromorphicTools::assembleMicroDeformation( microDisplacement, resultJ, dChidPhi );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the jacobians w.r.t. phi
     constantType eps = 1e-6;
@@ -1938,18 +1938,18 @@ BOOST_AUTO_TEST_CASE( test_assembleMicroDeformation ){
 
         variableVector P, M;
 
-        error = micromorphicTools::assembleMicroDeformation( microDisplacement + delta, P );
+        error = tardigradeMicromorphicTools::assembleMicroDeformation( microDisplacement + delta, P );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::assembleMicroDeformation( microDisplacement - delta, M );
+        error = tardigradeMicromorphicTools::assembleMicroDeformation( microDisplacement - delta, M );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dChidPhi[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dChidPhi[ j ][ i ] ) );
         }
     }
 
@@ -1980,21 +1980,21 @@ BOOST_AUTO_TEST_CASE( test_assembleGradientMicroDeformation ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, result );
+    errorOut error = tardigradeMicromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     //Test the Jacobians
     variableVector resultJ;
     variableMatrix dGradChidGradPhi;
 
-    error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, resultJ, dGradChidGradPhi );
+    error = tardigradeMicromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement, resultJ, dGradChidGradPhi );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the Jacobian w.r.t. the micro displacement gradient
     constantType eps = 1e-6;
@@ -2004,18 +2004,18 @@ BOOST_AUTO_TEST_CASE( test_assembleGradientMicroDeformation ){
 
         variableVector P, M;
 
-        error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement + delta, P );
+        error = tardigradeMicromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement + delta, P );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement - delta, M );
+        error = tardigradeMicromorphicTools::assembleGradientMicroDeformation( gradientMicroDisplacement - delta, M );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ ( int )( i / 3 ) ][ i % 3 ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dGradChidGradPhi[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dGradChidGradPhi[ j ][ i ] ) );
         }
     }
 
@@ -2041,27 +2041,27 @@ BOOST_AUTO_TEST_CASE( test_pullBackCauchyStress ){
 
     variableVector result, resultPF;
 
-    errorOut error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, result );
+    errorOut error = tardigradeMicromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
-    error = micromorphicTools::pushForwardPK2Stress( result, deformationGradient, resultPF );
+    error = tardigradeMicromorphicTools::pushForwardPK2Stress( result, deformationGradient, resultPF );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultPF, cauchyStress ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultPF, cauchyStress ) );
 
     //Test the Jacobians
     variableVector resultJ;
     variableMatrix dPK2dCauchy, dPK2dF;
 
-    error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, resultJ, dPK2dCauchy, dPK2dF );
+    error = tardigradeMicromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient, resultJ, dPK2dCauchy, dPK2dF );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test the Jacobian w.r.t. the Cauchy stress
     constantType eps = 1e-6;
@@ -2071,18 +2071,18 @@ BOOST_AUTO_TEST_CASE( test_pullBackCauchyStress ){
 
         variableVector P, M;
 
-        error = micromorphicTools::pullBackCauchyStress( cauchyStress + delta, deformationGradient, P );
+        error = tardigradeMicromorphicTools::pullBackCauchyStress( cauchyStress + delta, deformationGradient, P );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pullBackCauchyStress( cauchyStress - delta, deformationGradient, M );
+        error = tardigradeMicromorphicTools::pullBackCauchyStress( cauchyStress - delta, deformationGradient, M );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPK2dCauchy[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPK2dCauchy[ j ][ i ] ) );
         }
     }
 
@@ -2093,18 +2093,18 @@ BOOST_AUTO_TEST_CASE( test_pullBackCauchyStress ){
 
         variableVector P, M;
 
-        error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient + delta, P );
+        error = tardigradeMicromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient + delta, P );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient - delta, M );
+        error = tardigradeMicromorphicTools::pullBackCauchyStress( cauchyStress, deformationGradient - delta, M );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dPK2dF[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dPK2dF[ j ][ i ] ) );
         }
     }
 
@@ -2130,27 +2130,27 @@ BOOST_AUTO_TEST_CASE( test_pullBackMicroStress ){
 
     variableVector result, resultPF;
 
-    errorOut error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient, result );
+    errorOut error = tardigradeMicromorphicTools::pullBackMicroStress( microStress, deformationGradient, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( result, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( result, answer ) );
 
-    error = micromorphicTools::pushForwardReferenceMicroStress( result, deformationGradient, resultPF );
+    error = tardigradeMicromorphicTools::pushForwardReferenceMicroStress( result, deformationGradient, resultPF );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultPF, microStress ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultPF, microStress ) );
 
     //Test the Jacobians
     variableVector resultJ;
     variableMatrix dSigmads, dSigmadF;
 
-    error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient, resultJ, dSigmads, dSigmadF );
+    error = tardigradeMicromorphicTools::pullBackMicroStress( microStress, deformationGradient, resultJ, dSigmads, dSigmadF );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( resultJ, answer ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( resultJ, answer ) );
 
     //Test the Jacobian w.r.t. the micro stress
     constantType eps = 1e-6;
@@ -2160,18 +2160,18 @@ BOOST_AUTO_TEST_CASE( test_pullBackMicroStress ){
 
         variableVector P, M;
 
-        error = micromorphicTools::pullBackMicroStress( microStress + delta, deformationGradient, P );
+        error = tardigradeMicromorphicTools::pullBackMicroStress( microStress + delta, deformationGradient, P );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pullBackMicroStress( microStress - delta, deformationGradient, M );
+        error = tardigradeMicromorphicTools::pullBackMicroStress( microStress - delta, deformationGradient, M );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dSigmads[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dSigmads[ j ][ i ] ) );
         }
     }
 
@@ -2182,18 +2182,18 @@ BOOST_AUTO_TEST_CASE( test_pullBackMicroStress ){
 
         variableVector P, M;
 
-        error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient + delta, P );
+        error = tardigradeMicromorphicTools::pullBackMicroStress( microStress, deformationGradient + delta, P );
 
         BOOST_CHECK( !error );
 
-        error = micromorphicTools::pullBackMicroStress( microStress, deformationGradient - delta, M );
+        error = tardigradeMicromorphicTools::pullBackMicroStress( microStress, deformationGradient - delta, M );
 
         BOOST_CHECK( !error );
 
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dSigmadF[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dSigmadF[ j ][ i ] ) );
         }
     }
 
@@ -2230,31 +2230,31 @@ BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
 
     variableVector result;
 
-    errorOut error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+    errorOut error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                                    microDeformation, result );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, result ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, result ) );
 
     variableVector resultPF;
 
-    error = micromorphicTools::pushForwardHigherOrderStress( result, deformationGradient, microDeformation, resultPF );
+    error = tardigradeMicromorphicTools::pushForwardHigherOrderStress( result, deformationGradient, microDeformation, resultPF );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( higherOrderStress, resultPF ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( higherOrderStress, resultPF ) );
 
     //Test the Jacobian
     variableVector resultJ;
     variableMatrix dMdm, dMdF, dMdChi;
 
-    error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+    error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                           microDeformation, resultJ, dMdm, dMdF, dMdChi );
 
     BOOST_CHECK( !error );
 
-    BOOST_CHECK( vectorTools::fuzzyEquals( answer, resultJ ) );
+    BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( answer, resultJ ) );
 
     //Test the jacobian w.r.t. the higher order stress
     constantType eps = 1e-6;
@@ -2264,12 +2264,12 @@ BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
 
         variableVector P, M;
 
-        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress + delta, deformationGradient,
+        error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress + delta, deformationGradient,
                                                               microDeformation, P );
 
         BOOST_CHECK( !error );    
 
-        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress - delta, deformationGradient,
+        error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress - delta, deformationGradient,
                                                               microDeformation, M );
 
         BOOST_CHECK( !error );    
@@ -2277,7 +2277,7 @@ BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMdm[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dMdm[ j ][ i ] ) );
         }
     }
 
@@ -2288,12 +2288,12 @@ BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
 
         variableVector P, M;
 
-        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient + delta,
+        error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient + delta,
                                                               microDeformation, P );
 
         BOOST_CHECK( !error );
     
-        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient - delta,
+        error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient - delta,
                                                               microDeformation, M );
    
         BOOST_CHECK( !error ); 
@@ -2301,7 +2301,7 @@ BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMdF[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dMdF[ j ][ i ] ) );
         }
     }
 
@@ -2312,12 +2312,12 @@ BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
 
         variableVector P, M;
 
-        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+        error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                               microDeformation + delta, P );
 
         BOOST_CHECK( !error );    
 
-        error = micromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
+        error = tardigradeMicromorphicTools::pullBackHigherOrderStress( higherOrderStress, deformationGradient,
                                                               microDeformation - delta, M );
 
         BOOST_CHECK( !error );    
@@ -2325,7 +2325,7 @@ BOOST_AUTO_TEST_CASE( test_pullBackHigherOrderStress ){
         variableVector gradCol = ( P - M ) / ( 2 * delta[ i ] );
 
         for ( unsigned int j = 0; j < gradCol.size(); j++ ){
-            BOOST_CHECK( vectorTools::fuzzyEquals( gradCol[ j ], dMdChi[ j ][ i ] ) );
+            BOOST_CHECK( tardigradeVectorTools::fuzzyEquals( gradCol[ j ], dMdChi[ j ][ i ] ) );
         }
     }
 
