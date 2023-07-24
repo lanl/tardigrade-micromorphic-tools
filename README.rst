@@ -10,7 +10,7 @@
 .. _pipreqs: https://github.com/bndr/pipreqs 
 .. _LaTeX: https://www.latex-project.org/help/documentation/
 .. _W-13 DevOps Manual: https://xcp-confluence.lanl.gov/display/COM/W-13+DevOps
-.. _upstream repository: https://re-git.lanl.gov/aea/material-models/micromorphic_tools
+.. _upstream repository: https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools
 .. _Material Models: https://re-git.lanl.gov/aea/material-models
 .. _UNIX group: https://ddw-confluence.lanl.gov/pages/viewpage.action?pageId=150929410
 
@@ -30,8 +30,8 @@ verified and ready to be implemented.
 Information
 ===========
 
-* Documentation: https://aea.re-pages.lanl.gov/material-models/micromorphic_tools
-* Wiki: https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/wikis/home
+* Documentation: https://aea.re-pages.lanl.gov/material-models/tardigrade_micromorphic_tools
+* Wiki: https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools/-/wikis/home
 
 Developers
 ==========
@@ -69,7 +69,7 @@ configuration inspection, e.g. the extension packages.
 .. code-block:: bash
 
    $ pwd
-   path/to/micromorphic_tools/
+   path/to/tardigrade_micromorphic_tools/
    $ pipreqs --use-local --print --no-pin .
 
 A minimal anaconda environment for building the documentation can be created
@@ -94,9 +94,9 @@ C++ Libraries
 
 * `Eigen`_ >= 3.3.7
 * `BOOST`_ >= 1.59.0
-* error\_tools: https://re-git.lanl.gov/aea/material-models/error_tools
-* vector\_tools: https://re-git.lanl.gov/aea/material-models/vector_tools
-* constitutive\_tools: https://re-git.lanl.gov/aea/material-models/constitutive_tools
+* error\_tools: https://re-git.lanl.gov/aea/material-models/tardigrade_error_tools
+* vector\_tools: https://re-git.lanl.gov/aea/material-models/tardigrade_vector_tools
+* constitutive\_tools: https://re-git.lanl.gov/aea/material-models/tardigrade_constitutive_tools
 
 If not found on the current system or active Conda environment, all of the
 ``*_tools`` libraries are pulled from their git repos by branch name and built
@@ -124,7 +124,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/
+      /path/to/tardigrade_micromorphic_tools/
 
       $ mkdir build
       $ cd build
@@ -140,7 +140,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
       $ cmake3 ..
 
 4) Build various portions of the project
@@ -151,7 +151,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
 
       # Build everything
       $ cmake3 --build .
@@ -167,7 +167,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
 
       # find c++ libraries and ignore intermediate files with similar extensions
       $ find . \( -name "*.o" -o -name "*.so" -o -name "*.a" \) | grep -vE "\.cpp\."
@@ -177,7 +177,7 @@ Build on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
 
       $ make clean
 
@@ -189,7 +189,7 @@ Test on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
 
       # Build c++ tests
       $ cmake3 --build src/cpp/tests
@@ -199,7 +199,7 @@ Test on sstelmo
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
 
       # Run ctest
       $ ctest
@@ -223,7 +223,7 @@ To build just the documentation pick up the steps here:
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/
+      /path/to/tardigrade_micromorphic_tools/
       $ mkdir build/
       $ cd build/
 
@@ -232,7 +232,7 @@ To build just the documentation pick up the steps here:
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build/
+      /path/to/tardigrade_micromorphic_tools/build/
       $ cmake3 ..
 
 4) Build the docs
@@ -245,14 +245,14 @@ To build just the documentation pick up the steps here:
 
    .. code-block:: bash
 
-      micromorphic_tools/build/docs/sphinx/html/index.html
+      tardigrade_micromorphic_tools/build/docs/sphinx/html/index.html
 
 6) Display docs
 
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build/
+      /path/to/tardigrade_micromorphic_tools/build/
       $ firefox docs/sphinx/html/index.html &
 
 7) While the Sphinx API is still a WIP, try the doxygen API
@@ -260,7 +260,7 @@ To build just the documentation pick up the steps here:
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build/
+      /path/to/tardigrade_micromorphic_tools/build/
       $ firefox docs/doxygen/html/index.html &
 
 *******************
@@ -274,7 +274,7 @@ Build the entire before performing the installation.
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
       $ cmake3 --build .
 
 5) Install the library
@@ -282,7 +282,7 @@ Build the entire before performing the installation.
    .. code-block:: bash
 
       $ pwd
-      /path/to/micromorphic_tools/build
+      /path/to/tardigrade_micromorphic_tools/build
       $ cmake --install . --prefix path/to/root/install
 
       # Example local user (non-admin) Linux install

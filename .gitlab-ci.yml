@@ -19,7 +19,7 @@ before_script:
   - module use ${aea_modulefiles}
   - module use ${PWD}/modulefiles
   # Prefer the CI environment and fall back to AEA environment(s)
-  - project_environment='micromorphic_tools-env'
+  - project_environment='tardigrade_micromorphic_tools-env'
   - environment_choices="${project_environment} aea-beta aea-release"
   - for env in ${environment_choices}; do if [[ -d "${aea_compute_path}/${env}" ]]; then environment=${env}; break; fi; done
   - echo ${environment}
@@ -75,7 +75,7 @@ environment:
     - cp ${PWD}/modulefiles/* ${aea_modulefiles}
   tags:
     # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
-    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
+    # https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 microbump:
@@ -113,7 +113,7 @@ microbump:
     - git push oauth2-origin --tags
   tags:
     # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
-    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
+    # https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 fast-test:
@@ -141,7 +141,7 @@ fast-test:
       - build/results.txt
   tags:
     # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
-    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
+    # https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 conda-build:
@@ -172,10 +172,10 @@ conda-build:
   artifacts:
     expire_in: '2 hrs'
     paths:
-      - conda-bld/linux-64/micromorphic_tools-*-*.tar.bz2
+      - conda-bld/linux-64/tardigrade_micromorphic_tools-*-*.tar.bz2
   tags:
     # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
-    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
+    # https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 deploy:
@@ -193,16 +193,16 @@ deploy:
     # Override default permissions. Set group to rx with no write permissions.
     - umask 0022
     # Copy Conda package to AEA Conda Channel
-    - cp ${conda_artifacts_directory}/linux-64/micromorphic_tools-*-*.tar.bz2 ${aea_conda_channel}/linux-64
+    - cp ${conda_artifacts_directory}/linux-64/tardigrade_micromorphic_tools-*-*.tar.bz2 ${aea_conda_channel}/linux-64
     # Change group for access by all W-13 staff and prevent accidental modification by institutional account in CI jobs
-    - chgrp w13users ${aea_conda_channel}/linux-64/micromorphic_tools-*-*.tar.bz2 || true
-    - chmod 555 ${aea_conda_channel}/linux-64/micromorphic_tools-*-*.tar.bz2 || true
+    - chgrp w13users ${aea_conda_channel}/linux-64/tardigrade_micromorphic_tools-*-*.tar.bz2 || true
+    - chmod 555 ${aea_conda_channel}/linux-64/tardigrade_micromorphic_tools-*-*.tar.bz2 || true
     # Update the AEA Conda Channel index
     - conda index ${aea_conda_channel}
-    - conda search --channel file://${aea_conda_channel}/ --override-channels micromorphic_tools
+    - conda search --channel file://${aea_conda_channel}/ --override-channels tardigrade_micromorphic_tools
   tags:
     # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
-    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
+    # https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
 
 # It MUST be called pages
@@ -242,5 +242,5 @@ pages:
       - public
   tags:
     # FIXME: troubleshoot sstbigbird/RHEL8 python interpretter mismatch
-    # https://re-git.lanl.gov/aea/material-models/micromorphic_tools/-/issues/9
+    # https://re-git.lanl.gov/aea/material-models/tardigrade_micromorphic_tools/-/issues/9
     - sstelmo-shell-aea
