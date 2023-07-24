@@ -6,8 +6,13 @@ Changelog
 #########
 
 ******************
-1.2.2 (unreleased)
+1.3.1 (2023-07-24)
 ******************
+
+Breaking changes
+================
+- Change project, package, and namespace from 'micromporphic tools' to 'tardigrade micromorphic tools' (:issue:`14`,
+  :merge:`18`). By `Kyle Brindley`_.
 
 ******************
 1.2.1 (2023-07-11)
