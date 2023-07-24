@@ -11,14 +11,14 @@
 .. toctree::
     :maxdepth: 2
 
-.. _micromorphic_tools_source:
+.. _tardigrade_micromorphic_tools_source:
 
-micromorphic_tools.cpp
+tardigrade_micromorphic_tools.cpp
 ======================
 
-.. doxygenfile:: micromorphic_tools.cpp
+.. doxygenfile:: tardigrade_micromorphic_tools.cpp
 
-micromorphic_tools.h
+tardigrade_micromorphic_tools.h
 ====================
 
-.. doxygenfile:: micromorphic_tools.h
+.. doxygenfile:: tardigrade_micromorphic_tools.h

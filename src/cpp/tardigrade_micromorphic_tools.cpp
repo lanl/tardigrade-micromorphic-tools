@@ -8,9 +8,9 @@
  *
  */
 
-#include<micromorphic_tools.h>
+#include<tardigrade_micromorphic_tools.h>
 
-namespace micromorphicTools{
+namespace tardigradeMicromorphicTools{
 
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
                          variableVector &Psi ){
@@ -34,7 +34,7 @@ namespace micromorphicTools{
             return new errorNode( "computePsi", "The micro-deformation doesn't have the correct size" );
         }
 
-        Psi = vectorTools::matrixMultiply( deformationGradient, microDeformation,
+        Psi = tardigradeVectorTools::matrixMultiply( deformationGradient, microDeformation,
                                            dim, dim, dim, dim, 1, 0 );
 
         return NULL;
@@ -70,7 +70,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim, 0 );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         dPsidF  = variableMatrix( Psi.size(), variableVector( deformationGradient.size(), 0 ) );
         dPsidChi = variableMatrix( Psi.size(), variableVector( microDeformation.size(), 0 ) );
@@ -162,7 +162,7 @@ namespace micromorphicTools{
         dGammadGradChi = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
 
         constantVector eye( dim * dim, 0 );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
@@ -202,7 +202,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim, 0 );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         microStrain = Psi - eye;
 
@@ -231,7 +231,7 @@ namespace micromorphicTools{
             return result;
         }
 
-        dMicroStraindPsi = vectorTools::eye< variableType >( Psi.size() );
+        dMicroStraindPsi = tardigradeVectorTools::eye< variableType >( Psi.size() );
 
         return NULL;
     }
@@ -423,7 +423,7 @@ namespace micromorphicTools{
 
         microStress = variableVector( dim * dim, 0 );
 
-        detF = vectorTools::determinant( deformationGradient, dim, dim );
+        detF = tardigradeVectorTools::determinant( deformationGradient, dim, dim );
 
         for ( unsigned int i = 0; i < dim; i++ ){
             for ( unsigned int j = 0; j < dim; j++ ){
@@ -484,7 +484,7 @@ namespace micromorphicTools{
         }
 
         //Assemble the jacobian of the determinant of the deformation gradient
-        variableVector inverseDeformationGradient = vectorTools::inverse( deformationGradient, dim, dim );
+        variableVector inverseDeformationGradient = tardigradeVectorTools::inverse( deformationGradient, dim, dim );
 
         variableVector dDetFdF( dim * dim, 0 );
 
@@ -499,7 +499,7 @@ namespace micromorphicTools{
         dMicroStressdDeformationGradient = variableMatrix( microStress.size(), variableVector( deformationGradient.size(), 0 ) );
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         for ( unsigned int i = 0; i < dim; i++ ){
             for ( unsigned int j = 0; j < dim; j++ ){
@@ -581,8 +581,8 @@ namespace micromorphicTools{
 
         referenceMicroStress = variableVector( dim * dim, 0 );
 
-        detF = vectorTools::determinant( deformationGradient, dim, dim );
-        inverseDeformationGradient = vectorTools::inverse( deformationGradient, dim, dim );
+        detF = tardigradeVectorTools::determinant( deformationGradient, dim, dim );
+        inverseDeformationGradient = tardigradeVectorTools::inverse( deformationGradient, dim, dim );
 
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
@@ -655,7 +655,7 @@ namespace micromorphicTools{
         dReferenceMicroStressdDeformationGradient = variableMatrix( referenceMicroStress.size(), variableVector( deformationGradient.size(), 0 ) );
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
@@ -731,7 +731,7 @@ namespace micromorphicTools{
             return new errorNode( "pushForwardHigherOrderStress", "The micro-deformation doesn't have the correct size" );
         }
 
-        detF = vectorTools::determinant( deformationGradient, dim, dim );
+        detF = tardigradeVectorTools::determinant( deformationGradient, dim, dim );
 
         higherOrderStress = variableVector( dim * dim * dim, 0 );
 
@@ -799,7 +799,7 @@ namespace micromorphicTools{
         }
 
         //Assemble the jacobian of the determinant of the deformation gradient
-        variableVector inverseDeformationGradient = vectorTools::inverse( deformationGradient, dim, dim );
+        variableVector inverseDeformationGradient = tardigradeVectorTools::inverse( deformationGradient, dim, dim );
 
         variableVector dDetFdF( dim * dim, 0 );
 
@@ -810,7 +810,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         dHigherOrderStressdReferenceHigherOrderStress = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
         dHigherOrderStressdDeformationGradient = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
@@ -901,9 +901,9 @@ namespace micromorphicTools{
             return new errorNode( "pushForwardHigherOrderStress", "The micro-deformation doesn't have the correct size" );
         }
 
-        detF = vectorTools::determinant( deformationGradient, dim, dim );
-        inverseDeformationGradient = vectorTools::inverse( deformationGradient, dim, dim );
-        inverseMicroDeformation = vectorTools::inverse( microDeformation, dim, dim );
+        detF = tardigradeVectorTools::determinant( deformationGradient, dim, dim );
+        inverseDeformationGradient = tardigradeVectorTools::inverse( deformationGradient, dim, dim );
+        inverseMicroDeformation = tardigradeVectorTools::inverse( microDeformation, dim, dim );
 
         referenceHigherOrderStress = variableVector( dim * dim * dim, 0 );
 
@@ -1025,7 +1025,7 @@ namespace micromorphicTools{
         deviatoricHigherOrderStress = higherOrderStress;
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         for ( unsigned int i = 0; i < dim; i++ ){
             for ( unsigned int j = 0; j < dim; j++ ){
@@ -1071,7 +1071,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         dDeviatoricHigherOrderStressdHigherOrderStress = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
 
@@ -1176,7 +1176,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         dpdM = variableMatrix( referenceHigherOrderPressure.size(), variableVector( referenceHigherOrderStress.size(), 0 ) );
         dpdC = variableMatrix( referenceHigherOrderPressure.size(), variableVector( rightCauchyGreenDeformation.size(), 0 ) );
@@ -1242,7 +1242,7 @@ namespace micromorphicTools{
         }
 
         variableVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         d2pdMdC = variableMatrix( dim, variableVector( dim * dim * dim * dim * dim, 0 ) );
 
@@ -1314,7 +1314,7 @@ namespace micromorphicTools{
 
         deviatoricReferenceHigherOrderStress = referenceHigherOrderStress;
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+        variableVector invRCG = tardigradeVectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
         
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
@@ -1407,7 +1407,7 @@ namespace micromorphicTools{
 
         deviatoricReferenceHigherOrderStress = referenceHigherOrderStress;
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+        variableVector invRCG = tardigradeVectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
 
         //Compute the deviatoric higher order stress        
         for ( unsigned int I = 0; I < dim; I++ ){
@@ -1420,7 +1420,7 @@ namespace micromorphicTools{
 
         //Compute the jacobians
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
         dDeviatoricReferenceHigherOrderStressdRCG = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
@@ -1543,7 +1543,7 @@ namespace micromorphicTools{
 
         deviatoricReferenceHigherOrderStress = referenceHigherOrderStress;
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+        variableVector invRCG = tardigradeVectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
 
         //Compute the deviatoric higher order stress        
         for ( unsigned int I = 0; I < dim; I++ ){
@@ -1556,7 +1556,7 @@ namespace micromorphicTools{
 
         //Compute the first order Jacobians
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         dDeviatoricReferenceHigherOrderStressdReferenceHigherOrderStress = variableMatrix( dim * dim * dim, variableVector( dim * dim * dim, 0 ) );
         dDeviatoricReferenceHigherOrderStressdRCG = variableMatrix( dim * dim * dim, variableVector( dim * dim, 0 ) );
@@ -1621,9 +1621,9 @@ namespace micromorphicTools{
         unsigned int dim = 3;
 
         variableVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
-        variableType trace = vectorTools::trace( secondOrderStress );
+        variableType trace = tardigradeVectorTools::trace( secondOrderStress );
 
         deviatoricSecondOrderStress = secondOrderStress - trace * eye / 3.;
 
@@ -1650,7 +1650,7 @@ namespace micromorphicTools{
         unsigned int dim = 3;
 
         variableVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         errorOut error = computeDeviatoricSecondOrderStress( secondOrderStress, deviatoricSecondOrderStress );
 
@@ -1696,7 +1696,7 @@ namespace micromorphicTools{
                                   "The stress measure and right Cauchy-Green deformation tensors aren't the same size" );
         }
 
-        pressure = vectorTools::dot( referenceStressMeasure, rightCauchyGreen ) / 3;
+        pressure = tardigradeVectorTools::dot( referenceStressMeasure, rightCauchyGreen ) / 3;
 
         return NULL;
     }
@@ -1773,7 +1773,7 @@ namespace micromorphicTools{
             return result;
         }
 
-        d2pdStressdRCG = vectorTools::eye< constantType >( referenceStressMeasure.size() ) / 3;
+        d2pdStressdRCG = tardigradeVectorTools::eye< constantType >( referenceStressMeasure.size() ) / 3;
 
         return NULL;
     }
@@ -1825,7 +1825,7 @@ namespace micromorphicTools{
         //Assume 3d
         unsigned int dim = 3;
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+        variableVector invRCG = tardigradeVectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
 
         deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
 
@@ -1906,15 +1906,15 @@ namespace micromorphicTools{
         //Assume 3d
         unsigned int dim = 3;
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+        variableVector invRCG = tardigradeVectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
 
         deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
 
         //Compute the first order jacobians
-        dDeviatoricReferenceStressdReferenceStress = vectorTools::eye< constantType >( dim * dim );
-        dDeviatoricReferenceStressdReferenceStress -= vectorTools::dyadic( invRCG, dPressuredStress );
+        dDeviatoricReferenceStressdReferenceStress = tardigradeVectorTools::eye< constantType >( dim * dim );
+        dDeviatoricReferenceStressdReferenceStress -= tardigradeVectorTools::dyadic( invRCG, dPressuredStress );
 
-        dDeviatoricReferenceStressdRCG = - vectorTools::dyadic( invRCG, dPressuredRCG );
+        dDeviatoricReferenceStressdRCG = - tardigradeVectorTools::dyadic( invRCG, dPressuredRCG );
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
                 for ( unsigned int K = 0; K < dim; K++ ){
@@ -1968,15 +1968,15 @@ namespace micromorphicTools{
         //Assume 3d
         unsigned int dim = 3;
 
-        variableVector invRCG = vectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
+        variableVector invRCG = tardigradeVectorTools::inverse( rightCauchyGreenDeformation, dim, dim );
 
         deviatoricSecondOrderReferenceStress = secondOrderReferenceStress - pressure * invRCG;
 
         //Compute the first order jacobians
-        dDeviatoricReferenceStressdReferenceStress = vectorTools::eye< constantType >( dim * dim );
-        dDeviatoricReferenceStressdReferenceStress -= vectorTools::dyadic( invRCG, dPressuredStress );
+        dDeviatoricReferenceStressdReferenceStress = tardigradeVectorTools::eye< constantType >( dim * dim );
+        dDeviatoricReferenceStressdReferenceStress -= tardigradeVectorTools::dyadic( invRCG, dPressuredStress );
 
-        dDeviatoricReferenceStressdRCG = - vectorTools::dyadic( invRCG, dPressuredRCG );
+        dDeviatoricReferenceStressdRCG = - tardigradeVectorTools::dyadic( invRCG, dPressuredRCG );
         for ( unsigned int I = 0; I < dim; I++ ){
             for ( unsigned int J = 0; J < dim; J++ ){
                 for ( unsigned int K = 0; K < dim; K++ ){
@@ -2444,7 +2444,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
         dHigherOrderStressNormdHigherOrderStress = variableMatrix( dim, variableVector( dim * dim * dim, 0 ) );
         for ( unsigned int K = 0; K < 3; K++ ){
             for ( unsigned int L = 0; L < 3; L++ ){
@@ -2499,7 +2499,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         d2HigherOrderStressNormdHigherOrderStress2 = variableMatrix( dim, variableVector( dim * dim * dim * dim * dim * dim, 0 ) );
 
@@ -2549,7 +2549,7 @@ namespace micromorphicTools{
             }
         }
 
-        deformationGradient = vectorTools::appendVectors( displacementGradient + vectorTools::eye< variableType >( dim ) );
+        deformationGradient = tardigradeVectorTools::appendVectors( displacementGradient + tardigradeVectorTools::eye< variableType >( dim ) );
 
         return NULL;
     }
@@ -2576,7 +2576,7 @@ namespace micromorphicTools{
             return result;
         }
 
-        dFdGradU = vectorTools::eye< variableType >( dim * dim );
+        dFdGradU = tardigradeVectorTools::eye< variableType >( dim * dim );
 
         return NULL;
     }
@@ -2598,7 +2598,7 @@ namespace micromorphicTools{
         }
 
         constantVector eye( dim * dim );
-        vectorTools::eye( eye );
+        tardigradeVectorTools::eye( eye );
 
         microDeformation = microDisplacement + eye;
 
@@ -2627,7 +2627,7 @@ namespace micromorphicTools{
             return result;
         }
 
-        dChidPhi = vectorTools::eye< variableType >( dim * dim );
+        dChidPhi = tardigradeVectorTools::eye< variableType >( dim * dim );
 
         return NULL;
     }
@@ -2695,7 +2695,7 @@ namespace micromorphicTools{
             return result;
         }
         
-        dGradChidGradPhi = vectorTools::eye< variableType >( dim * dim * dim );
+        dGradChidGradPhi = tardigradeVectorTools::eye< variableType >( dim * dim * dim );
 
         return NULL;
     }

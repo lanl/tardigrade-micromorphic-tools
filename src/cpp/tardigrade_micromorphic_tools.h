@@ -8,15 +8,15 @@
  *
  */
 
-#ifndef MICROMORPHIC_TOOLS_H
-#define MICROMORPHIC_TOOLS_H
+#ifndef TARDIGRADE_MICROMORPHIC_TOOLS_H
+#define TARDIGRADE_MICROMORPHIC_TOOLS_H
 
-#include<error_tools.h>
+#include<tardigrade_error_tools.h>
 #define USE_EIGEN
-#include<vector_tools.h>
-#include<constitutive_tools.h>
+#include<tardigrade_vector_tools.h>
+#include<tardigrade_constitutive_tools.h>
 
-namespace micromorphicTools{
+namespace tardigradeMicromorphicTools{
 
     typedef double variableType;
     typedef std::vector< variableType > variableVector;
@@ -30,7 +30,7 @@ namespace micromorphicTools{
     typedef std::vector< constantType > constantVector;
     typedef std::vector< constantVector > constantMatrix;
 
-    typedef errorTools::Node errorNode;
+    typedef tardigradeErrorTools::Node errorNode;
     typedef errorNode* errorOut;
 
     errorOut computePsi( const variableVector &deformationGradient, const variableVector &microDeformation,
